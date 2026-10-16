@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Series;
 
+use App\Filament\Forms\Components\MediaPicker;
 use App\Filament\Resources\Series\Pages\ManageSeries;
 use App\Filament\Support\SlugFields;
 use App\Models\Series;
@@ -12,6 +13,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use UnitEnum;
@@ -42,6 +44,7 @@ class SeriesResource extends Resource
                 SlugFields::slug('/series'),
                 Textarea::make('description')->rows(3)->columnSpanFull()
                     ->helperText('What the reader will be able to do after finishing the series.'),
+                MediaPicker::make('cover_media_id')->label('Cover image')->columnSpanFull(),
             ]);
     }
 
@@ -50,7 +53,9 @@ class SeriesResource extends Resource
         return $table
             ->reorderable('sort')
             ->defaultSort('sort')
+            ->modifyQueryUsing(fn ($query) => $query->with('cover'))
             ->columns([
+                ImageColumn::make('cover')->label('')->state(fn (Series $record) => $record->cover?->thumbUrl())->imageWidth(64)->imageHeight(40),
                 TextColumn::make('title')->searchable()->description(fn (Series $record) => $record->description ? str($record->description)->limit(90) : null),
                 TextColumn::make('slug')->color('gray'),
             ])

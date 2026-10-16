@@ -316,7 +316,7 @@ The dumps live in `legacy/` (git-ignored):
 | `title` | `title` | Strip suffixes like ` [Deprecated]` into `needs_review = true` and a deprecated notice |
 | `slug` (all mixed case, e.g. `CakePHP-4-CRUD`) | `slug` = lowercase (`cakephp-4-crud`) | The old URL redirects |
 | **`body`** | `body` | Run through the **legacy HTML converter** (§10.3), then the render pipeline |
-| `poster` + `poster_dir` (`webroot\files\Articles\poster\{Slug}\{file}`) | `featured_media_id` | Downloaded from the **live site** `https://codethepixel.com/files/Articles/poster/{Slug}/{file}` (verified HTTP 200) |
+| `poster` + `poster_dir` (`webroot\files\Articles\poster\{Slug}\{file}`) | `featured_media_id` | Downloaded from the **live site** `https://codethepixel.com/files/Articles/poster/{Slug}/{file}` (verified HTTP 200). **`poster_dir` comes in two formats**: `webroot\files\Articles\poster\{Slug}` and `webroot/files/Articles/poster/{Slug}`. Normalise both separators before building the URL |
 | `featured` | `is_featured` | 11 articles |
 | `hits` | `views` | |
 | `kudos` | `kudos` | Kept as a starting count if reactions are built (PRD §11), otherwise stored only |

@@ -13,7 +13,7 @@
 | Icons | Lucide |
 | Dark mode | Light / Dark / System. `.dark` class on `<html>`, set inline in `<head>` before paint |
 | Contrast | **WCAG 2.2 AA**: text ≥ 4.5:1, UI ≥ 3:1 |
-| Admin | Filament `primary => Color::Teal`, `gray => Color::Slate`, Inter |
+| Admin | Filament `primary => Color::Teal`, `gray => Color::Slate`, Inter. Custom theme `resources/css/filament/admin/theme.css` (Vite) so our own admin views (media grid, pickers) get their Tailwind classes |
 
 ## 2. Palette (from the SaaS)
 

@@ -63,12 +63,12 @@
 - [x] T1.10 Filament resources: Categories (reorder, icon picker), Tags (merge action, counts), Series (ordered articles)
 
 ### 1C. Media Manager
-- [ ] T1.11 `media`, `media_folders` and `media_usages` tables plus models (MED-01)
-- [ ] T1.12 Upload service: validation, EXIF strip, SHA1 dedupe, SVG sanitising (MED-02)
-- [ ] T1.13 Variant job: WebP 320/768/1280, OG 1200×630, AVIF if supported (MED-03)
-- [ ] T1.14 Filament Media page: grid and list views, folders, drag-drop upload, metadata side panel, replace file (MED-01, 04, 07)
-- [ ] T1.15 Reusable **media picker** modal and form field (MED-06)
-- [ ] T1.16 Usage tracking plus delete protection (MED-05)
+- [x] T1.11 `media`, `media_folders` and `media_usages` tables plus models (MED-01)
+- [x] T1.12 Upload service: validation, EXIF strip, SHA1 dedupe, SVG sanitising (MED-02)
+- [x] T1.13 Variant job: WebP 320/768/1280, OG 1200×630, AVIF behind `MEDIA_AVIF` (GD AVIF is slow, off by default) (MED-03)
+- [x] T1.14 Filament Media page: grid and list views, folders, drag-drop upload, metadata side panel, replace file (MED-01, 04, 07)
+- [x] T1.15 Reusable **media picker** modal and form field (MED-06)
+- [x] T1.16 Usage tracking plus delete protection (MED-05)
 
 ### 1D. Articles
 - [ ] T1.17 `articles`, `article_tag`, `article_revisions` and `seo_meta` migrations (ART-01)
