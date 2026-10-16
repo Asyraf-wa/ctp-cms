@@ -4,12 +4,14 @@ namespace App\Support;
 
 use App\Models\Article;
 use App\Models\Category;
+use App\Settings\DisplaySettings;
 use Illuminate\Support\Facades\Cache;
 
 // Left sidebar of the tutorial layout: categories with a few recent tutorials (template accordion).
 class Sidebar
 {
-    public const PER_CATEGORY = 5;
+    // The cache keeps up to the maximum; the per-category setting is applied when reading.
+    public const CACHED_PER_CATEGORY = DisplaySettings::SIDEBAR_MAX;
 
     /** @return list<array{name: string, icon: string, url: string, count: int, open: bool, items: list<array{title: string, url: string, active: bool}>}> */
     public static function categories(?Article $current = null, ?Category $open = null): array
@@ -27,7 +29,7 @@ class Sidebar
                         'icon' => $category->icon ?: 'folder',
                         'url' => url($category->publicPath() ?? '/'),
                         'count' => (clone $articles)->count(),
-                        'items' => (clone $articles)->latest('published_at')->limit(self::PER_CATEGORY)->get(['id', 'title', 'slug', 'type'])
+                        'items' => (clone $articles)->latest('published_at')->limit(self::CACHED_PER_CATEGORY)->get(['id', 'title', 'slug', 'type'])
                             ->map(fn (Article $a) => ['id' => $a->id, 'title' => $a->title, 'url' => url($a->publicPath() ?? '/')])->all(),
                     ];
                 })
@@ -36,11 +38,13 @@ class Sidebar
                 ->all();
         });
 
+        $perCategory = max(1, app(DisplaySettings::class)->sidebar_items_per_category);
+
         $out = [];
         foreach ($tree as $index => $entry) {
             $isCurrent = ($current && in_array($current->category_id, $entry['ids'], true))
                 || ($open && in_array($open->id, $entry['ids'], true));
-            $items = array_map(fn (array $i) => ['title' => $i['title'], 'url' => $i['url'], 'active' => $current?->id === $i['id']], $entry['items']);
+            $items = array_map(fn (array $i) => ['title' => $i['title'], 'url' => $i['url'], 'active' => $current?->id === $i['id']], array_slice($entry['items'], 0, $perCategory));
 
             // Keep the article being read visible even when it is not among the newest.
             if ($current && $isCurrent && ! collect($items)->contains('active', true)) {

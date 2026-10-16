@@ -4,6 +4,7 @@ use App\Models\Article;
 use App\Models\Category;
 use App\Models\Series;
 use App\Models\Tag;
+use App\Settings\DisplaySettings;
 use Database\Factories\ArticleFactory;
 
 beforeEach(function () {
@@ -68,4 +69,19 @@ it('renders blog posts in a single column with more posts', function () {
         ->assertSee('Why I Moved To Laravel')
         ->assertSee('More from the blog')->assertSee('Another Journal Entry')
         ->assertDontSee('aria-label="Categories"', false);
+});
+
+it('lists as many sidebar tutorials per category as the Layout setting says, plus the one being read', function () {
+    $articles = collect(range(1, 8))->map(fn (int $i) => Article::factory()->published(now()->subDays($i))->create([
+        'title' => "Cake Tutorial {$i}", 'category_id' => $this->cake->id,
+    ]));
+    updateSettings(DisplaySettings::class, ['sidebar_items_per_category' => 3]);
+
+    $html = $this->get('/'.$articles->last()->slug)->assertOk()->getContent();
+    $sidebar = substr($html, strpos($html, 'aria-label="Categories"'), 6000);
+
+    // Newest three, then the oldest because it is the article being read.
+    expect(substr_count($sidebar, 'Cake Tutorial '))->toBe(4)
+        ->and($sidebar)->toContain('Cake Tutorial 1')->toContain('Cake Tutorial 3')->not->toContain('Cake Tutorial 4<')
+        ->and($sidebar)->toContain('View all 8 tutorials');
 });

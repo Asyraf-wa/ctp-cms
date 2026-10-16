@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Models\User;
+use App\Settings\DisplaySettings;
 use App\Settings\GeneralSettings;
 use App\Settings\IntegrationSettings;
 use App\Settings\NoticeSettings;
@@ -54,6 +55,7 @@ class ManageSettings extends Page
     /** @var array<string, class-string<Settings>> form key => settings class */
     private const GROUPS = [
         'general' => GeneralSettings::class,
+        'display' => DisplaySettings::class,
         'seo' => SeoSettings::class,
         'notice' => NoticeSettings::class,
         'ribbon' => RibbonSettings::class,
@@ -106,6 +108,7 @@ class ManageSettings extends Page
                     ->persistTabInQueryString()
                     ->tabs([
                         $this->generalTab(),
+                        $this->layoutTab(),
                         $this->seoTab(),
                         $this->noticeTab(),
                         $this->ribbonTab(),
@@ -176,6 +179,22 @@ class ManageSettings extends Page
                     FileUpload::make('default_og_image')->label('Default social image')->image()->disk('public')->directory('settings')
                         ->helperText('1200 × 630. Used when a page has no image of its own.'),
                 ]),
+            ]),
+        ]);
+    }
+
+    private function layoutTab(): Tab
+    {
+        return Tab::make('Layout')->icon(Heroicon::OutlinedViewColumns)->schema([
+            Group::make()->statePath('display')->schema([
+                Section::make('Category sidebar')
+                    ->description('The left column on tutorial pages and the home page.')
+                    ->schema([
+                        TextInput::make('sidebar_items_per_category')->label('Tutorials per category')
+                            ->required()->integer()->minValue(1)->maxValue(DisplaySettings::SIDEBAR_MAX)
+                            ->suffix('tutorials')
+                            ->helperText('The newest tutorials listed under each category before the “View all” link. The tutorial being read is always shown.'),
+                    ]),
             ]),
         ]);
     }

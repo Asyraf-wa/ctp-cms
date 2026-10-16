@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\LaravelSettings\Settings;
 use Tests\TestCase;
 use Tests\TruncatingTestCase;
 
@@ -51,4 +52,15 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+/**
+ * Save part of a settings group, e.g. updateSettings(DisplaySettings::class, ['sidebar_items_per_category' => 3]).
+ *
+ * @param  class-string<Settings>  $class
+ * @param  array<string, mixed>  $values
+ */
+function updateSettings(string $class, array $values): void
+{
+    app($class)->fill($values)->save();
 }

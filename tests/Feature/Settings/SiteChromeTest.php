@@ -7,11 +7,6 @@ use App\Settings\ScriptSettings;
 use App\Settings\SeoSettings;
 use App\Settings\SocialSettings;
 
-function updateSettings(string $class, array $values): void
-{
-    app($class)->fill($values)->save();
-}
-
 it('renders the site name, slogan and meta tags from settings', function () {
     updateSettings(GeneralSettings::class, ['site_name' => 'Pixel Lab', 'slogan' => 'Build things', 'copyright' => 'Pixel Lab Sdn Bhd']);
     updateSettings(SeoSettings::class, ['meta_keywords' => 'laravel, cakephp', 'meta_author' => 'Asyraf', 'google_verification' => 'abc123']);
