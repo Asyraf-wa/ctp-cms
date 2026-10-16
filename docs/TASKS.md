@@ -87,7 +87,7 @@
 - [ ] T1.26 Projects resource: cover, gallery, stack tags, status, links, related tutorials
 - [ ] T1.27 Pages resource (About, Privacy, Terms, Uses)
 
-**Exit criteria:** a tutorial with 5 images, 3 code blocks, a callout and tags is written, previewed, scheduled and auto-published from the admin. *Status: covered by Pest tests; the browser E2E run (scratch Playwright script) is unfinished — next session.*
+**Exit criteria:** a tutorial with 5 images, 3 code blocks, a callout and tags is written, previewed, scheduled and auto-published from the admin. *Status: covered by Pest tests, plus a browser E2E run (Playwright) on 2026-10-16: create, slug autofill, heading and callout block, category and tags, schedule, signed preview, then the `scheduler` container auto-published it on the minute (404 → 200).*
 
 ---
 
