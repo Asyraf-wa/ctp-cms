@@ -158,6 +158,14 @@
         @apply outline-2 outline-offset-2 outline-ring;
     }
 
+    .no-scrollbar {
+        scrollbar-width: none;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
     [x-cloak] {
         display: none !important;
     }

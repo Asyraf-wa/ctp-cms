@@ -57,6 +57,18 @@
 - Highlight theme tuned to the palette: keywords teal `#5EEAD4`, strings `#FDE68A`, comments `#7C8BA1` (≥ 4.5:1), functions `#93C5FD`.
 - Inline `code`: brand-soft background, 6px radius, no backticks.
 
+## 4b. Layout Reference
+**`tutorial_web_template.html` (the owner's template) is the source of truth for structure.** Colours come from the tokens above (teal instead of the template's blue).
+
+- **Header:** white card bar with a bottom border, `py-6`, shrinking to `py-3` with a shadow and blur after 50 px. The logo goes from `text-3xl` to `text-xl`. The nav is centred.
+  - Right side: a pill search input (`rounded-full`, `w-56`, "Ctrl K" badge), the theme toggle, a **fullscreen** toggle and a pill **Subscribe** button (links to RSS).
+- **Main:** `max-w-[1440px]`, with 3 columns.
+  - Left: `w-64` category accordion, sticky, from `lg`.
+  - Centre: the article as a `rounded-2xl` card with a border and `p-8`.
+  - Right: `w-64` "On this page" TOC with scroll-spy, from `xl`.
+- **Footer:** 4 columns: brand (2 columns wide), Platform, Company. The bottom bar holds the copyright and social icons.
+- **Additions to the template:** a mobile drawer (nav, search, Subscribe), a skip link, a 3-state theme (Light, Dark, System), and search that works without JS.
+
 ## 5. Key Components
 - **Header:** translucent and blurred after scroll. The logo shrinks, as in the template. Nav, a search trigger button (`Search… Ctrl K`) that opens the palette, theme toggle, and a GitHub icon button.
 - **Search palette:** modal, keyboard-first (↑↓, Enter, Esc). Results are grouped (Tutorials, Blog, Tags). Recent searches are kept in localStorage.

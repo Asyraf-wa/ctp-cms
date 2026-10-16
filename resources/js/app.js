@@ -27,6 +27,26 @@ Alpine.store('theme', {
 
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => Alpine.store('theme').apply());
 
+// Scroll-spy for the "On this page" TOC: highlights the heading nearest the top of the viewport.
+Alpine.data('toc', () => ({
+    active: null,
+
+    init() {
+        const ids = [...this.$el.querySelectorAll('[data-toc]')].map((a) => a.dataset.toc);
+        const headings = ids.map((id) => document.getElementById(id)).filter(Boolean);
+        if (!headings.length) return;
+        this.active = ids[0];
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.filter((e) => e.isIntersecting).forEach((e) => (this.active = e.target.id));
+            },
+            { rootMargin: '-100px 0px -60% 0px' },
+        );
+        headings.forEach((h) => observer.observe(h));
+    },
+}));
+
 Alpine.plugin([collapse, focus]);
 window.Alpine = Alpine;
 Alpine.start();
