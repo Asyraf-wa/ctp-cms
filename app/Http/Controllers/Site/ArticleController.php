@@ -16,7 +16,7 @@ class ArticleController extends Controller
     {
         abort_unless($preview || $article->isPubliclyVisible(), 404);
 
-        $article->loadMissing(['author', 'category.parent', 'tags', 'series', 'featuredMedia', 'seo']);
+        $article->loadMissing(['author', 'category.parent', 'category.technology', 'tags', 'series', 'featuredMedia', 'seo', 'technologies.iconMedia']);
 
         $data = [
             'article' => $article,

@@ -35,7 +35,6 @@ use Illuminate\Support\Carbon;
  * @property list<string>|null $tldr
  * @property list<array{id: string, label: string, level: int}>|null $toc
  * @property list<string>|null $prerequisites
- * @property list<array{name: string, version: string}>|null $tested_with
  * @property list<array{question: string, answer: string}>|null $faq
  * @property Carbon|null $published_at
  * @property Carbon|null $content_updated_at
@@ -44,7 +43,7 @@ use Illuminate\Support\Carbon;
     'type', 'author_id', 'title', 'slug', 'excerpt', 'tldr', 'body',
     'featured_media_id', 'category_id', 'series_id', 'series_position',
     'status', 'published_at', 'content_updated_at',
-    'difficulty', 'reading_minutes_override', 'prerequisites', 'tested_with', 'repo_url', 'demo_url', 'faq',
+    'difficulty', 'reading_minutes_override', 'prerequisites', 'repo_url', 'demo_url', 'faq',
     'is_featured', 'is_pinned', 'needs_review', 'comments_enabled', 'views', 'kudos', 'legacy_id',
 ])]
 class Article extends Model implements HasPublicPath, HasRichContent
@@ -90,7 +89,6 @@ class Article extends Model implements HasPublicPath, HasRichContent
             'body' => 'array',
             'toc' => 'array',
             'prerequisites' => 'array',
-            'tested_with' => 'array',
             'faq' => 'array',
             'published_at' => 'datetime',
             'content_updated_at' => 'datetime',
@@ -133,6 +131,24 @@ class Article extends Model implements HasPublicPath, HasRichContent
         return $this->belongsTo(Media::class, 'featured_media_id');
     }
 
+    /** @return BelongsToMany<Technology, $this> tech stack in order; the first is the main one */
+    public function technologies(): BelongsToMany
+    {
+        return $this->belongsToMany(Technology::class)->withPivot(['version', 'sort'])->orderByPivot('sort');
+    }
+
+    /** @return HasMany<ArticleTechnology, $this> the same stack as editable rows (admin repeater) */
+    public function techStack(): HasMany
+    {
+        return $this->hasMany(ArticleTechnology::class)->orderBy('sort');
+    }
+
+    // The logo shown in lists: the first technology, else the category's.
+    public function primaryTechnology(): ?Technology
+    {
+        return $this->technologies->first() ?? $this->category?->technology;
+    }
+
     /** @return BelongsToMany<Project, $this> */
     public function projects(): BelongsToMany
     {
@@ -167,7 +183,7 @@ class Article extends Model implements HasPublicPath, HasRichContent
             'id', 'type', 'author_id', 'title', 'slug', 'excerpt', 'featured_media_id', 'category_id', 'series_id', 'series_position',
             'status', 'published_at', 'content_updated_at', 'difficulty', 'reading_minutes', 'reading_minutes_override',
             'is_featured', 'is_pinned', 'views', 'kudos',
-        ])->with(['category', 'featuredMedia']);
+        ])->with(['category.technology.iconMedia', 'featuredMedia', 'technologies.iconMedia']);
     }
 
     /** @param Builder<Article> $query */

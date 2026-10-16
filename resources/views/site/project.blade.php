@@ -44,12 +44,14 @@
                                 </dd>
                             </div>
                         @endif
-                        @if ($project->stack)
+                        @if ($project->technologies->isNotEmpty())
                             <div>
                                 <dt class="text-muted-foreground">Stack</dt>
-                                <dd class="mt-2 flex flex-wrap gap-1.5">
-                                    @foreach ($project->stack as $tech)
-                                        <a href="{{ url('/projects').'?'.http_build_query(['tech' => $tech]) }}" class="rounded-sm border border-border bg-surface-2 px-2 py-0.5 text-xs font-medium text-muted-foreground hover:border-primary hover:text-primary">{{ $tech }}</a>
+                                <dd class="mt-2 space-y-1">
+                                    @foreach ($project->technologies as $technology)
+                                        <a href="{{ url('/projects').'?tech='.$technology->slug }}" class="tech-hover flex items-center gap-2.5 rounded-sm px-2 py-1 text-foreground hover:bg-accent">
+                                            <x-site.tech-icon :technology="$technology" size="size-4" /> {{ $technology->name }}
+                                        </a>
                                     @endforeach
                                 </dd>
                             </div>

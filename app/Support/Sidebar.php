@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\Technology;
 use App\Settings\DisplaySettings;
 use Illuminate\Support\Facades\Cache;
 
@@ -13,7 +14,7 @@ class Sidebar
     // The cache keeps up to the maximum; the per-category setting is applied when reading.
     public const CACHED_PER_CATEGORY = DisplaySettings::SIDEBAR_MAX;
 
-    /** @return list<array{name: string, icon: string, url: string, count: int, open: bool, items: list<array{title: string, url: string, active: bool}>}> */
+    /** @return list<array{name: string, icon: string, technology: ?Technology, url: string, count: int, open: bool, items: list<array{title: string, url: string, active: bool}>}> */
     public static function categories(?Article $current = null, ?Category $open = null): array
     {
         $tree = Cache::remember('sidebar.categories', now()->addMinutes(10), function () {
@@ -27,6 +28,7 @@ class Sidebar
                         'ids' => $ids,
                         'name' => $category->name,
                         'icon' => $category->icon ?: 'folder',
+                        'technology_id' => $category->technology_id,
                         'url' => url($category->publicPath() ?? '/'),
                         'count' => (clone $articles)->count(),
                         'items' => (clone $articles)->latest('published_at')->limit(self::CACHED_PER_CATEGORY)->get(['id', 'title', 'slug', 'type'])
@@ -39,6 +41,8 @@ class Sidebar
         });
 
         $perCategory = max(1, app(DisplaySettings::class)->sidebar_items_per_category);
+        // Logos are not cached as models: one small query per request.
+        $technologies = Technology::with('iconMedia')->findMany(array_filter(array_column($tree, 'technology_id')))->keyBy('id');
 
         $out = [];
         foreach ($tree as $index => $entry) {
@@ -54,6 +58,7 @@ class Sidebar
             $out[] = [
                 'name' => $entry['name'],
                 'icon' => $entry['icon'],
+                'technology' => $technologies->get($entry['technology_id'] ?? 0),
                 'url' => $entry['url'],
                 'count' => $entry['count'],
                 // Open the reader's category; with no article, open the first one (as in the template).

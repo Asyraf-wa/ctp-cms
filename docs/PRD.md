@@ -80,7 +80,7 @@ Full schema: [ARCHITECTURE.md §4](ARCHITECTURE.md).
   - difficulty (`beginner`, `intermediate`, `advanced`)
   - estimated time (auto-calculated from word count, can be overridden)
   - prerequisites (list)
-  - "Tested with" (repeater of name and version, such as `Laravel 13`, `PHP 8.4`)
+  - **Tech stack**: ordered technologies from the Technologies list, each with an optional version (`Laravel 13.x`, `PHP 8.4`). The first is the main one: its logo shows in lists. Versions are the "Tested with" facts (D18)
   - source code / repo URL
   - demo URL
 - **ART-06** **TL;DR / Key takeaways** field, shown at the top of the article and used for GEO.
@@ -433,6 +433,8 @@ The full mapping is in [ARCH §10](ARCHITECTURE.md). The legacy dump has 64 arti
 | D14 | Legacy FAQs and Books | Not needed. Not imported. |
 | D16 | Editor | **Filament RichEditor (TipTap), stored as JSON**, with custom blocks (Code with CodeEditor, Callout, Tabs, Terminal, Steps, YouTube, CodePen) and a Media Library tool. Verified against real legacy articles (T0.12). |
 | D17 | Dev ports | app 8100 · phpMyAdmin 8101 · Mailpit 8125 · MySQL 3317 · Vite 5183 (8080/8081/3306 are taken on this machine). |
+| D18 | Technology logos | A **Technologies** list (brand logos from Simple Icons, CC0, bundled; or an uploaded SVG; or a Lucide icon) replaces free-text "Tested with" and project stacks. Tutorials pick an ordered tech stack with optional versions; the first logo shows in lists, the whole stack in the article's right column. Categories may link one technology as their logo, which is also the fallback for tutorials without a stack (all legacy articles). Logos are grey and take the brand colour on hover. |
+| D19 | Sidebar length | Tutorials per category in the left sidebar is a setting (Site settings → Layout), default 5. |
 | D15 | Staging and live deploy | **No staging.** Development is local in Docker. The owner does the live deploy; we supply `.cpanel.yml`, the CI workflow and a deploy guide. |
 
 ## 11. Open Questions

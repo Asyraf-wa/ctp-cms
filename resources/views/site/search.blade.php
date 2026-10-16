@@ -34,7 +34,9 @@
             @if ($results && $results->isNotEmpty())
                 <ol class="rounded-xl border border-border bg-card px-5 sm:px-6">
                     @foreach ($results as $article)
-                        <li class="group relative border-b border-border py-5 last:border-b-0">
+                        <li class="group relative flex gap-4 border-b border-border py-5 last:border-b-0">
+                            <x-site.article-logo :article="$article" class="mt-0.5" />
+                            <div class="min-w-0 flex-1">
                             <p class="mb-1 flex flex-wrap items-center gap-2 text-xs">
                                 <span class="font-semibold tracking-wide text-primary uppercase">{{ $article->type->value === 'blog' ? 'Blog' : $article->category?->name }}</span>
                                 <x-site.difficulty :level="$article->difficulty" />
@@ -46,6 +48,7 @@
                                 <p class="search-hit mt-1 line-clamp-2 text-sm text-muted-foreground">{!! Search::highlight($article->excerpt, $query) !!}</p>
                             @endif
                             <p class="mt-2 text-xs text-muted-foreground">{{ $article->published_at->timezone(config('ctp.display_timezone'))->format('M j, Y') }} · {{ $article->readingMinutes() }} min read</p>
+                            </div>
                         </li>
                     @endforeach
                 </ol>

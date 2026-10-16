@@ -27,7 +27,7 @@ class HomeController extends Controller
             ->whereNotIn('id', $featured->modelKeys())
             ->latest('published_at')->limit(6)->get();
 
-        $categories = Category::query()->roots()->ordered()->with('children')->get()
+        $categories = Category::query()->roots()->ordered()->with(['children', 'technology.iconMedia'])->get()
             ->map(function (Category $category) {
                 $category->setAttribute('tutorial_count', Article::published()->tutorials()->whereIn('category_id', $category->familyIds())->count());
 
@@ -46,7 +46,7 @@ class HomeController extends Controller
             'categories' => $categories,
             'series' => $series,
             'posts' => Article::published()->blogPosts()->forCards()->latest('published_at')->limit(3)->get(),
-            'projects' => Project::published()->with('cover')->orderByDesc('is_featured')->orderBy('sort')->limit(3)->get(),
+            'projects' => Project::published()->with(['cover', 'technologies.iconMedia'])->orderByDesc('is_featured')->orderBy('sort')->limit(3)->get(),
             'tutorialCount' => Article::published()->tutorials()->count(),
         ]);
     }
@@ -57,7 +57,7 @@ class HomeController extends Controller
      */
     public function preview(Request $request): View
     {
-        $categories = Category::query()->roots()->ordered()->with('children')->get()
+        $categories = Category::query()->roots()->ordered()->with(['children', 'technology.iconMedia'])->get()
             ->map(function (Category $category) {
                 $category->setAttribute('tutorial_count', Article::published()->tutorials()->whereIn('category_id', $category->familyIds())->count());
 

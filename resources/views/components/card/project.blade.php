@@ -12,10 +12,12 @@
         @if ($project->tagline)
             <p class="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{{ $project->tagline }}</p>
         @endif
-        @if ($project->stack)
+        @if ($project->technologies->isNotEmpty())
             <ul class="mt-4 flex flex-wrap gap-1.5" aria-label="Tech stack">
-                @foreach (array_slice($project->stack, 0, 5) as $tech)
-                    <li class="rounded-sm border border-border bg-surface-2 px-2 py-0.5 text-xs font-medium text-muted-foreground">{{ $tech }}</li>
+                @foreach ($project->technologies->take(5) as $technology)
+                    <li class="inline-flex items-center gap-1.5 rounded-sm border border-border bg-surface-2 px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                        <x-site.tech-icon :technology="$technology" size="size-3.5" /> {{ $technology->name }}
+                    </li>
                 @endforeach
             </ul>
         @endif

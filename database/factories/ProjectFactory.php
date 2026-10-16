@@ -15,7 +15,6 @@ class ProjectFactory extends Factory
             'title' => fake()->unique()->words(2, true),
             'tagline' => fake()->sentence(),
             'status' => ProjectStatus::Active,
-            'stack' => ['Laravel', 'Tailwind CSS'],
             'started_at' => now()->subYear(),
             'is_published' => true,
         ];

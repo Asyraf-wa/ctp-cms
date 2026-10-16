@@ -11,6 +11,7 @@ use App\Models\Menu;
 use App\Models\MenuItem;
 use App\Models\Project;
 use App\Models\Redirect;
+use App\Models\Technology;
 use App\Models\User;
 use Database\Factories\ArticleFactory;
 use Livewire\Livewire;
@@ -28,7 +29,6 @@ function validProject(array $overrides = []): array
         'tagline' => 'Generate CakePHP and Laravel admin panels from a schema.',
         'status' => 'active',
         'is_published' => true,
-        'stack' => ['Laravel', 'Vue', 'Tailwind CSS'],
         'live_url' => 'https://example.com',
         'repo_url' => 'https://github.com/example/ctp',
         'started_at' => '2024-03-01',
@@ -45,6 +45,8 @@ it('lists projects', function () {
 
 it('creates a project with cover, gallery, stack and related tutorials in order', function () {
     [$cover, $shot1, $shot2] = Media::factory()->count(3)->create();
+    $vue = Technology::factory()->brand('vuedotjs', 'Vue.js')->create();
+    $laravel = Technology::factory()->brand('laravel', 'Laravel')->create();
     $first = Article::factory()->published()->create(['title' => 'Part one']);
     $second = Article::factory()->published()->create(['title' => 'Part two']);
 
@@ -53,13 +55,14 @@ it('creates a project with cover, gallery, stack and related tutorials in order'
             'cover_media_id' => $cover->id,
             'gallery' => [['media_id' => $shot1->id, 'caption' => 'Dashboard'], ['media_id' => $shot2->id, 'caption' => null]],
             'articles' => [$second->id, $first->id],
+            'technologies' => [$laravel->id, $vue->id],
         ]))
         ->call('create')
         ->assertHasNoFormErrors();
 
     $project = Project::sole();
     expect($project->status)->toBe(ProjectStatus::Active)
-        ->and($project->stack)->toBe(['Laravel', 'Vue', 'Tailwind CSS'])
+        ->and($project->technologies->pluck('name')->all())->toBe(['Laravel', 'Vue.js'])
         ->and($project->publicPath())->toBe('/projects/ctp-saas')
         ->and($project->body_rendered)->toContain('id="the-problem"')
         ->and($project->period())->toBe('2024 – present')
@@ -88,13 +91,13 @@ it('redirects the old URL when the slug changes', function () {
     expect(Redirect::where('from_path', '/projects/pixel-maps')->value('to_path'))->toBe('/projects/interactive-svg-maps');
 });
 
-it('tidies the stack and offers it for filtering', function () {
-    Project::factory()->create(['stack' => [' Laravel ', 'Alpine.js', 'Laravel', '']]);
-    Project::factory()->create(['stack' => ['CakePHP']]);
-    Project::factory()->draft()->create(['stack' => ['Secret']]);
+it('offers only technologies used by published projects for filtering', function () {
+    [$laravel, $cake, $secret] = [Technology::factory()->create(['name' => 'Laravel']), Technology::factory()->create(['name' => 'CakePHP']), Technology::factory()->create(['name' => 'Secret'])];
+    Project::factory()->create()->technologies()->attach($laravel);
+    Project::factory()->create()->technologies()->attach($cake);
+    Project::factory()->draft()->create()->technologies()->attach($secret);
 
-    expect(Project::first()->stack)->toBe(['Laravel', 'Alpine.js'])
-        ->and(Project::stackOptions())->toBe(['Alpine.js', 'CakePHP', 'Laravel']);
+    expect(Project::stackOptions()->pluck('name')->all())->toBe(['CakePHP', 'Laravel']);
 });
 
 it('can be linked from a menu and drops out when unpublished', function () {

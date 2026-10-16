@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 // PRD TAX-01: two levels (a category may have a parent, a child may not have children).
-#[Fillable(['parent_id', 'name', 'slug', 'description', 'icon', 'sort', 'seo_title', 'seo_description', 'legacy_id'])]
+#[Fillable(['parent_id', 'name', 'slug', 'description', 'icon', 'technology_id', 'sort', 'seo_title', 'seo_description', 'legacy_id'])]
 class Category extends Model implements HasPublicPath
 {
     /** @use HasFactory<CategoryFactory> */
@@ -40,6 +40,12 @@ class Category extends Model implements HasPublicPath
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'parent_id');
+    }
+
+    /** @return BelongsTo<Technology, $this> logo used for the category (and its tutorials without a tech stack) */
+    public function technology(): BelongsTo
+    {
+        return $this->belongsTo(Technology::class);
     }
 
     /** @return HasMany<Category, $this> */

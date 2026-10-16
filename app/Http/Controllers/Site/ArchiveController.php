@@ -18,7 +18,7 @@ class ArchiveController extends Controller
 
     public function category(string $slug): View
     {
-        $category = Category::where('slug', $slug)->with(['parent', 'children'])->firstOrFail();
+        $category = Category::where('slug', $slug)->with(['parent', 'children', 'technology.iconMedia'])->firstOrFail();
 
         return view('site.category', [
             'category' => $category,

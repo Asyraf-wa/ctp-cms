@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Categories;
 use App\Filament\Resources\Categories\Pages\ManageCategories;
 use App\Filament\Support\IconPicker;
 use App\Filament\Support\SlugFields;
+use App\Filament\Support\TechnologyPicker;
 use App\Models\Category;
 use BackedEnum;
 use Closure;
@@ -56,7 +57,9 @@ class CategoryResource extends Resource
                             $fail('This category has sub-categories, so it must stay at the top level.');
                         }
                     }),
-                IconPicker::make(),
+                IconPicker::make()->helperText('Used when no technology is linked.'),
+                TechnologyPicker::make('technology_id')->label('Technology logo')
+                    ->helperText('Shows the brand logo for this category, and for its tutorials that have no tech stack yet.'),
                 Textarea::make('description')->rows(2)->maxLength(500)->columnSpanFull()
                     ->helperText('Shown on the category page and in the sidebar tooltip.'),
                 Section::make('Search engines')->collapsed()->columnSpanFull()->columns(2)->schema([
@@ -74,7 +77,7 @@ class CategoryResource extends Resource
             ->reorderable('sort')
             ->defaultSort('sort')
             ->columns([
-                ViewColumn::make('icon')->view('filament.columns.lucide-icon')->label('')->width('1%'),
+                ViewColumn::make('icon')->view('filament.columns.category-icon')->label('')->width('1%'),
                 TextColumn::make('name')
                     ->formatStateUsing(fn (Category $record) => $record->fullName())
                     ->description(fn (Category $record) => $record->description)

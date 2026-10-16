@@ -7,6 +7,7 @@
     @endif
     <div class="flex flex-1 flex-col p-5">
         <div class="mb-2 flex flex-wrap items-center gap-2">
+            <x-site.article-logo :article="$article" size="size-4" :tile="false" />
             @if ($article->type->value === 'blog')
                 <span class="text-xs font-semibold tracking-wide text-primary uppercase">Blog</span>
             @elseif ($article->category)

@@ -1,6 +1,7 @@
 {{-- Compact list row for archives and search: title, excerpt, meta. No cover. --}}
 @props(['article', 'heading' => 'h3'])
 <article class="group relative flex gap-4 border-b border-border py-5 last:border-b-0">
+    <x-site.article-logo :article="$article" class="mt-0.5" />
     <div class="min-w-0 flex-1">
         <div class="mb-1 flex flex-wrap items-center gap-2 text-xs">
             @if ($article->category)

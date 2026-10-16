@@ -7,7 +7,7 @@
         <x-site.category-sidebar :categories="$sidebar" />
     </x-slot:left>
 
-    <x-site.page-header :title="$category->name" eyebrow="Category" :icon="$category->icon ?: 'folder'" :breadcrumbs="$crumbs"
+    <x-site.page-header :title="$category->name" eyebrow="Category" :icon="$category->icon ?: 'folder'" :technology="$category->technology" :breadcrumbs="$crumbs"
         :description="$category->description">
         <p class="mt-2 text-sm text-muted-foreground">{{ number_format($articles->total()) }} {{ Str::plural('tutorial', $articles->total()) }}</p>
     </x-site.page-header>

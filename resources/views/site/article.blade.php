@@ -61,9 +61,12 @@
 
     <x-article.related :articles="$related" />
 
-    @if ($article->toc)
+    @if ($article->toc || $article->technologies->isNotEmpty())
         <x-slot:right>
-            <x-site.toc :items="$article->toc" />
+            <x-article.tech-stack :article="$article" />
+            @if ($article->toc)
+                <x-site.toc :items="$article->toc" />
+            @endif
             <div class="mt-8 space-y-3 border-t border-border pt-6 text-sm">
                 @if ($updated = $article->lastUpdated() ?? $article->published_at)
                     <p class="flex items-center gap-2 text-muted-foreground">

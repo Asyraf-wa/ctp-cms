@@ -75,17 +75,21 @@ articles         id, type enum(tutorial,blog), author_id → users, title, slug 
                  featured_media_id, category_id (null for blog), series_id, series_position,
                  status enum(draft,scheduled,published), published_at, content_updated_at,
                  difficulty enum(beginner,intermediate,advanced) null, reading_minutes, reading_minutes_override,
-                 prerequisites (json), tested_with (json [{name,version}]), repo_url, demo_url,
+                 prerequisites (json), repo_url, demo_url,
                  faq (json), is_featured, is_pinned, needs_review, comments_enabled,
                  views (unsigned int), kudos (unsigned int), legacy_id, timestamps, softDeletes
                  FULLTEXT(title, excerpt, body_text)   -- body_text = stripped plain text
 article_revisions id, article_id, title, body, tldr, created_at, is_autosave
-categories       id, parent_id, name, slug (unique), description, icon, sort, seo_title, seo_description, timestamps
+categories       id, parent_id, name, slug (unique), description, icon, technology_id (logo), sort, seo_title, seo_description, timestamps
+technologies     id, name, slug (unique), icon_type (simple|media|lucide), icon (Simple Icons slug or Lucide name),
+                 icon_media_id, color (brand hex), website_url, timestamps
+article_technology id, article_id, technology_id, version (= "Tested with"), sort   -- first row = main logo in lists
+project_technology project_id, technology_id, sort
 tags             id, name, slug (unique), description, timestamps
 article_tag      article_id, tag_id
 series           id, title, slug, description, cover_media_id, sort, timestamps
 projects         id, title, slug, tagline, body (TipTap json), body_rendered, toc (json), cover_media_id,
-                 gallery (json [{media_id, caption}]), stack (json list of strings),
+                 gallery (json [{media_id, caption}]), stack via project_technology,
                  status (active|maintained|archived), live_url, repo_url, started_at, ended_at,
                  is_featured, is_published, sort, timestamps
 project_article  project_id, article_id, sort    -- related tutorials, in reading order

@@ -53,7 +53,11 @@
                     @foreach ($categories as $category)
                         <a href="{{ url($category->publicPath()) }}" class="group flex items-start gap-4 rounded-xl border border-border bg-card p-5 shadow-xs transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0">
                             <span class="flex size-11 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-primary">
-                                <x-dynamic-component :component="'lucide-'.($category->icon ?: 'folder')" class="size-5" />
+                                @if ($category->technology)
+                                    <x-site.tech-icon :technology="$category->technology" size="size-5" />
+                                @else
+                                    <x-dynamic-component :component="'lucide-'.($category->icon ?: 'folder')" class="size-5" />
+                                @endif
                             </span>
                             <span class="min-w-0">
                                 <span class="block font-semibold text-foreground group-hover:text-primary">{{ $category->name }}</span>

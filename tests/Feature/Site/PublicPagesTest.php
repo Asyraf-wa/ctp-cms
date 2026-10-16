@@ -7,6 +7,7 @@ use App\Models\Media;
 use App\Models\Project;
 use App\Models\Series;
 use App\Models\Tag;
+use App\Models\Technology;
 use App\Models\User;
 use App\Support\Slugs\RootSlugs;
 
@@ -94,13 +95,15 @@ it('lists only blog posts on the blog index', function () {
 it('filters projects by tech and shows the detail page with gallery and related tutorials', function () {
     $shot = Media::factory()->create();
     $tutorial = Article::factory()->published()->create(['title' => 'Built Along The Way', 'category_id' => $this->tools->id]);
-    $maps = Project::factory()->create(['title' => 'Pixel Maps', 'stack' => ['Alpine.js', 'SVG'], 'gallery' => [['media_id' => $shot->id, 'caption' => 'Map editor']]]);
+    $svg = Technology::factory()->create(['name' => 'SVG']);
+    $maps = Project::factory()->create(['title' => 'Pixel Maps', 'gallery' => [['media_id' => $shot->id, 'caption' => 'Map editor']]]);
     $maps->articles()->attach($tutorial, ['sort' => 0]);
-    Project::factory()->create(['title' => 'CTP SaaS', 'stack' => ['Laravel']]);
+    $maps->technologies()->attach($svg);
+    Project::factory()->create(['title' => 'CTP SaaS'])->technologies()->attach(Technology::factory()->create(['name' => 'Laravel']));
     Project::factory()->draft()->create(['title' => 'Hidden Project']);
 
     $this->get('/projects')->assertOk()->assertSee(['Pixel Maps', 'CTP SaaS'])->assertDontSee('Hidden Project');
-    $this->get('/projects?tech=SVG')->assertSee('Pixel Maps')->assertDontSee('CTP SaaS');
+    $this->get('/projects?tech=svg')->assertSee('Pixel Maps')->assertDontSee('CTP SaaS');
     $this->get('/projects/'.$maps->slug)->assertOk()->assertSee(['Map editor', 'Built Along The Way', 'At a glance']);
     $this->get('/projects/hidden-project')->assertNotFound();
 });

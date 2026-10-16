@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Site;
 use App\Http\Controllers\Controller;
 use App\Models\Media;
 use App\Models\Project;
+use App\Models\Technology;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
@@ -13,10 +14,10 @@ class ProjectController extends Controller
 {
     public function index(Request $request): View
     {
-        $tech = $request->string('tech')->trim()->value() ?: null;
+        $tech = $request->filled('tech') ? Technology::where('slug', (string) $request->query('tech'))->first() : null;
 
-        $projects = Project::published()->with('cover')
-            ->when($tech, fn ($q, string $t) => $q->whereJsonContains('stack', $t))
+        $projects = Project::published()->with(['cover', 'technologies.iconMedia'])
+            ->when($tech, fn ($q, Technology $t) => $q->whereHas('technologies', fn ($q) => $q->whereKey($t->id)))
             ->orderByDesc('is_featured')->orderBy('sort')->latest('started_at')
             ->get();
 
@@ -29,7 +30,7 @@ class ProjectController extends Controller
 
     public function show(string $slug): View
     {
-        $project = Project::published()->where('slug', $slug)->with(['cover', 'seo'])->firstOrFail();
+        $project = Project::published()->where('slug', $slug)->with(['cover', 'seo', 'technologies.iconMedia'])->firstOrFail();
 
         $gallery = collect($project->gallery ?? [])
             ->map(fn (array $item) => ['media' => Media::find($item['media_id'] ?? null), 'caption' => $item['caption'] ?? null])

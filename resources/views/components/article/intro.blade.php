@@ -1,4 +1,4 @@
-{{-- Outdated notice (ART-08), TL;DR (ART-06/GEO-03), tested-with and prerequisites (ART-05). --}}
+{{-- Outdated notice (ART-08), TL;DR (ART-06/GEO-03), tech stack with tested versions and prerequisites (ART-05). --}}
 @props(['article'])
 <div class="not-prose mt-8 space-y-4">
     @if ($article->isOutdated())
@@ -24,14 +24,26 @@
         </section>
     @endif
 
-    @if ($article->tested_with || $article->prerequisites)
-        <div class="grid gap-4 rounded-xl border border-border bg-surface-2 p-5 text-sm sm:grid-cols-2">
-            @if ($article->tested_with)
-                <div>
-                    <p class="mb-2 font-semibold text-foreground">Tested with</p>
+    {{-- Tech stack (with tested versions) and prerequisites. On xl the stack is in the right column instead. --}}
+    @php($stack = $article->technologies)
+    @if ($stack->isNotEmpty() || $article->prerequisites)
+        <div @class([
+            'grid gap-4 rounded-xl border border-border bg-surface-2 p-5 text-sm sm:grid-cols-2',
+            'xl:hidden' => ! $article->prerequisites,
+            'xl:grid-cols-1' => $article->prerequisites && $stack->isNotEmpty(),
+        ])>
+            @if ($stack->isNotEmpty())
+                <div class="xl:hidden">
+                    <p class="mb-2 font-semibold text-foreground">Tech stack</p>
                     <ul class="flex flex-wrap gap-2">
-                        @foreach ($article->tested_with as $item)
-                            <li class="rounded-xs border border-border bg-card px-2 py-0.5 font-medium">{{ $item['name'] }} <span class="text-muted-foreground">{{ $item['version'] }}</span></li>
+                        @foreach ($stack as $technology)
+                            <li class="tech-hover inline-flex items-center gap-1.5 rounded-xs border border-border bg-card px-2 py-1 font-medium">
+                                <x-site.tech-icon :technology="$technology" />
+                                {{ $technology->name }}
+                                @if ($technology->pivot->version)
+                                    <span class="text-muted-foreground">{{ $technology->pivot->version }}</span>
+                                @endif
+                            </li>
                         @endforeach
                     </ul>
                 </div>

@@ -10,7 +10,9 @@ use App\Filament\Resources\Projects\Pages\ListProjects;
 use App\Filament\Support\ContentEditor;
 use App\Filament\Support\SeoSection;
 use App\Filament\Support\SlugFields;
+use App\Filament\Support\TechnologyPicker;
 use App\Models\Project;
+use App\Models\Technology;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -19,7 +21,6 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
@@ -90,10 +91,14 @@ class ProjectResource extends Resource
                         MediaPicker::make('cover_media_id')->hiddenLabel(),
                     ]),
                     Section::make('Stack & links')->schema([
-                        TagsInput::make('stack')->label('Tech stack')->placeholder('Add a technology')
-                            ->suggestions(fn () => Project::query()->pluck('stack')->flatten()->filter()->unique()->sort()->values()->all())
-                            ->reorderable()
-                            ->helperText('Shown as chips and used for “filter by tech”.'),
+                        TechnologyPicker::make('technologies')->label('Tech stack')->multiple()
+                            ->relationship('technologies', 'name')
+                            ->getOptionLabelFromRecordUsing(fn (Technology $record) => TechnologyPicker::label($record))
+                            // Keep the order the technologies were picked in.
+                            ->saveRelationshipsUsing(fn (Project $record, ?array $state) => $record->technologies()->sync(
+                                collect($state ?? [])->values()->mapWithKeys(fn ($id, $i) => [(int) $id => ['sort' => $i]])->all()
+                            ))
+                            ->helperText('Shown as logos on the project and used for “filter by tech”.'),
                         TextInput::make('live_url')->label('Live URL')->url()->prefixIcon(Heroicon::OutlinedGlobeAlt),
                         TextInput::make('repo_url')->label('Repository URL')->url()->prefixIcon(Heroicon::OutlinedCodeBracket),
                     ]),
@@ -127,7 +132,7 @@ class ProjectResource extends Resource
                 TextColumn::make('title')->label('Name')->searchable()->sortable()->wrap()
                     ->description(fn (Project $record) => $record->tagline ? str($record->tagline)->limit(60) : null),
                 TextColumn::make('status')->badge()->sortable(),
-                TextColumn::make('stack')->badge()->color('gray')->limitList(2)->expandableLimitedList()->visibleFrom('xl'),
+                TextColumn::make('technologies.name')->label('Stack')->badge()->color('gray')->limitList(2)->expandableLimitedList()->visibleFrom('xl'),
                 IconColumn::make('is_featured')->label('Featured')->boolean()->trueIcon(Heroicon::Star)->falseIcon(Heroicon::OutlinedStar)->trueColor('warning'),
                 IconColumn::make('is_published')->label('Published')->boolean(),
             ])

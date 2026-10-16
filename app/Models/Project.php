@@ -11,6 +11,7 @@ use Database\Factories\ProjectFactory;
 use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -25,12 +26,11 @@ use Illuminate\Support\Carbon;
  * @property array<string, mixed>|null $body
  * @property list<array{id: string, label: string, level: int}>|null $toc
  * @property list<array{media_id: int|string|null, caption?: string|null}>|null $gallery
- * @property list<string>|null $stack
  * @property Carbon|null $started_at
  * @property Carbon|null $ended_at
  */
 #[Fillable([
-    'title', 'slug', 'tagline', 'body', 'cover_media_id', 'gallery', 'stack', 'status',
+    'title', 'slug', 'tagline', 'body', 'cover_media_id', 'gallery', 'status',
     'live_url', 'repo_url', 'started_at', 'ended_at', 'is_featured', 'is_published', 'sort',
 ])]
 class Project extends Model implements HasPublicPath, HasRichContent
@@ -44,8 +44,6 @@ class Project extends Model implements HasPublicPath, HasRichContent
             if ($project->isDirty('body') || ! $project->exists) {
                 $project->renderBody();
             }
-            // Keep the stack tidy for "filter by tech": trimmed, unique, in the order given.
-            $project->stack = array_values(array_unique(array_filter(array_map('trim', $project->stack ?? []))));
         });
     }
 
@@ -56,7 +54,6 @@ class Project extends Model implements HasPublicPath, HasRichContent
             'body' => 'array',
             'toc' => 'array',
             'gallery' => 'array',
-            'stack' => 'array',
             'started_at' => 'date',
             'ended_at' => 'date',
             'is_featured' => 'boolean',
@@ -125,10 +122,16 @@ class Project extends Model implements HasPublicPath, HasRichContent
             : $this->started_at->format('Y');
     }
 
-    /** @return list<string> every tech used by a published project, for the filter chips */
-    public static function stackOptions(): array
+    /** @return BelongsToMany<Technology, $this> the stack, in the order given */
+    public function technologies(): BelongsToMany
     {
-        return static::published()->pluck('stack')->flatten()->filter()->unique()->sort(SORT_NATURAL | SORT_FLAG_CASE)->values()->all();
+        return $this->belongsToMany(Technology::class)->withPivot('sort')->orderByPivot('sort');
+    }
+
+    /** @return Collection<int, Technology> technologies used by published projects, for the filter chips */
+    public static function stackOptions(): Collection
+    {
+        return Technology::query()->whereHas('projects', fn ($q) => $q->where('is_published', true))->orderBy('name')->get();
     }
 
     public function mediaUsage(): array

@@ -36,10 +36,13 @@
                     @php($isActive = $tab?->id === $active?->id)
                     <a href="{{ $tab ? url('/preview/home').'?category='.$tab->slug : url('/preview/home') }}" @if ($isActive) aria-current="page" @endif
                         @class([
-                            'shrink-0 border-b-2 px-3 pb-3 text-sm font-medium whitespace-nowrap transition-colors',
+                            'tech-hover inline-flex shrink-0 items-center gap-1.5 border-b-2 px-3 pb-3 text-sm font-medium whitespace-nowrap transition-colors',
                             'border-primary text-primary' => $isActive,
                             'border-transparent text-muted-foreground hover:border-border hover:text-foreground' => ! $isActive,
                         ])>
+                        @if ($tab?->technology)
+                            <x-site.tech-icon :technology="$tab->technology" size="size-3.5" />
+                        @endif
                         {{ $tab?->name ?? 'All' }}
                         @if ($tab)
                             <span class="ml-1 text-xs tabular-nums opacity-70">{{ $tab->tutorial_count }}</span>
@@ -52,26 +55,33 @@
         @if ($latest->isNotEmpty())
             <ol>
                 @foreach ($latest as $article)
-                    <li class="group relative border-b border-border px-6 py-4 transition-colors last:border-b-0 hover:bg-surface-2 sm:px-8">
-                        <div class="mb-1 flex flex-wrap items-center gap-2 text-xs">
-                            @if ($article->is_pinned)
-                                <x-lucide-pin class="size-3.5 text-primary" aria-label="Pinned" />
+                    <li class="group relative flex gap-4 border-b border-border px-6 py-4 transition-colors last:border-b-0 hover:bg-surface-2 sm:px-8">
+                        <x-site.article-logo :article="$article" class="mt-0.5 group-hover:bg-card" />
+                        <div class="min-w-0 flex-1">
+                            <div class="mb-1 flex flex-wrap items-center gap-2 text-xs">
+                                @if ($article->is_pinned)
+                                    <x-lucide-pin class="size-3.5 text-primary" aria-label="Pinned" />
+                                @endif
+                                @if ($article->category)
+                                    <span class="font-semibold tracking-wide text-primary uppercase">{{ $article->category->name }}</span>
+                                @endif
+                                <x-site.difficulty :level="$article->difficulty" />
+                            </div>
+                            <h3 class="font-semibold text-foreground">
+                                <a href="{{ url($article->publicPath()) }}" class="after:absolute after:inset-0 group-hover:text-primary focus:outline-none focus-visible:underline">{{ $article->title }}</a>
+                            </h3>
+                            @if ($article->excerpt)
+                                <p class="mt-1 line-clamp-1 text-sm text-muted-foreground">{{ $article->excerpt }}</p>
                             @endif
-                            @if ($article->category)
-                                <span class="font-semibold tracking-wide text-primary uppercase">{{ $article->category->name }}</span>
-                            @endif
-                            <x-site.difficulty :level="$article->difficulty" />
+                            <p class="mt-1.5 flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
+                                <time datetime="{{ $article->published_at->toAtomString() }}">{{ $article->published_at->timezone($tz)->format('M j, Y') }}</time>
+                                <span aria-hidden="true">·</span> {{ $article->readingMinutes() }} min read
+                                @if ($article->technologies->count() > 1)
+                                    <span aria-hidden="true">·</span>
+                                    <span class="sr-only">Uses</span>{{ $article->technologies->pluck('name')->join(', ') }}
+                                @endif
+                            </p>
                         </div>
-                        <h3 class="font-semibold text-foreground">
-                            <a href="{{ url($article->publicPath()) }}" class="after:absolute after:inset-0 group-hover:text-primary focus:outline-none focus-visible:underline">{{ $article->title }}</a>
-                        </h3>
-                        @if ($article->excerpt)
-                            <p class="mt-1 line-clamp-1 text-sm text-muted-foreground">{{ $article->excerpt }}</p>
-                        @endif
-                        <p class="mt-1.5 text-xs text-muted-foreground">
-                            <time datetime="{{ $article->published_at->toAtomString() }}">{{ $article->published_at->timezone($tz)->format('M j, Y') }}</time>
-                            · {{ $article->readingMinutes() }} min read
-                        </p>
                     </li>
                 @endforeach
             </ol>

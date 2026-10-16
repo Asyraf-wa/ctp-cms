@@ -6,8 +6,10 @@ use App\Enums\ArticleStatus;
 use App\Enums\ArticleType;
 use App\Enums\Difficulty;
 use App\Filament\Forms\Components\MediaPicker;
+use App\Filament\Resources\Technologies\TechnologyResource;
 use App\Filament\Support\ContentEditor;
 use App\Filament\Support\SeoSection;
+use App\Filament\Support\TechnologyPicker;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\User;
@@ -16,6 +18,7 @@ use App\Support\Slugs\RootSlugs;
 use Closure;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -117,13 +120,6 @@ class ArticleForm
                 ToggleButtons::make('difficulty')->inline()->options(Difficulty::class),
                 TextInput::make('reading_minutes_override')->label('Reading time (minutes)')->numeric()->minValue(1)->maxValue(240)
                     ->placeholder(fn (?Article $record) => $record ? "Auto: {$record->reading_minutes}" : 'Calculated on save'),
-                Repeater::make('tested_with')->label('Tested with')
-                    ->helperText('Versions this tutorial was verified on, e.g. Laravel 13, PHP 8.4. Readers use this to judge if it still applies.')
-                    ->schema([
-                        TextInput::make('name')->required()->placeholder('Laravel')->maxLength(50),
-                        TextInput::make('version')->required()->placeholder('13.x')->maxLength(30),
-                    ])
-                    ->columns(2)->defaultItems(0)->addActionLabel('Add software')->reorderable()->columnSpanFull(),
                 Repeater::make('prerequisites')
                     ->simple(TextInput::make('item')->required()->maxLength(200))
                     ->defaultItems(0)->addActionLabel('Add prerequisite')->reorderable()->columnSpanFull(),
@@ -186,6 +182,22 @@ class ArticleForm
                 ->visible(fn (Get $get) => self::isTutorial($get)),
             Select::make('tags')->relationship('tags', 'name')->multiple()->searchable()->preload()
                 ->createOptionForm([TextInput::make('name')->required()->maxLength(60)]),
+            // The first row is the main technology: its logo shows in lists. Versions show as "Tested with".
+            Repeater::make('techStack')->label('Tech stack')
+                ->relationship('techStack')
+                ->orderColumn('sort')
+                ->table([
+                    TableColumn::make('Technology')->markAsRequired(),
+                    TableColumn::make('Version')->width('5.5rem'),
+                ])
+                ->schema([
+                    // No inline "create" here: the sidebar is narrow. New ones are added under Content → Technologies.
+                    TechnologyPicker::make('technology_id', creatable: false)->label('Technology')->required()->distinct(),
+                    TextInput::make('version')->label('Version')->placeholder('Optional, e.g. 8.4')->maxLength(30),
+                ])
+                ->defaultItems(0)->reorderable()->addActionLabel('Add technology')
+                ->hint(new HtmlString('<a href="'.e(TechnologyResource::getUrl()).'" target="_blank" class="text-primary-600 hover:underline">Manage</a>'))
+                ->helperText('Drag the main one to the top: its logo shows in lists. Versions show as “Tested with”.'),
             Grid::make(3)->visible(fn (Get $get) => self::isTutorial($get))->schema([
                 Select::make('series_id')->label('Series')->relationship('series', 'title')->searchable()->preload()->live()->columnSpan(2),
                 TextInput::make('series_position')->label('Part')->numeric()->minValue(1)
