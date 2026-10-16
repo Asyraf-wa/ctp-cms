@@ -8,6 +8,7 @@ use Database\Factories\TagFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\DB;
 
 // PRD TAX-02.
@@ -27,9 +28,10 @@ class Tag extends Model implements HasPublicPath
         return '/tag/'.$slug;
     }
 
-    public function usageCount(): int
+    /** @return BelongsToMany<Article, $this> */
+    public function articles(): BelongsToMany
     {
-        return DB::table('article_tag')->where('tag_id', $this->id)->count();
+        return $this->belongsToMany(Article::class);
     }
 
     /**

@@ -25,8 +25,9 @@ class MenuItem extends Model
         'feed' => ['RSS feed', '/feed'],
     ];
 
-    // Content types an item can point at (morph alias => label). Articles and projects join in Phase 1D/1E.
+    // Content types an item can point at (morph alias => label). Projects join in Phase 1E.
     public const CONTENT_TYPES = [
+        'article' => 'Tutorial / blog post',
         'page' => 'Page',
         'category' => 'Category',
         'tag' => 'Tag',

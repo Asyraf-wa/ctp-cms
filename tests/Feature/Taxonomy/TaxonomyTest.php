@@ -3,6 +3,7 @@
 use App\Filament\Resources\Categories\Pages\ManageCategories;
 use App\Filament\Resources\Series\Pages\ManageSeries;
 use App\Filament\Resources\Tags\Pages\ManageTags;
+use App\Models\Article;
 use App\Models\Category;
 use App\Models\Redirect;
 use App\Models\Series;
@@ -17,9 +18,13 @@ beforeEach(function () {
     $this->actingAs(User::factory()->create(['email' => 'owner@example.com']));
 });
 
-function tagArticles(Tag $tag, array $articleIds): void
+// Tags the articles with the given positions (1-based), creating articles as needed.
+function tagArticles(Tag $tag, array $positions): void
 {
-    DB::table('article_tag')->insert(array_map(fn ($id) => ['article_id' => $id, 'tag_id' => $tag->id], $articleIds));
+    foreach ($positions as $position) {
+        $article = Article::find($position) ?? Article::factory()->create(['id' => $position]);
+        $article->tags()->attach($tag);
+    }
 }
 
 it('lists categories as a two-level tree for selects', function () {

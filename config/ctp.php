@@ -32,6 +32,11 @@ return [
         ],
     ],
 
+    /*
+    | ART-08: a tutorial not updated for this many months shows "may be outdated".
+    */
+    'freshness_months' => (int) env('CTP_FRESHNESS_MONTHS', 24),
+
     'display_timezone' => env('CTP_DISPLAY_TIMEZONE', 'Asia/Kuala_Lumpur'),
 
 ];

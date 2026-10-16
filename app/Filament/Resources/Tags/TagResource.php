@@ -23,7 +23,6 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
 use UnitEnum;
 
 // PRD TAX-02: tags with usage counts and merging.
@@ -53,20 +52,16 @@ class TagResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->select('tags.*')->selectSub(
-                DB::table('article_tag')->selectRaw('count(*)')->whereColumn('tag_id', 'tags.id'),
-                'articles_count',
-            ))
             ->defaultSort('name')
             ->columns([
                 TextColumn::make('name')->searchable()->sortable(),
                 TextColumn::make('slug')->color('gray')->searchable(),
-                TextColumn::make('articles_count')->label('Articles')->badge()->sortable()
+                TextColumn::make('articles_count')->counts('articles')->label('Articles')->badge()->sortable()
                     ->color(fn (int $state) => $state === 0 ? 'gray' : 'primary'),
             ])
             ->filters([
                 Filter::make('unused')->label('Unused only')
-                    ->query(fn (Builder $query) => $query->whereNotExists(fn ($q) => $q->from('article_tag')->whereColumn('tag_id', 'tags.id'))),
+                    ->query(fn (Builder $query) => $query->whereDoesntHave('articles')),
             ])
             ->recordActions([
                 self::mergeAction(),

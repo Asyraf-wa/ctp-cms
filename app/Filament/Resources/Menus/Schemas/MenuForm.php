@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Menus\Schemas;
 
+use App\Models\Article;
 use App\Models\Category;
 use App\Models\Menu;
 use App\Models\MenuItem;
@@ -97,6 +98,7 @@ class MenuForm
     private static function contentOptions(?string $type): array
     {
         return match ($type) {
+            'article' => Article::orderBy('title')->pluck('title', 'id')->all(),
             'page' => Page::orderBy('title')->pluck('title', 'id')->all(),
             'category' => Category::treeOptions(),
             'tag' => Tag::orderBy('name')->pluck('name', 'id')->all(),

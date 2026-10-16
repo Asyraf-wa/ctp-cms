@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\Article;
 use App\Models\Category;
 use App\Models\Media;
 use App\Models\Page;
+use App\Models\SeoMeta;
 use App\Models\Series;
 use App\Models\Tag;
 use App\Models\User;
@@ -37,6 +39,8 @@ class AppServiceProvider extends ServiceProvider
             'tag' => Tag::class,
             'series' => Series::class,
             'media' => Media::class,
+            'article' => Article::class,
+            'seo_meta' => SeoMeta::class,
         ]);
     }
 }
