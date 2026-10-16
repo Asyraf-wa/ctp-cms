@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
-import { bunny } from 'laravel-vite-plugin/fonts';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
@@ -8,17 +7,19 @@ export default defineConfig({
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.js'],
             refresh: true,
-            fonts: [
-                bunny('Instrument Sans', {
-                    weights: [400, 500, 600],
-                }),
-            ],
         }),
         tailwindcss(),
     ],
+    // Runs inside Docker (vite service); the browser reaches it on the published port.
     server: {
+        host: '0.0.0.0',
+        port: 5183,
+        strictPort: true,
+        origin: 'http://localhost:5183',
+        cors: true,
+        hmr: { host: 'localhost' },
         watch: {
-            ignored: ['**/storage/framework/views/**'],
+            ignored: ['**/storage/framework/views/**', '**/vendor/**', '**/legacy/**'],
         },
     },
 });
