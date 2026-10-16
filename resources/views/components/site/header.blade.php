@@ -1,3 +1,5 @@
+@inject('general', 'App\Settings\GeneralSettings')
+@inject('ribbon', 'App\Settings\RibbonSettings')
 @php
     // Temporary until menu management (MENU, T1.07) supplies the `header` menu.
     $nav = [
@@ -10,20 +12,22 @@
 
 {{-- Layout follows tutorial_web_template.html: shrinks on scroll (py-6 → py-3, logo 3xl → xl). --}}
 <header x-data="{ scrolled: false, open: false }"
+    @keydown.window.ctrl.k.prevent="$refs.q.offsetParent ? $refs.q.focus() : (window.location = @js(url('/search')))"
+    @keydown.window.meta.k.prevent="$refs.q.offsetParent ? $refs.q.focus() : (window.location = @js(url('/search')))"
     x-init="scrolled = window.scrollY > 50"
     @scroll.window.throttle.50ms="scrolled = window.scrollY > 50"
     @keydown.escape.window="open = false"
     class="sticky top-0 z-40 w-full border-b border-border transition-all duration-300"
     :class="scrolled ? 'py-3 shadow-sm bg-card/95 backdrop-blur' : 'py-6 bg-card'">
-    <div class="mx-auto flex h-full max-w-[1440px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+    <div @class(['mx-auto flex h-full max-w-[1440px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8', 'sm:pr-24 lg:pr-24' => $ribbon->isVisible()])>
 
-        <a href="{{ url('/') }}" class="flex items-center gap-2" aria-label="{{ config('app.name') }} home">
+        <a href="{{ url('/') }}" class="flex shrink-0 items-center gap-2 whitespace-nowrap" aria-label="{{ $general->site_name }} home">
             <x-brand.mark class="size-8" />
             <span class="font-bold tracking-tight text-foreground transition-all duration-300"
-                :class="scrolled ? 'text-xl' : 'text-xl sm:text-3xl'">{{ config('app.name') }}</span>
+                :class="scrolled ? 'text-xl' : 'text-xl lg:text-3xl'">{{ $general->site_name }}</span>
         </a>
 
-        <nav class="hidden gap-6 md:flex" aria-label="Main">
+        <nav class="hidden gap-6 whitespace-nowrap md:flex" aria-label="Main">
             @foreach ($nav as $item)
                 <a href="{{ $item['url'] }}"
                     @class([
@@ -34,10 +38,9 @@
             @endforeach
         </nav>
 
-        <div class="flex items-center gap-2 sm:gap-4">
+        <div class="flex shrink-0 items-center gap-2 sm:gap-3">
             {{-- Plain GET form, so search works without JS; Ctrl/⌘ K focuses it (PUB-06). --}}
-            <form action="{{ url('/search') }}" method="get" role="search" class="relative hidden sm:block"
-                x-data @keydown.window.prevent.ctrl.k="$refs.q.focus()" @keydown.window.prevent.meta.k="$refs.q.focus()">
+            <form action="{{ url('/search') }}" method="get" role="search" class="relative hidden xl:block">
                 <label for="site-search" class="sr-only">Search tutorials</label>
                 <input x-ref="q" id="site-search" name="q" type="search" placeholder="Search..." autocomplete="off"
                     class="w-56 rounded-full border border-transparent bg-muted py-2 pr-16 pl-4 text-sm text-foreground transition-all placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none dark:border-border">
@@ -46,13 +49,18 @@
                 </div>
             </form>
 
+            <a href="{{ url('/search') }}" aria-label="Search"
+                class="hidden rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent sm:inline-flex xl:hidden">
+                <x-lucide-search class="size-5" />
+            </a>
+
             <x-site.theme-toggle />
 
             <button type="button" x-data="{ full: false }" x-show="document.fullscreenEnabled"
                 @fullscreenchange.document="full = !!document.fullscreenElement"
                 @click="full ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {})"
                 :title="full ? 'Exit fullscreen' : 'Fullscreen'" :aria-label="full ? 'Exit fullscreen' : 'Fullscreen'"
-                class="hidden rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent focus:ring-4 focus:ring-line-strong focus:outline-none sm:inline-flex">
+                class="hidden rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent focus:ring-4 focus:ring-line-strong focus:outline-none lg:inline-flex">
                 <x-lucide-maximize class="size-5" x-show="!full" />
                 <x-lucide-minimize class="size-5" x-show="full" x-cloak />
             </button>

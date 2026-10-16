@@ -166,6 +166,10 @@
         display: none;
     }
 
+    [data-notice-dismissed] #site-notice {
+        display: none;
+    }
+
     [x-cloak] {
         display: none !important;
     }

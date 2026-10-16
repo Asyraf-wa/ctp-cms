@@ -10,4 +10,9 @@ return [
         explode(',', (string) env('ADMIN_EMAILS', '')),
     ))),
 
+    /*
+    | Times are stored in UTC (config app.timezone); the admin shows and accepts them in this zone.
+    */
+    'display_timezone' => env('CTP_DISPLAY_TIMEZONE', 'Asia/Kuala_Lumpur'),
+
 ];

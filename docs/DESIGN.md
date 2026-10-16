@@ -61,6 +61,7 @@
 **`tutorial_web_template.html` (the owner's template) is the source of truth for structure.** Colours come from the tokens above (teal instead of the template's blue).
 
 - **Header:** white card bar with a bottom border, `py-6`, shrinking to `py-3` with a shadow and blur after 50 px. The logo goes from `text-3xl` to `text-xl`. The nav is centred.
+  - Responsive: the full search pill shows from `xl`; between `sm` and `xl` it is an icon (Ctrl K still works). The fullscreen button shows from `lg`. The logo is `text-xl` below `lg`. Logo and nav never wrap.
   - Right side: a pill search input (`rounded-full`, `w-56`, "Ctrl K" badge), the theme toggle, a **fullscreen** toggle and a pill **Subscribe** button (links to RSS).
 - **Main:** `max-w-[1440px]`, with 3 columns.
   - Left: `w-64` category accordion, sticky, from `lg`.
@@ -93,11 +94,11 @@
 - **Comment:** Gravatar, name ("Author" badge for the owner), relative time, body, Reply.
 - **Empty states and skeletons** for search and lists.
 - **Topbar notification:** full-width, 40px, with an icon by style (info, success, warning, maintenance) and a soft tinted background (the callout colours). Inline link, and a dismiss ✕ when that's enabled. It sits above the header and doesn't overlap it.
-- **Ribbon:** a 45° band in the top-right corner, 160px long, `position: fixed` above the header, 12px uppercase semibold text.
+- **Ribbon:** a 45° band in the top-right corner (112px box, 170px band), `position: fixed` above the header, 11px uppercase semibold text. While it is on, the header and notice bar get extra right padding so no control sits under it.
   - background from settings; text colour auto-picked to reach ≥ 4.5:1
   - subtle shadow
   - on hover, the band darkens 8%
-  - below 640 px it becomes a small rounded badge next to the logo
+  - below 640 px it becomes a small rounded badge fixed at the bottom-right
 - **Contact page:**
   - left column: an intro headline, topic cards (icon, title, one-line description; clicking one preselects the topic), a reply-time chip, an email with a copy button, social icons, and a "Before you ask" callout
   - right column: the form card
