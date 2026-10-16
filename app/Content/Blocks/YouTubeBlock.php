@@ -5,10 +5,16 @@ namespace App\Content\Blocks;
 use Filament\Actions\Action;
 use Filament\Forms\Components\RichEditor\RichContentCustomBlock;
 use Filament\Forms\Components\TextInput;
+use Filament\Support\Icons\Heroicon;
 
 // PRD EDIT-05: privacy-friendly embed — a thumbnail until clicked, then youtube-nocookie.
 class YouTubeBlock extends RichContentCustomBlock
 {
+    public static function getIcon(): Heroicon
+    {
+        return Heroicon::OutlinedPlayCircle;
+    }
+
     public static function getId(): string
     {
         return 'youtube';

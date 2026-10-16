@@ -6,10 +6,16 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\RichEditor\RichContentCustomBlock;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Support\Icons\Heroicon;
 
 // PRD EDIT-05: commands and their output, in a terminal window. Copy takes the commands only.
 class TerminalBlock extends RichContentCustomBlock
 {
+    public static function getIcon(): Heroicon
+    {
+        return Heroicon::OutlinedCommandLine;
+    }
+
     public static function getId(): string
     {
         return 'terminal';
@@ -42,8 +48,8 @@ class TerminalBlock extends RichContentCustomBlock
         $commands = collect(preg_split('/\R/', trim((string) ($config['commands'] ?? ''))))
             ->filter(fn ($l) => $l !== '')
             ->map(fn (string $l) => '<span class="terminal__line"><span class="terminal__prompt" aria-hidden="true">$ </span>'.e($l).'</span>')
-            ->implode("\n");
-        $output = filled($config['output'] ?? null) ? "\n".'<span class="terminal__output">'.e(rtrim($config['output'])).'</span>' : '';
+            ->implode(''); // the spans are display:block, so no newlines between them
+        $output = filled($config['output'] ?? null) ? '<span class="terminal__output">'.e(rtrim($config['output'])).'</span>' : '';
         $copy = e(trim((string) ($config['commands'] ?? '')));
 
         return <<<HTML

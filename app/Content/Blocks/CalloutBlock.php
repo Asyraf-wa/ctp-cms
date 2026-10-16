@@ -8,6 +8,7 @@ use Filament\Forms\Components\RichEditor\RichContentCustomBlock;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
+use Filament\Support\Icons\Heroicon;
 
 // PRD EDIT-05: note / tip / warning / danger box (DESIGN §2 callout colours, always with an icon and label).
 class CalloutBlock extends RichContentCustomBlock
@@ -18,6 +19,11 @@ class CalloutBlock extends RichContentCustomBlock
         'warning' => ['Warning', 'triangle-alert'],
         'danger' => ['Danger', 'octagon-alert'],
     ];
+
+    public static function getIcon(): Heroicon
+    {
+        return Heroicon::OutlinedInformationCircle;
+    }
 
     public static function getId(): string
     {

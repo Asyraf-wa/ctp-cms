@@ -9,10 +9,16 @@ use Filament\Forms\Components\RichEditor\RichContentCustomBlock;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Support\Icons\Heroicon;
 
 // PRD EDIT-04 / MED-04: an image from the library, with alt text required.
 class ImageBlock extends RichContentCustomBlock
 {
+    public static function getIcon(): Heroicon
+    {
+        return Heroicon::OutlinedPhoto;
+    }
+
     public static function getId(): string
     {
         return 'image';

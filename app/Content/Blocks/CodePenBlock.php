@@ -6,10 +6,16 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\RichEditor\RichContentCustomBlock;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Support\Icons\Heroicon;
 
 // PRD MIG-04 / EDIT-05: CodePen demo, loaded on click.
 class CodePenBlock extends RichContentCustomBlock
 {
+    public static function getIcon(): Heroicon
+    {
+        return Heroicon::OutlinedCodeBracketSquare;
+    }
+
     public static function getId(): string
     {
         return 'codepen';

@@ -8,10 +8,16 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor\RichContentCustomBlock;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Support\Icons\Heroicon;
 
 // PRD EDIT-05: a numbered procedure. Also feeds the HowTo structured data (SEO-04).
 class StepsBlock extends RichContentCustomBlock
 {
+    public static function getIcon(): Heroicon
+    {
+        return Heroicon::OutlinedNumberedList;
+    }
+
     public static function getId(): string
     {
         return 'steps';

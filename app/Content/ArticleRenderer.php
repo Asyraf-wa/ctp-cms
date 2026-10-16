@@ -131,9 +131,12 @@ class ArticleRenderer
                 .($caption !== '' ? '<figcaption>'.e($caption).($media->credit ? ' <span class="article-figure__credit">'.e($media->credit).'</span>' : '').'</figcaption>' : '')
                 .'</figure>';
 
-            // An image alone in its paragraph replaces the paragraph; inline images stay inline.
+            // Image blocks are always figures. Editor images become figures when alone in their paragraph,
+            // otherwise they stay inline.
             $parent = $img->parentElement;
-            if ($parent && $parent->tagName === 'P' && trim($parent->textContent) === '' && $parent->querySelectorAll('img')->length === 1) {
+            if ($img->hasAttribute('data-media-id')) {
+                $this->replaceWithHtml($doc, $img, $figure);
+            } elseif ($parent && $parent->tagName === 'P' && trim($parent->textContent) === '' && $parent->querySelectorAll('img')->length === 1) {
                 $this->replaceWithHtml($doc, $parent, $figure);
             } else {
                 $this->replaceWithHtml($doc, $img, $tag);

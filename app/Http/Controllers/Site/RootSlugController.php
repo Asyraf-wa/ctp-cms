@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Site;
 
 use App\Http\Controllers\Controller;
+use App\Models\Article;
 use App\Models\Page;
 use App\Support\Slugs\RootSlugs;
 use Filament\Forms\Components\RichEditor\RichContentRenderer;
@@ -16,6 +17,7 @@ class RootSlugController extends Controller
         $model = RootSlugs::resolve($slug);
 
         return match (true) {
+            $model instanceof Article => app(ArticleController::class)->show($model),
             $model instanceof Page => $this->page($model),
             default => abort(404),
         };

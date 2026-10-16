@@ -10,10 +10,16 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
+use Filament\Support\Icons\Heroicon;
 
 // PRD EDIT-05: the same step in several languages or operating systems.
 class CodeTabsBlock extends RichContentCustomBlock
 {
+    public static function getIcon(): Heroicon
+    {
+        return Heroicon::OutlinedRectangleGroup;
+    }
+
     public static function getId(): string
     {
         return 'code_tabs';

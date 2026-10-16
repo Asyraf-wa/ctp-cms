@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\HasSlug;
 use App\Models\Contracts\HasPublicPath;
+use App\Support\Sidebar;
 use Database\Factories\CategoryFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -18,6 +19,12 @@ class Category extends Model implements HasPublicPath
 {
     /** @use HasFactory<CategoryFactory> */
     use HasFactory, HasSlug;
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => Sidebar::flush());
+        static::deleted(fn () => Sidebar::flush());
+    }
 
     protected function slugSourceColumn(): string
     {
@@ -62,10 +69,16 @@ class Category extends Model implements HasPublicPath
     /** @return array<int, string> id => name, parents followed by their children, for select options */
     public static function treeOptions(?int $exceptId = null): array
     {
-        return static::query()->roots()->ordered()->with('children')->get()
-            ->flatMap(fn (Category $root) => collect([$root->id => $root->name])
-                ->union($root->children->mapWithKeys(fn (Category $child) => [$child->id => '— '.$child->name])))
-            ->except($exceptId === null ? [] : [$exceptId])
-            ->all();
+        // A plain loop: Collection::flatMap() would renumber the ids.
+        $options = [];
+        foreach (static::query()->roots()->ordered()->with('children')->get() as $root) {
+            $options[$root->id] = $root->name;
+            foreach ($root->children as $child) {
+                $options[$child->id] = '— '.$child->name;
+            }
+        }
+        unset($options[$exceptId]);
+
+        return $options;
     }
 }

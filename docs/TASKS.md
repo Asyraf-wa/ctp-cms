@@ -71,23 +71,23 @@
 - [x] T1.16 Usage tracking plus delete protection (MED-05)
 
 ### 1D. Articles
-- [ ] T1.17 `articles`, `article_tag`, `article_revisions` and `seo_meta` migrations (ART-01)
-- [ ] T1.18 Article resource:
+- [x] T1.17 `articles`, `article_tag`, `article_revisions` and `seo_meta` migrations (ART-01)
+- [x] T1.18 Article resource:
   - tabs for Content, Tutorial info, SEO and Settings
   - fields for type, **author**, status, schedule, featured image, series, tutorial fields, TL;DR and FAQ (ART-01, 02, 05, 06)
-- [ ] T1.19 Editor configured (toolbar, code block, callout, code tabs, terminal, steps, YouTube, insert from media) (EDIT-01..05)
-- [ ] T1.20 Render pipeline (sanitise → headings → TOC → highlight → images → blocks → exports) with tests ([ARCH §5](ARCHITECTURE.md))
-- [ ] T1.21 Autosave and revisions with diff and restore (ART-03)
-- [ ] T1.22 Signed preview URL (ART-04)
-- [ ] T1.23 Scheduled publishing in the scheduler (ART-02)
-- [ ] T1.24 "Meaningful update" checkbox and the `needs_review` / freshness rule (ART-07, 08)
-- [ ] T1.25 Table filters and bulk actions (ART-11)
+- [x] T1.19 Editor configured (toolbar, code block, callout, code tabs, terminal, steps, YouTube, insert from media) (EDIT-01..05)
+- [x] T1.20 Render pipeline (sanitise → headings → TOC → highlight → images → blocks → exports) with tests ([ARCH §5](ARCHITECTURE.md))
+- [x] T1.21 Autosave and revisions with diff and restore (ART-03)
+- [x] T1.22 Signed preview URL (ART-04)
+- [x] T1.23 Scheduled publishing in the scheduler (ART-02)
+- [x] T1.24 "Meaningful update" checkbox and the `needs_review` / freshness rule (ART-07, 08)
+- [x] T1.25 Table filters and bulk actions (ART-11)
 
 ### 1E. Projects & Pages
 - [ ] T1.26 Projects resource: cover, gallery, stack tags, status, links, related tutorials
 - [ ] T1.27 Pages resource (About, Privacy, Terms, Uses)
 
-**Exit criteria:** a tutorial with 5 images, 3 code blocks, a callout and tags is written, previewed, scheduled and auto-published from the admin.
+**Exit criteria:** a tutorial with 5 images, 3 code blocks, a callout and tags is written, previewed, scheduled and auto-published from the admin. *Status: covered by Pest tests; the browser E2E run (scratch Playwright script) is unfinished — next session.*
 
 ---
 

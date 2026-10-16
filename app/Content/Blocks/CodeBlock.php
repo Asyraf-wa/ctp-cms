@@ -11,10 +11,16 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Support\Icons\Heroicon;
 
 // PRD EDIT-03: a code block edited in a real code editor.
 class CodeBlock extends RichContentCustomBlock
 {
+    public static function getIcon(): Heroicon
+    {
+        return Heroicon::OutlinedCodeBracket;
+    }
+
     public static function getId(): string
     {
         return 'code';

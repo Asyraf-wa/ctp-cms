@@ -47,6 +47,41 @@ Alpine.data('toc', () => ({
     },
 }));
 
+// Copy buttons on code blocks and terminals (PUB-04). Line numbers are not copied.
+document.addEventListener('click', async (event) => {
+    const button = event.target.closest('[data-copy-code], [data-copy-text]');
+    if (!button) return;
+
+    let text = button.dataset.copyText;
+    if (text === undefined) {
+        const code = button.closest('.code-block')?.querySelector('pre code')?.cloneNode(true);
+        code?.querySelectorAll('.hl-gutter').forEach((g) => g.remove());
+        text = code?.textContent ?? '';
+    }
+
+    try {
+        await navigator.clipboard.writeText(text);
+        button.textContent = 'Copied';
+        button.dataset.copied = '';
+        setTimeout(() => { button.textContent = 'Copy'; delete button.dataset.copied; }, 1500);
+    } catch {}
+});
+
+// Click-to-load embeds (YouTube via youtube-nocookie, CodePen): nothing third-party loads before the click.
+document.addEventListener('click', (event) => {
+    const figure = event.target.closest('[data-embed-src]');
+    if (!figure || figure.querySelector('iframe')) return;
+    event.preventDefault();
+
+    const iframe = document.createElement('iframe');
+    iframe.src = figure.dataset.embedSrc;
+    iframe.title = figure.dataset.embedTitle ?? 'Embedded content';
+    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture; fullscreen';
+    iframe.allowFullscreen = true;
+    iframe.loading = 'lazy';
+    figure.querySelector('a')?.replaceWith(iframe);
+});
+
 Alpine.plugin([collapse, focus]);
 window.Alpine = Alpine;
 Alpine.start();

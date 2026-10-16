@@ -11,6 +11,7 @@ use App\Media\MediaLibraryAttachmentProvider;
 use App\Models\Concerns\HasSlug;
 use App\Models\Concerns\TracksMediaUsage;
 use App\Models\Contracts\HasPublicPath;
+use App\Support\Sidebar;
 use App\Support\Slugs\RootSlugs;
 use Carbon\CarbonInterface;
 use Database\Factories\ArticleFactory;
@@ -77,8 +78,14 @@ class Article extends Model implements HasPublicPath, HasRichContent
             }
         });
 
-        static::saved(fn (Article $article) => $article->syncRootSlug());
-        static::deleted(fn (Article $article) => RootSlug::where('sluggable_type', 'article')->where('sluggable_id', $article->id)->delete());
+        static::saved(function (Article $article) {
+            $article->syncRootSlug();
+            Sidebar::flush();
+        });
+        static::deleted(function (Article $article) {
+            RootSlug::where('sluggable_type', 'article')->where('sluggable_id', $article->id)->delete();
+            Sidebar::flush();
+        });
         static::restored(fn (Article $article) => $article->syncRootSlug());
 
         // Moving between tutorial and blog changes the URL: keep the old one working.

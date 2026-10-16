@@ -29,10 +29,11 @@ function tagArticles(Tag $tag, array $positions): void
 
 it('lists categories as a two-level tree for selects', function () {
     $php = Category::factory()->create(['name' => 'PHP', 'sort' => 1]);
-    Category::factory()->create(['name' => 'Laravel', 'parent_id' => $php->id]);
-    Category::factory()->create(['name' => 'Tools', 'sort' => 2]);
+    $tools = Category::factory()->create(['name' => 'Tools', 'sort' => 2]); // created before Laravel: ids differ from positions
+    $laravel = Category::factory()->create(['name' => 'Laravel', 'parent_id' => $php->id]);
 
-    expect(array_values(Category::treeOptions()))->toBe(['PHP', '— Laravel', 'Tools']);
+    // Keys must be the category ids, not positions.
+    expect(Category::treeOptions())->toBe([$php->id => 'PHP', $laravel->id => '— Laravel', $tools->id => 'Tools']);
 });
 
 it('creates a category with a slug from its name', function () {
