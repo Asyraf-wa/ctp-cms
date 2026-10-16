@@ -1,36 +1,16 @@
-@props(['title' => null, 'description' => null, 'robots' => null])
-@inject('general', 'App\Settings\GeneralSettings')
-@inject('seo', 'App\Settings\SeoSettings')
+@props(['title' => null, 'description' => null, 'robots' => null, 'meta' => null])
 @inject('scripts', 'App\Settings\ScriptSettings')
 @inject('notice', 'App\Settings\NoticeSettings')
 @php
-    $pageTitle = $title
-        ? strtr($seo->title_format, ['{page}' => $title, '{site}' => $general->site_name])
-        : ($seo->meta_title ?: $general->site_name);
+    // Pages either pass a full Meta (App\Seo\Seo) or just a title/description/robots.
+    $meta ??= app(\App\Seo\Seo::class)->basic($title, $description, $robots);
 @endphp
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $pageTitle }}</title>
-    <meta name="description" content="{{ $description ?: $seo->meta_description }}">
-    <meta name="robots" content="{{ $robots ?: $seo->default_robots }}">
-    @if ($seo->meta_keywords)
-        <meta name="keywords" content="{{ $seo->meta_keywords }}">
-    @endif
-    @if ($seo->meta_author)
-        <meta name="author" content="{{ $seo->meta_author }}">
-    @endif
-    @if ($seo->meta_copyright)
-        <meta name="copyright" content="{{ $seo->meta_copyright }}">
-    @endif
-    @if ($seo->google_verification)
-        <meta name="google-site-verification" content="{{ $seo->google_verification }}">
-    @endif
-    @if ($seo->bing_verification)
-        <meta name="msvalidate.01" content="{{ $seo->bing_verification }}">
-    @endif
+    <x-seo.head :meta="$meta" />
 
     {{-- Before first paint: theme (PUB-11) and a dismissed topbar notice (SET-03), so neither flashes. --}}
     <script>

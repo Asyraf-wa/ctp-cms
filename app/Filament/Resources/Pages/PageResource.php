@@ -70,7 +70,7 @@ class PageResource extends Resource
                             ->helperText('Used as the meta description when the SEO description is empty.'),
                         ContentEditor::make(minHeight: '24rem'),
                     ]),
-                    SeoSection::make('the title and summary', 'Defaults to a generated card.'),
+                    SeoSection::make('the title and summary'),
                 ])->columnSpan(['lg' => 2]),
 
                 Group::make([

@@ -1,8 +1,7 @@
 {{-- Blog index (PUB-08): single column, journal feel, no sidebars. --}}
-<x-layouts.site title="Blog" description="Notes, opinions and updates from Code The Pixel."
-    :robots="$posts->currentPage() > 1 ? 'noindex, follow' : null">
+<x-layouts.site :meta="$meta">
     <div class="mx-auto max-w-3xl px-4 pt-8 pb-12 sm:px-6 lg:px-8">
-        <x-site.page-header title="Blog" :breadcrumbs="[['Blog', null]]" description="Notes, opinions and project updates. Tutorials live in their own section." />
+        <x-site.page-header title="Blog" :breadcrumbs="$meta->breadcrumbs" description="Notes, opinions and project updates. Tutorials live in their own section." />
 
         @forelse ($posts as $post)
             <article class="group relative border-b border-border py-8 first:pt-2 last:border-b-0">

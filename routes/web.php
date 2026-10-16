@@ -6,6 +6,7 @@ use App\Http\Controllers\Site\ArticleController;
 use App\Http\Controllers\Site\AuthorController;
 use App\Http\Controllers\Site\EngagementController;
 use App\Http\Controllers\Site\HomeController;
+use App\Http\Controllers\Site\OgImageController;
 use App\Http\Controllers\Site\PageController;
 use App\Http\Controllers\Site\ProjectController;
 use App\Http\Controllers\Site\RootSlugController;
@@ -24,6 +25,7 @@ Route::get('series/{slug}', [ArchiveController::class, 'series'])->where('slug',
 Route::get('blog', [ArticleController::class, 'blogIndex'])->name('blog.index');
 Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');
 Route::get('projects/{slug}', [ProjectController::class, 'show'])->where('slug', $slug)->name('projects.show');
+Route::get('og/{key}.png', OgImageController::class)->where('key', '[a-z]+-\d+-[a-f0-9]{8}')->name('og');
 Route::get('search', [SearchController::class, 'page'])->name('search');
 Route::get('api/search', [SearchController::class, 'api'])->middleware('throttle:60,1')->name('api.search');
 // ART-10, ART-12. No CSRF token (pages are cached); the controller checks origin and filters bots.

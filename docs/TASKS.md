@@ -118,10 +118,10 @@
 ---
 
 ## Phase 3 — SEO & GEO
-- [ ] T3.01 MetaBuilder: title, description, canonical, robots, OG and Twitter, with fallbacks (SEO-01)
+- [x] T3.01 MetaBuilder: title, description, canonical, robots, OG and Twitter, with fallbacks (SEO-01)
 - [ ] T3.02 Admin SEO tab: counters, SERP preview, social preview, checklist (SEO-02)
-- [ ] T3.03 OG image generator (GD, brand template) with cache (SEO-03)
-- [ ] T3.04 JSON-LD builders for every page type (SEO-04)
+- [x] T3.03 OG image generator (GD, brand template) with cache (SEO-03)
+- [x] T3.04 JSON-LD builders for every page type (SEO-04)
 - [ ] T3.05 Sitemaps (index plus children, images) (SEO-05)
 - [ ] T3.06 `robots.txt` from settings, including the AI crawler policy (SEO-06, GEO-05)
 - [ ] T3.07 RSS/Atom feeds (SEO-07)

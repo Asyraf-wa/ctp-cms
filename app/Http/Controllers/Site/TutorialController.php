@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\Tag;
+use App\Seo\Seo;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -34,7 +35,13 @@ class TutorialController extends Controller
             ->paginate(self::PER_PAGE)
             ->withQueryString();
 
+        $filtered = $category || $tag || $difficulty;
+        $title = $category ? $category->name : ($tag ? '#'.$tag->name : null);
+
         return view('site.tutorials', [
+            'meta' => app(Seo::class)->listing($filtered && $title ? $title.' tutorials' : 'All tutorials',
+                'Step-by-step tutorials on CakePHP, Laravel, Joomla and web development tools.',
+                [['Tutorials', null]], $articles, $filtered || $sort === 'popular' ? 'noindex, follow' : null),
             'articles' => $articles,
             'category' => $category,
             'tag' => $tag,
@@ -44,7 +51,7 @@ class TutorialController extends Controller
             'counts' => Article::published()->tutorials()->selectRaw('category_id, count(*) as total')->groupBy('category_id')->pluck('total', 'category_id'),
             'popularTags' => Tag::query()->withCount(['articles' => fn ($q) => $q->published()->tutorials()])
                 ->orderByDesc('articles_count')->limit(15)->get()->filter(fn (Tag $t) => $t->getAttribute('articles_count') > 0),
-            'filtered' => $category || $tag || $difficulty,
+            'filtered' => $filtered,
         ]);
     }
 }

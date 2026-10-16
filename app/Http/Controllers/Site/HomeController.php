@@ -7,6 +7,7 @@ use App\Models\Article;
 use App\Models\Category;
 use App\Models\Series;
 use App\Models\Tag;
+use App\Seo\Seo;
 use App\Support\Sidebar;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -48,7 +49,11 @@ class HomeController extends Controller
             ->orderByDesc('views_30d')->orderByDesc('views')->latest('published_at')
             ->limit(5)->get();
 
+        $seo = app(Seo::class);
+
         return view('site.home', [
+            // A filtered home duplicates the category page, so only the plain home is indexed.
+            'meta' => $active ? $seo->listing('Latest '.$active->name.' tutorials', null, [], null, 'noindex, follow', $latest) : $seo->home(),
             'sidebar' => Sidebar::categories(open: $active),
             'categories' => $categories,
             'active' => $active,

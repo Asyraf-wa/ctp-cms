@@ -1,7 +1,7 @@
 {{-- Series index (TAX-03): learning paths. --}}
-<x-layouts.site title="Learning paths" description="Step-by-step tutorial series, in reading order.">
+<x-layouts.site :meta="$meta">
     <div class="mx-auto max-w-[1440px] px-4 pt-8 pb-12 sm:px-6 lg:px-8">
-        <x-site.page-header title="Learning paths" :breadcrumbs="[['Series', null]]"
+        <x-site.page-header title="Learning paths" :breadcrumbs="$meta->breadcrumbs"
             description="Tutorial series that build on each other. Start at part one and work through in order." />
         @if ($series->isNotEmpty())
             <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

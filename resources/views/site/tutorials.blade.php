@@ -1,13 +1,10 @@
 {{-- Tutorials index (PUB-02). Filters are plain links, so they work without JS and can be shared. --}}
 @php
     $filterUrl = fn (array $change) => request()->fullUrlWithQuery([...$change, 'page' => null]);
-    $title = $category?->name ?? ($tag ? '#'.$tag->name : 'All tutorials');
 @endphp
-<x-layouts.site :title="$filtered ? $title.' tutorials' : 'All tutorials'"
-    description="Step-by-step tutorials on CakePHP, Laravel, Joomla and web development tools."
-    :robots="$filtered || $articles->currentPage() > 1 ? 'noindex, follow' : null">
+<x-layouts.site :meta="$meta">
     <div class="mx-auto max-w-[1440px] px-4 pt-8 pb-12 sm:px-6 lg:px-8">
-        <x-site.page-header title="All tutorials" :breadcrumbs="[['Tutorials', null]]"
+        <x-site.page-header title="All tutorials" :breadcrumbs="$meta->breadcrumbs"
             description="Practical, tested walkthroughs. Filter by topic or level, or sort by what readers found most useful." />
 
         <div class="flex flex-col gap-8 lg:flex-row">

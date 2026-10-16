@@ -2,8 +2,8 @@
     3-column tutorial layout from tutorial_web_template.html: categories · article · "On this page".
     Focus mode (PUB-05) hides both sidebars; the header button only appears on pages using this layout.
 --}}
-@props(['title' => null, 'description' => null, 'robots' => null])
-<x-layouts.site :title="$title" :description="$description" :robots="$robots">
+@props(['title' => null, 'description' => null, 'robots' => null, 'meta' => null])
+<x-layouts.site :title="$title" :description="$description" :robots="$robots" :meta="$meta">
     @isset($head)
         <x-slot:head>{{ $head }}</x-slot:head>
     @endisset

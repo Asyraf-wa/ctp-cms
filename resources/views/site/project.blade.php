@@ -1,7 +1,7 @@
 {{-- Project detail (PUB-09, DESIGN §6): hero, write-up with an "At a glance" panel, gallery, related tutorials. --}}
-<x-layouts.site :title="$project->seo?->title ?: $project->title" :description="$project->seo?->description ?: $project->tagline" :robots="$project->seo?->robots">
+<x-layouts.site :meta="$meta">
     <div class="mx-auto max-w-[1440px] px-4 pt-8 pb-12 sm:px-6 lg:px-8">
-        <x-site.breadcrumbs :items="[['Projects', url('/projects')], [$project->title, null]]" class="mb-6" />
+        <x-site.breadcrumbs :items="$meta->breadcrumbs" class="mb-6" />
 
         <header class="grid items-center gap-8 lg:grid-cols-2">
             <div>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Media;
 use App\Models\Project;
 use App\Models\Technology;
+use App\Seo\Seo;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
@@ -22,6 +23,8 @@ class ProjectController extends Controller
             ->get();
 
         return view('site.projects', [
+            'meta' => app(Seo::class)->listing('Projects', 'Apps, tools and experiments built by Code The Pixel, with the tutorials written along the way.',
+                [['Projects', null]], null, $tech ? 'noindex, follow' : null, $projects),
             'projects' => $projects,
             'tech' => $tech,
             'stack' => Project::stackOptions(),
@@ -37,10 +40,13 @@ class ProjectController extends Controller
             ->filter(fn (array $item) => $item['media'] !== null)
             ->values();
 
+        $articles = $project->articles()->published()->forCards()->get();
+
         return view('site.project', [
             'project' => $project,
             'gallery' => $gallery,
-            'articles' => $project->articles()->published()->forCards()->get(),
+            'articles' => $articles,
+            'meta' => app(Seo::class)->project($project, $articles),
         ]);
     }
 }

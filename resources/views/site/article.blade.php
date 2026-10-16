@@ -1,18 +1,8 @@
 {{-- Tutorial page (PUB-03): tutorial_web_template.html layout. --}}
 @php
     $tz = config('ctp.display_timezone');
-    $crumbs = [['Tutorials', url('/tutorials')]];
-    if ($article->category?->parent) {
-        $crumbs[] = [$article->category->parent->name, url($article->category->parent->publicPath())];
-    }
-    if ($article->category) {
-        $crumbs[] = [$article->category->name, url($article->category->publicPath())];
-    }
-    $crumbs[] = [$article->title, null];
 @endphp
-<x-layouts.tutorial :title="$article->seo?->title ?: $article->title"
-    :description="$article->seo?->description ?: $article->excerpt"
-    :robots="$preview ? 'noindex, nofollow' : $article->seo?->robots">
+<x-layouts.tutorial :meta="$meta">
     @if ($preview)
         <x-slot:banner><x-article.preview-banner :article="$article" /></x-slot:banner>
     @endif
@@ -28,7 +18,7 @@
     <article class="rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 sm:p-8" data-article @unless ($preview) data-view-beacon="{{ route('api.articles.view', $article) }}" @endunless>
         <header>
             {{-- Long titles make the breadcrumb noisy on phones; the category link covers it there. --}}
-            <x-site.breadcrumbs :items="$crumbs" class="mb-5 hidden sm:block [&_li:last-child]:max-w-[24ch] [&_li:last-child_span]:truncate" />
+            <x-site.breadcrumbs :items="$meta->breadcrumbs" class="mb-5 hidden sm:block [&_li:last-child]:max-w-[24ch] [&_li:last-child_span]:truncate" />
             @if ($article->category)
                 <a href="{{ url($article->category->publicPath()) }}" class="text-sm font-semibold tracking-wide text-primary uppercase hover:underline">{{ $article->category->name }}</a>
             @endif

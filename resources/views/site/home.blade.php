@@ -4,7 +4,7 @@
 --}}
 @inject('general', 'App\Settings\GeneralSettings')
 @php($tz = config('ctp.display_timezone'))
-<x-layouts.tutorial :title="null" :robots="$active ? 'noindex, follow' : null">
+<x-layouts.tutorial :meta="$meta">
     <x-slot:left>
         <x-site.category-sidebar :categories="$sidebar" />
     </x-slot:left>

@@ -1,8 +1,8 @@
 {{-- Series page (TAX-03): every part in order. --}}
-<x-layouts.site :title="$series->title" :description="$series->description">
+<x-layouts.site :meta="$meta">
     <div class="mx-auto max-w-4xl px-4 pt-8 pb-12 sm:px-6 lg:px-8">
         <x-site.page-header :title="$series->title" eyebrow="Series" icon="list-ordered"
-            :breadcrumbs="[['Series', url('/series')], [$series->title, null]]" :description="$series->description">
+            :breadcrumbs="$meta->breadcrumbs" :description="$series->description">
             <p class="mt-2 text-sm text-muted-foreground">{{ $articles->count() }} {{ Str::plural('part', $articles->count()) }} · about {{ $articles->sum(fn ($a) => $a->readingMinutes()) }} min in total</p>
         </x-site.page-header>
 

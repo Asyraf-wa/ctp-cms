@@ -1,9 +1,8 @@
 {{-- Author page (AUTHOR-03): profile and articles. --}}
 @php($socials = collect($author->socials ?? [])->filter(fn ($url) => filled($url)))
-<x-layouts.site :title="$author->authorName()" :description="$author->bio_short ?: 'Tutorials and posts by '.$author->authorName().'.'"
-    :robots="$articles->currentPage() > 1 ? 'noindex, follow' : null">
+<x-layouts.site :meta="$meta">
     <div class="mx-auto max-w-5xl px-4 pt-8 pb-12 sm:px-6 lg:px-8">
-        <x-site.breadcrumbs :items="[[$author->authorName(), null]]" class="mb-6" />
+        <x-site.breadcrumbs :items="$meta->breadcrumbs" class="mb-6" />
 
         <header class="flex flex-col gap-6 rounded-2xl border border-border bg-card p-6 shadow-sm sm:flex-row sm:items-center sm:p-8">
             @if ($author->avatarUrl())

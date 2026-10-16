@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Site;
 use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\User;
+use App\Seo\Seo;
 use Illuminate\Contracts\View\View;
 
 // PRD AUTHOR-03: the author's profile and articles (E-E-A-T). Person JSON-LD is added in Phase 3.
@@ -19,6 +20,7 @@ class AuthorController extends Controller
         return view('site.author', [
             'author' => $author,
             'articles' => $articles,
+            'meta' => app(Seo::class)->author($author, $articles),
             'stats' => [
                 'tutorials' => Article::published()->tutorials()->where('author_id', $author->id)->count(),
                 'posts' => Article::published()->blogPosts()->where('author_id', $author->id)->count(),

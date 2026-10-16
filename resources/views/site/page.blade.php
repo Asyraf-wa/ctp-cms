@@ -9,10 +9,7 @@
         : null;
     $withToc = $page->template === 'toc' && $page->toc;
 @endphp
-<x-layouts.site
-    :title="$page->seo?->title ?: $page->title"
-    :description="$page->seo?->description ?: $page->excerpt"
-    :robots="$preview ? 'noindex, nofollow' : $page->seo?->robots">
+<x-layouts.site :meta="$meta">
     @if ($preview)
         <x-slot:banner>
             <div class="sticky top-0 z-[60] bg-[#854d0e] px-4 py-2 text-center text-sm font-medium text-white">
@@ -27,7 +24,7 @@
             'max-w-4xl' => ! in_array($page->template, ['wide'], true),
             'max-w-6xl' => $page->template === 'wide',
         ])>
-            <x-site.breadcrumbs :items="[[$page->title, null]]" class="mb-6" />
+            <x-site.breadcrumbs :items="$meta->breadcrumbs" class="mb-6" />
             <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{{ $page->title }}</h1>
             @if ($page->excerpt)
                 <p class="mt-4 text-lg leading-relaxed text-muted-foreground">{{ $page->excerpt }}</p>

@@ -1,8 +1,7 @@
 {{-- Projects (PUB-09): showcase grid with a tech filter. --}}
-<x-layouts.site title="Projects" description="Apps, tools and experiments built by Code The Pixel, with the tutorials written along the way."
-    :robots="$tech ? 'noindex, follow' : null">
+<x-layouts.site :meta="$meta">
     <div class="mx-auto max-w-[1440px] px-4 pt-8 pb-12 sm:px-6 lg:px-8">
-        <x-site.page-header title="Projects" :breadcrumbs="[['Projects', null]]"
+        <x-site.page-header title="Projects" :breadcrumbs="$meta->breadcrumbs"
             description="Things built and shipped: what problem each one solves, how it was made and the tutorials written along the way." />
 
         @if ($stack->count() > 1)

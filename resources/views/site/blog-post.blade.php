@@ -1,7 +1,5 @@
 {{-- Blog post (PUB-08, DESIGN §6): single column, larger type, no sidebars, optional cover hero. --}}
-<x-layouts.site :title="$article->seo?->title ?: $article->title"
-    :description="$article->seo?->description ?: $article->excerpt"
-    :robots="$preview ? 'noindex, nofollow' : $article->seo?->robots">
+<x-layouts.site :meta="$meta">
     @if ($preview)
         <x-slot:banner><x-article.preview-banner :article="$article" /></x-slot:banner>
     @endif
@@ -12,7 +10,7 @@
 
     <article class="mx-auto max-w-3xl px-4 pt-10 pb-4 sm:px-6" data-article @unless ($preview) data-view-beacon="{{ route('api.articles.view', $article) }}" @endunless>
         <header class="mb-10 text-center">
-            <x-site.breadcrumbs :items="[['Blog', url('/blog')], [$article->title, null]]" class="mb-6 hidden justify-center sm:flex [&_li:last-child]:max-w-[28ch] [&_li:last-child_span]:truncate" />
+            <x-site.breadcrumbs :items="$meta->breadcrumbs" class="mb-6 hidden justify-center sm:flex [&_li:last-child]:max-w-[28ch] [&_li:last-child_span]:truncate" />
             <a href="{{ url('/blog') }}" class="text-sm font-semibold tracking-wide text-primary uppercase hover:underline">Blog</a>
             <h1 class="mt-3 mb-6 text-4xl font-bold tracking-tight text-balance text-foreground sm:text-5xl">{{ $article->title }}</h1>
             @if ($article->excerpt)

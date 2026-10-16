@@ -77,7 +77,7 @@ class ProjectResource extends Resource
                                 ->grid(['default' => 1, 'md' => 2])
                                 ->defaultItems(0)->reorderable()->addActionLabel('Add screenshot'),
                         ]),
-                    SeoSection::make('the name, pitch and cover image', 'Defaults to the cover image, then a generated card.'),
+                    SeoSection::make('the name and pitch'),
                 ])->columnSpan(['lg' => 2]),
 
                 Group::make([

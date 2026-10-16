@@ -1,13 +1,10 @@
 {{-- Category archive (PUB-07): the tutorial layout with the category accordion opened on this category. --}}
-@php($crumbs = array_values(array_filter([['Tutorials', url('/tutorials')], $category->parent ? [$category->parent->name, url($category->parent->publicPath())] : null, [$category->name, null]])))
-<x-layouts.tutorial :title="$category->seo_title ?: $category->name.' tutorials'"
-    :description="$category->seo_description ?: ($category->description ?: 'Tutorials about '.$category->name.'.')"
-    :robots="$articles->currentPage() > 1 ? 'noindex, follow' : null">
+<x-layouts.tutorial :meta="$meta">
     <x-slot:left>
         <x-site.category-sidebar :categories="$sidebar" />
     </x-slot:left>
 
-    <x-site.page-header :title="$category->name" eyebrow="Category" :icon="$category->icon ?: 'folder'" :technology="$category->technology" :breadcrumbs="$crumbs"
+    <x-site.page-header :title="$category->name" eyebrow="Category" :icon="$category->icon ?: 'folder'" :technology="$category->technology" :breadcrumbs="$meta->breadcrumbs"
         :description="$category->description">
         <p class="mt-2 text-sm text-muted-foreground">{{ number_format($articles->total()) }} {{ Str::plural('tutorial', $articles->total()) }}</p>
     </x-site.page-header>

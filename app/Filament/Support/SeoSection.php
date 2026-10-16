@@ -12,7 +12,7 @@ use Filament\Schemas\Components\Section;
 // PRD SEO-01: per-item overrides stored in seo_meta (the model needs a `seo()` morphOne).
 class SeoSection
 {
-    public static function make(string $fallbacks = 'the title, excerpt and featured image', string $imageHint = 'Defaults to the featured image, then a generated card.'): Section
+    public static function make(string $fallbacks = 'the title and excerpt', string $imageHint = 'Defaults to a generated card with the title.'): Section
     {
         return Section::make('Search engines & social')
             ->description("Leave empty to use {$fallbacks}.")
