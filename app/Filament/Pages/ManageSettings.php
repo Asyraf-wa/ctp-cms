@@ -224,6 +224,13 @@ class ManageSettings extends Page
                         ->helperText('Only the content value of the meta tag.'),
                     TextInput::make('bing_verification')->label('Bing Webmaster code'),
                 ]),
+                Section::make('robots.txt')
+                    ->description(new HtmlString('Generated at <a href="'.e(url('/robots.txt')).'" target="_blank" class="text-primary-600 underline">/robots.txt</a>: admin, previews, search and the API are blocked; AI crawlers follow Integrations → AI crawlers; the sitemap is linked.'))
+                    ->schema([
+                        Textarea::make('robots_extra')->label('Extra rules')->rows(4)
+                            ->placeholder("User-agent: AhrefsBot\nDisallow: /")
+                            ->helperText('Appended as written. Leave empty unless you need to block or allow a specific bot or path.'),
+                    ]),
             ]),
         ]);
     }

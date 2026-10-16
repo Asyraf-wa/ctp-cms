@@ -1,6 +1,10 @@
 <?php
 
 use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\Seo\FeedController;
+use App\Http\Controllers\Seo\IndexNowKeyController;
+use App\Http\Controllers\Seo\RobotsController;
+use App\Http\Controllers\Seo\SitemapController;
 use App\Http\Controllers\Site\ArchiveController;
 use App\Http\Controllers\Site\ArticleController;
 use App\Http\Controllers\Site\AuthorController;
@@ -25,6 +29,16 @@ Route::get('series/{slug}', [ArchiveController::class, 'series'])->where('slug',
 Route::get('blog', [ArticleController::class, 'blogIndex'])->name('blog.index');
 Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');
 Route::get('projects/{slug}', [ProjectController::class, 'show'])->where('slug', $slug)->name('projects.show');
+// SEO-05..08: sitemaps, robots.txt, feeds and the IndexNow key file.
+Route::get('sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::get('sitemaps/{section}.xml', [SitemapController::class, 'section'])->where('section', '[a-z]+')->name('sitemap.section');
+Route::get('robots.txt', RobotsController::class)->name('robots');
+Route::get('feed', [FeedController::class, 'all'])->name('feed');
+Route::get('feed/atom', [FeedController::class, 'atom'])->name('feed.atom');
+Route::get('feed/blog', [FeedController::class, 'blog'])->name('feed.blog');
+Route::get('feed/category/{slug}', [FeedController::class, 'category'])->where('slug', $slug)->name('feed.category');
+Route::get('{key}.txt', IndexNowKeyController::class)->where('key', '[A-Za-z0-9-]{8,128}')->name('indexnow.key');
+
 Route::get('og/{key}.png', OgImageController::class)->where('key', '[a-z]+-\d+-[a-f0-9]{8}')->name('og');
 Route::get('search', [SearchController::class, 'page'])->name('search');
 Route::get('api/search', [SearchController::class, 'api'])->middleware('throttle:60,1')->name('api.search');

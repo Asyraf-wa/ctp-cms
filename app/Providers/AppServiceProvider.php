@@ -11,6 +11,8 @@ use App\Models\SeoMeta;
 use App\Models\Series;
 use App\Models\Tag;
 use App\Models\User;
+use App\Seo\IndexNow;
+use App\Seo\Sitemap;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 use Intervention\Image\Drivers\Gd\Driver as GdDriver;
@@ -44,5 +46,15 @@ class AppServiceProvider extends ServiceProvider
             'seo_meta' => SeoMeta::class,
             'project' => Project::class,
         ]);
+
+        // SEO-05, SEO-08: content changes refresh the sitemaps and ping IndexNow.
+        foreach ([Article::class, Page::class, Project::class, Category::class, Tag::class, Series::class, User::class] as $model) {
+            $model::saved(fn () => Sitemap::flush());
+            $model::deleted(fn () => Sitemap::flush());
+        }
+        foreach ([Article::class, Page::class, Project::class] as $model) {
+            $model::saved(fn ($record) => IndexNow::changed($record));
+            $model::deleted(fn ($record) => IndexNow::changed($record, deleted: true));
+        }
     }
 }

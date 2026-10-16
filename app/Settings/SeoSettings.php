@@ -25,6 +25,9 @@ class SeoSettings extends Settings
 
     public ?string $bing_verification;
 
+    // SEO-06: extra robots.txt lines (rules for other bots, extra Disallow paths).
+    public ?string $robots_extra;
+
     public static function group(): string
     {
         return 'seo';

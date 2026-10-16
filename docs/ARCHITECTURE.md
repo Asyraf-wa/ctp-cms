@@ -267,6 +267,7 @@ deployment:
     - export APP=/home/USER/ctp-app            # live app dir (outside public_html)
     - /bin/rsync -a --delete --exclude='.env' --exclude='storage/' --exclude='.git' ./ $APP/
     - cd $APP && /usr/local/bin/php artisan migrate --force
+    - cd $APP && /usr/local/bin/php artisan settings:clear-cache   # settings are cached; new settings need this
     - cd $APP && /usr/local/bin/php artisan optimize
     - cd $APP && /usr/local/bin/php artisan responsecache:clear
 ```

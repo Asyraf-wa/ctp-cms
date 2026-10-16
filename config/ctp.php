@@ -39,4 +39,11 @@ return [
 
     'display_timezone' => env('CTP_DISPLAY_TIMEZONE', 'Asia/Kuala_Lumpur'),
 
+    'seo' => [
+        // robots.txt blocks everything unless this is the production site (or forced for testing).
+        'allow_indexing' => (bool) env('CTP_ALLOW_INDEXING', env('APP_ENV') === 'production'),
+        // SEO-08: IndexNow pings go out only from production with a key set in Site settings.
+        'indexnow' => (bool) env('CTP_INDEXNOW', env('APP_ENV') === 'production'),
+        'indexnow_endpoint' => 'https://api.indexnow.org/indexnow',
+    ],
 ];
