@@ -1,0 +1,11 @@
+# Legacy dumps & files (personal data — never commit)
+/legacy/
+
+# Windows download metadata
+*:Zone.Identifier
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

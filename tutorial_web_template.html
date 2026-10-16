@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShortsTuts - Tutorial Platform</title>
+    <!-- Load Tailwind CSS with Typography plugin for beautiful article formatting -->
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <!-- Prevent FOUC (Flash of Unstyled Content) -->
+    <script>
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        /* Hide scrollbar for sidebars for a cleaner look */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-300 transition-colors duration-300">
+
+    <!-- Sticky Header -->
+    <header id="navbar" class="fixed top-0 w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 z-50 transition-all duration-300 py-6">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-full">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-white font-bold">T</div>
+                <a href="#" id="logo" class="font-bold text-3xl tracking-tight text-slate-900 dark:text-white transition-all duration-300">ShortsTuts</a>
+            </div>
+            <nav class="hidden md:flex gap-6">
+                <a href="#" class="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Home</a>
+                <a href="#" class="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">All Tutorials</a>
+                <a href="#" class="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Resources</a>
+            </nav>
+            <div class="flex items-center gap-4">
+                <div class="relative hidden sm:block">
+                    <input id="search-input" type="text" placeholder="Search..." class="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-200 text-sm rounded-full pl-4 pr-16 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-56 transition-all border border-transparent dark:border-slate-700">
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <span class="text-slate-400 dark:text-slate-500 text-[10px] font-semibold border border-slate-200 dark:border-slate-600 rounded px-1.5 py-0.5 bg-white dark:bg-slate-700 hidden lg:block">Ctrl K</span>
+                    </div>
+                </div>
+                <!-- Dark Mode Toggle -->
+                <button id="theme-toggle" type="button" class="text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-200 dark:focus:ring-slate-700 rounded-lg text-sm p-2 transition-colors">
+                    <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                    <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                </button>
+                <!-- Fullscreen Toggle -->
+                <button id="fullscreen-toggle" type="button" class="text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-200 dark:focus:ring-slate-700 rounded-lg text-sm p-2 transition-colors" title="Toggle Fullscreen">
+                    <svg id="fs-enter-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                    <svg id="fs-exit-icon" class="hidden w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 14h4v4m0-4l-5 5m11-5h4v4m0-4l-5 5M4 10h4V6m0 4l-5-5m11 5h4V6m0 4l-5-5"></path></svg>
+                </button>
+                <button class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-full transition-colors">Subscribe</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container (Max width 1440px) -->
+    <main class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-12 flex flex-col lg:flex-row gap-8">
+
+        <!-- Left Sidebar: Categories & Menu -->
+        <aside class="w-full lg:w-64 flex-shrink-0 hidden lg:block">
+            <div class="sticky top-28 h-[calc(100vh-8rem)] overflow-y-auto no-scrollbar pr-4 pb-8">
+                <h3 class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4">Categories</h3>
+                
+                <div class="space-y-2">
+                    <!-- Category 1 -->
+                    <div class="border-b border-slate-100 dark:border-slate-800/50 pb-2 mb-2">
+                        <button class="accordion-toggle w-full flex items-center justify-between font-medium text-slate-900 dark:text-slate-200 py-1.5 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group" aria-expanded="true">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-slate-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                                Web Development
+                            </div>
+                            <svg class="w-4 h-4 transform transition-transform duration-300 rotate-180 chevron text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content overflow-hidden transition-all duration-300 opacity-100">
+                            <ul class="space-y-2 border-l border-slate-200 dark:border-slate-700 ml-2 pl-4 py-2">
+                                <li><a href="#" class="text-sm text-blue-600 dark:text-blue-400 font-medium">Getting Started with Tailwind</a></li>
+                                <li><a href="#" class="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">Mastering Flexbox</a></li>
+                                <li><a href="#" class="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">CSS Grid Layouts</a></li>
+                                <li class="pt-2 mt-2 border-t border-slate-100 dark:border-slate-800"><a href="#" class="text-[11px] font-bold uppercase tracking-wider text-slate-900 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1">View all 24 tutorials <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Category 2 -->
+                    <div class="border-b border-slate-100 dark:border-slate-800/50 pb-2 mb-2">
+                        <button class="accordion-toggle w-full flex items-center justify-between font-medium text-slate-900 dark:text-slate-200 py-1.5 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group" aria-expanded="false">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-slate-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path></svg>
+                                Server-side
+                            </div>
+                            <svg class="w-4 h-4 transform transition-transform duration-300 chevron text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content overflow-hidden transition-all duration-300 opacity-0 max-h-0">
+                            <ul class="space-y-2 border-l border-slate-200 dark:border-slate-700 ml-2 pl-4 py-2">
+                                <li><a href="#" class="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">Node.js Basics</a></li>
+                                <li><a href="#" class="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">Express Routing</a></li>
+                                <li class="pt-2 mt-2 border-t border-slate-100 dark:border-slate-800"><a href="#" class="text-[11px] font-bold uppercase tracking-wider text-slate-900 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1">View all 15 tutorials <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Category 3 -->
+                    <div class="border-b border-slate-100 dark:border-slate-800/50 pb-2 mb-2">
+                        <button class="accordion-toggle w-full flex items-center justify-between font-medium text-slate-900 dark:text-slate-200 py-1.5 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group" aria-expanded="false">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-slate-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+                                Databases
+                            </div>
+                            <svg class="w-4 h-4 transform transition-transform duration-300 chevron text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content overflow-hidden transition-all duration-300 opacity-0 max-h-0">
+                            <ul class="space-y-2 border-l border-slate-200 dark:border-slate-700 ml-2 pl-4 py-2">
+                                <li><a href="#" class="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">Intro to MongoDB</a></li>
+                                <li><a href="#" class="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">SQL vs NoSQL</a></li>
+                                <li class="pt-2 mt-2 border-t border-slate-100 dark:border-slate-800"><a href="#" class="text-[11px] font-bold uppercase tracking-wider text-slate-900 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1">View all 8 tutorials <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Category 4 -->
+                    <div class="border-b border-slate-100 dark:border-slate-800/50 pb-2 mb-2">
+                        <button class="accordion-toggle w-full flex items-center justify-between font-medium text-slate-900 dark:text-slate-200 py-1.5 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group" aria-expanded="false">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-slate-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                                JS Frameworks
+                            </div>
+                            <svg class="w-4 h-4 transform transition-transform duration-300 chevron text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content overflow-hidden transition-all duration-300 opacity-0 max-h-0">
+                            <ul class="space-y-2 border-l border-slate-200 dark:border-slate-700 ml-2 pl-4 py-2">
+                                <li><a href="#" class="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">React for Beginners</a></li>
+                                <li><a href="#" class="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">Vue 3 Composition API</a></li>
+                                <li><a href="#" class="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">Svelte Animations</a></li>
+                                <li class="pt-2 mt-2 border-t border-slate-100 dark:border-slate-800"><a href="#" class="text-[11px] font-bold uppercase tracking-wider text-slate-900 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1">View all 40 tutorials <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center Content: Article Area -->
+        <article class="flex-1 min-w-0 bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 transition-colors duration-300">
+            <div class="prose prose-slate prose-blue dark:prose-invert max-w-none transition-colors duration-300">
+                <span class="text-blue-600 dark:text-blue-400 font-semibold tracking-wide text-sm uppercase">Web Development</span>
+                <h1 class="mt-2 mb-4">Getting Started with Tailwind CSS</h1>
+                <p class="text-slate-500 dark:text-slate-400 text-sm mb-8">Published on October 15, 2026 • 5 min read</p>
+                
+                <p class="lead">Tailwind CSS is a utility-first CSS framework packed with classes like flex, pt-4, text-center and rotate-90 that can be composed to build any design, directly in your markup.</p>
+
+                <section id="introduction" class="scroll-mt-28">
+                    <h2>Introduction</h2>
+                    <p>Unlike traditional CSS frameworks, Tailwind doesn't give you pre-built components. Instead, it gives you low-level utility classes that let you build completely custom designs without ever leaving your HTML.</p>
+                </section>
+
+                <section id="installation" class="scroll-mt-28">
+                    <h2>Installation Process</h2>
+                    <p>The simplest way to use Tailwind CSS is via the Play CDN for development. However, for production, you should install it via npm.</p>
+                    <pre><code class="language-bash">npm install -D tailwindcss
+npx tailwindcss init</code></pre>
+                    <p>Next, configure your template paths in the <code>tailwind.config.js</code> file.</p>
+                </section>
+
+                <section id="utility-classes" class="scroll-mt-28">
+                    <h2>Core Utility Classes</h2>
+                    <p>Here are some of the most commonly used utility concepts in Tailwind.</p>
+                    
+                    <h3 id="spacing">Spacing</h3>
+                    <p>Tailwind includes a comprehensive spacing scale. You can use classes like <code>p-4</code> for padding and <code>m-4</code> for margin.</p>
+
+                    <h3 id="typography">Typography</h3>
+                    <p>Control font size, weight, color, and more. For example, <code>text-xl font-bold text-slate-800</code>.</p>
+                </section>
+
+                <section id="responsive-design" class="scroll-mt-28">
+                    <h2>Responsive Design</h2>
+                    <p>Every utility class in Tailwind can be applied conditionally at different breakpoints. This makes it incredibly easy to build complex responsive interfaces without writing a single media query.</p>
+                    <pre><code class="language-html">&lt;div class="w-full md:w-1/2 lg:w-1/3"&gt;
+    &lt;!-- Content goes here --&gt;
+&lt;/div&gt;</code></pre>
+                </section>
+                
+                <section id="conclusion" class="scroll-mt-28">
+                    <h2>Conclusion</h2>
+                    <p>Once you get used to utility-first CSS, you'll find that building UIs is faster and more maintainable. Start small, read the documentation, and build your next tutorial using Tailwind!</p>
+                </section>
+            </div>
+            
+            <!-- Article Footer / Navigation -->
+            <div class="mt-12 pt-8 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center transition-colors">
+                <a href="#" class="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm font-medium flex items-center gap-2 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    Previous: CSS Grid
+                </a>
+                <a href="#" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium flex items-center gap-2 transition-colors">
+                    Next: Master Flexbox
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </a>
+            </div>
+        </article>
+
+        <!-- Right Sidebar: Table of Contents -->
+        <aside class="w-full lg:w-64 flex-shrink-0 hidden xl:block">
+            <div class="sticky top-28">
+                <h3 class="text-xs font-semibold text-slate-900 dark:text-slate-200 uppercase tracking-wider mb-4 transition-colors">On this page</h3>
+                <nav id="toc" class="border-l border-slate-200 dark:border-slate-700 text-sm transition-colors">
+                    <a href="#introduction" class="toc-link block pl-4 py-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">Introduction</a>
+                    <a href="#installation" class="toc-link block pl-4 py-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">Installation Process</a>
+                    <a href="#utility-classes" class="toc-link block pl-4 py-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">Core Utility Classes</a>
+                    <!-- Nested link -->
+                    <a href="#spacing" class="toc-link block pl-8 py-1 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">Spacing</a>
+                    <a href="#typography" class="toc-link block pl-8 py-1 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">Typography</a>
+                    <a href="#responsive-design" class="toc-link block pl-4 py-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">Responsive Design</a>
+                    <a href="#conclusion" class="toc-link block pl-4 py-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">Conclusion</a>
+                </nav>
+            </div>
+        </aside>
+
+    </main>
+
+        <!-- Footer -->
+    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 transition-colors duration-300 mt-12">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-12">
+                
+                <!-- Brand Info -->
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-white font-bold">T</div>
+                        <span class="font-bold text-2xl tracking-tight text-slate-900 dark:text-white">ShortsTuts</span>
+                    </div>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed max-w-sm">
+                        Bite-sized, practical tutorials for modern web developers. Learn Tailwind CSS, React, Node.js, and more with our completely free, open-source guides.
+                    </p>
+                </div>
+
+                <!-- Links 1 -->
+                <div>
+                    <h4 class="text-slate-900 dark:text-slate-100 font-semibold mb-4">Platform</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-sm text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">All Tutorials</a></li>
+                        <li><a href="#" class="text-sm text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Learning Paths</a></li>
+                        <li><a href="#" class="text-sm text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Community Forum</a></li>
+                        <li><a href="#" class="text-sm text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Submit a Tutorial</a></li>
+                    </ul>
+                </div>
+
+                <!-- Links 2 -->
+                <div>
+                    <h4 class="text-slate-900 dark:text-slate-100 font-semibold mb-4">Company</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-sm text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">About Us</a></li>
+                        <li><a href="#" class="text-sm text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Careers</a></li>
+                        <li><a href="#" class="text-sm text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Privacy Policy</a></li>
+                        <li><a href="#" class="text-sm text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-12 pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-slate-500 dark:text-slate-400 text-sm">
+                    © 2026 ShortsTuts. All rights reserved.
+                </p>
+                <div class="flex gap-4">
+                    <a href="#" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                        <span class="sr-only">Twitter</span>
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path></svg>
+                    </a>
+                    <a href="#" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                        <span class="sr-only">GitHub</span>
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Theme Toggle Logic ---
+            const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+            const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+            const themeToggleBtn = document.getElementById('theme-toggle');
+
+            // Change the icons inside the button based on previous settings
+            if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                themeToggleLightIcon.classList.remove('hidden');
+            } else {
+                themeToggleDarkIcon.classList.remove('hidden');
+            }
+
+            themeToggleBtn.addEventListener('click', function() {
+                // toggle icons inside button
+                themeToggleDarkIcon.classList.toggle('hidden');
+                themeToggleLightIcon.classList.toggle('hidden');
+
+                // if set via local storage previously
+                if (localStorage.getItem('color-theme')) {
+                    if (localStorage.getItem('color-theme') === 'light') {
+                        document.documentElement.classList.add('dark');
+                        localStorage.setItem('color-theme', 'dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                        localStorage.setItem('color-theme', 'light');
+                    }
+                // if NOT set via local storage previously
+                } else {
+                    if (document.documentElement.classList.contains('dark')) {
+                        document.documentElement.classList.remove('dark');
+                        localStorage.setItem('color-theme', 'light');
+                    } else {
+                        document.documentElement.classList.add('dark');
+                        localStorage.setItem('color-theme', 'dark');
+                    }
+                }
+            });
+
+            // --- Fullscreen Toggle Logic ---
+            const fullscreenToggleBtn = document.getElementById('fullscreen-toggle');
+            const fsEnterIcon = document.getElementById('fs-enter-icon');
+            const fsExitIcon = document.getElementById('fs-exit-icon');
+
+            // Hide the button if the current environment (like an iframe without permissions) does not support fullscreen
+            if (!document.fullscreenEnabled) {
+                fullscreenToggleBtn.style.display = 'none';
+            }
+
+            fullscreenToggleBtn.addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    const playPromise = document.documentElement.requestFullscreen();
+                    if (playPromise !== undefined) {
+                        playPromise.catch((err) => {
+                            console.warn(`Fullscreen not allowed in this environment: ${err.message}`);
+                        });
+                    }
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    }
+                }
+            });
+
+            // Listen for fullscreen changes to update icons reliably (e.g., user presses ESC)
+            document.addEventListener('fullscreenchange', () => {
+                if (document.fullscreenElement) {
+                    fsEnterIcon.classList.add('hidden');
+                    fsExitIcon.classList.remove('hidden');
+                } else {
+                    fsEnterIcon.classList.remove('hidden');
+                    fsExitIcon.classList.add('hidden');
+                }
+            });
+
+            // --- Navbar Shrink on Scroll Logic ---
+            const navbar = document.getElementById('navbar');
+            const logo = document.getElementById('logo');
+
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    // Shrink navbar
+                    navbar.classList.remove('py-6');
+                    navbar.classList.add('py-3', 'shadow-sm', 'bg-white/95', 'dark:bg-slate-900/95', 'backdrop-blur');
+                    // Shrink logo
+                    logo.classList.remove('text-3xl');
+                    logo.classList.add('text-xl');
+                } else {
+                    // Expand navbar
+                    navbar.classList.add('py-6');
+                    navbar.classList.remove('py-3', 'shadow-sm', 'bg-white/95', 'dark:bg-slate-900/95', 'backdrop-blur');
+                    // Expand logo
+                    logo.classList.add('text-3xl');
+                    logo.classList.remove('text-xl');
+                }
+            });
+
+            // --- Table of Contents (TOC) Active Tracking Logic ---
+            const sections = document.querySelectorAll('article section[id], article h3[id]');
+            const tocLinks = document.querySelectorAll('.toc-link');
+
+            // Intersection Observer to watch headings scroll into view
+            const observerOptions = {
+                root: null,
+                rootMargin: '-100px 0px -60% 0px', // Adjust triggers: slightly below navbar to middle of screen
+                threshold: 0
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        
+                        // Remove active class from all
+                        tocLinks.forEach(link => {
+                            link.classList.remove('text-blue-600', 'dark:text-blue-400', 'font-medium', 'border-l-2', 'border-blue-600', 'dark:border-blue-400', '-ml-[1px]');
+                            link.classList.add('text-slate-500', 'dark:text-slate-400');
+                        });
+
+                        // Add active class to current
+                        const activeLink = document.querySelector(`.toc-link[href="#${id}"]`);
+                        if (activeLink) {
+                            activeLink.classList.remove('text-slate-500', 'dark:text-slate-400');
+                            activeLink.classList.add('text-blue-600', 'dark:text-blue-400', 'font-medium', 'border-l-2', 'border-blue-600', 'dark:border-blue-400', '-ml-[1px]');
+                        }
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all sections and subheadings with IDs
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+
+            // --- Search Shortcut (Ctrl+K) Logic ---
+            const searchInput = document.getElementById('search-input');
+            document.addEventListener('keydown', (e) => {
+                // Check if Ctrl or Cmd is pressed along with 'k'
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+                    e.preventDefault(); // Prevent default browser search behavior
+                    searchInput.focus(); // Focus the search box
+                }
+            });
+
+            // --- Accordion Sidebar Logic ---
+            const accordions = document.querySelectorAll('.accordion-toggle');
+            
+            // First, initialize the max-height for elements that start open
+            accordions.forEach(btn => {
+                const content = btn.nextElementSibling;
+                if (btn.getAttribute('aria-expanded') === 'true') {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                }
+            });
+
+            // Add click listeners
+            accordions.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const content = this.nextElementSibling;
+                    const chevron = this.querySelector('.chevron');
+                    const isExpanded = this.getAttribute('aria-expanded') === 'true';
+
+                    if (isExpanded) {
+                        // Collapse
+                        this.setAttribute('aria-expanded', 'false');
+                        content.style.maxHeight = '0px';
+                        content.style.opacity = '0';
+                        chevron.classList.remove('rotate-180');
+                    } else {
+                        // Expand
+                        this.setAttribute('aria-expanded', 'true');
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        content.style.opacity = '1';
+                        chevron.classList.add('rotate-180');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
