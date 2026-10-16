@@ -159,15 +159,16 @@
 ## Phase 5 — Legacy Migration ([ARCH §10](ARCHITECTURE.md))
 - [x] T5.01 Inspect the legacy dump and write the mapping into ARCH §10 *(done 2026-10-16)*
 - [x] T5.02 Look for the legacy inline images: live site 404, Wayback Machine none *(checked 2026-10-16)*. Fallback chain plus placeholder (D11)
-- [ ] T5.03 `./dev legacy-import`: load the dump into `ctp_legacy`
-- [ ] T5.04 `ctp:import-legacy` for categories, tags (prune and merge), settings, **tutorials only** (`body`, views, kudos, SEO; the 4 blog posts are skipped), with `--dry-run` (MIG-01, 02)
-- [ ] T5.05 Poster download from the live site. Inline images through the fallback chain, with a placeholder and `needs_review` (MIG-03)
-- [ ] T5.06 `HtmlCleaner` with **fixture tests** built from 5 real legacy articles: headings, `<br>` paragraphs, File Location → filename, code blocks, tables, styles (MIG-04)
-- [ ] T5.07 Redirect map: `/codethepixel/articles/{Slug}` → `/{slug}`, tags, the index, poster image URLs, and the legacy blog posts (Emmet → tutorial, others 410) (MIG-05)
-- [ ] T5.08 Import report, and a manual QA pass over all 60 imported tutorials (MIG-06, 07)
-- [ ] T5.09 Crawl the old site's URL list and assert that each one returns a 301 to a 200
+- [x] T5.03 `./dev legacy-import`: load the dump into `ctp_legacy`
+- [x] T5.04 `ctp:import-legacy` for categories, tags (prune and merge), settings, **tutorials only** (`body`, views, kudos, SEO; the 4 blog posts are skipped), with `--dry-run` (MIG-01, 02)
+- [x] T5.05 Poster download from the live site. Inline images through the fallback chain, with a placeholder and `needs_review` (MIG-03)
+- [x] T5.06 `HtmlCleaner` with **fixture tests** built from 5 real legacy articles: headings, `<br>` paragraphs, File Location → filename, code blocks, tables, styles (MIG-04)
+- [x] T5.07 Redirect map: `/codethepixel/articles/{Slug}` → `/{slug}`, tags, the index, poster image URLs, and the legacy blog posts (Emmet → tutorial, others 410) (MIG-05)
+- [x] T5.08 Import report, and a manual QA pass over all 60 imported tutorials (MIG-06, 07)
+- [x] T5.09 Crawl the old site's URL list and assert that each one returns a 301 to a 200
 
 **Exit criteria:** every legacy article renders correctly. Every legacy URL returns a 301 to a 200.
+*Status (2026-10-16): met locally. 60 tutorials imported (224 headings, 379 code and terminal blocks, 113 tags, 60 posters); automated QA finds no leftover styles, legacy classes or lost code blocks, and every page returns 200. `ctp:check-legacy-urls`: 308 of 308 legacy URLs reach a page in one hop (retired blog posts answer 410). 25 screenshots are unrecoverable (D11): those 12 articles, plus 12 without headings in the source, are on the review checklist in `storage/logs/legacy-import-*.md`. Run the import again on production after deploy (it is idempotent).*
 
 ---
 

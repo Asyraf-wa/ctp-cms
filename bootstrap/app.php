@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\NormalizeUrl;
 use App\Http\Middleware\SecurityHeaders;
+use App\Legacy\LegacyUrls;
 use App\Models\NotFoundLog;
 use App\Models\Redirect;
 use Illuminate\Foundation\Application;
@@ -31,6 +32,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         // Redirects are only looked up when nothing else matched, so real pages always win (SEO-11, SLUG-03).
         $exceptions->render(function (NotFoundHttpException $e, Request $request) {
+            // MIG-05: old listing URLs whose query string matters (?tag=, ?category=).
+            if ($request->isMethod('GET') && ($legacy = LegacyUrls::redirectFor($request))) {
+                return $legacy;
+            }
             if ($request->isMethod('GET') && ($redirect = Redirect::findForPath($request->getPathInfo()))) {
                 return $redirect->toResponse();
             }

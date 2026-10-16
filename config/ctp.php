@@ -56,4 +56,7 @@ return [
     'backup' => [
         'verify_database' => env('BACKUP_VERIFY_DATABASE'),
     ],
+
+    // MIG-01: the database ./dev legacy-import loads the old CakePHP dump into.
+    'legacy_database' => env('LEGACY_DB_DATABASE', 'ctp_legacy'),
 ];

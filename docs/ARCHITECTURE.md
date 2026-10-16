@@ -404,3 +404,8 @@ Conversion rules, in order:
 1. `php artisan ctp:import-legacy --dry-run`: mapping report with counts, warnings, unconverted HTML and missing images.
 2. `php artisan ctp:import-legacy`: upserts everything, then re-renders.
 3. The report goes to `storage/logs/legacy-import-{date}.md`, including a checklist of articles that need a manual look.
+4. `php artisan ctp:check-legacy-urls`: requests every old URL through the app (articles under `/codethepixel/articles/` and `/articles/`, `?tag=` and `?category=` listings, poster images) and fails unless each one reaches a page (or a 410 for the retired blog posts).
+
+Re-running the import leaves articles that were already imported alone, so hand edits after QA survive; `--force` re-imports them, `--id=` limits the run, `--no-download` skips the network. Posters and found screenshots are de-duplicated by hash in the media library. Image probes are remembered in `storage/app/legacy-image-probes.json`.
+
+Old listing URLs whose meaning is in the query string (`?tag=`, `?category=`) are handled by `App\Legacy\LegacyUrls` before the redirect table, because redirects match paths only.

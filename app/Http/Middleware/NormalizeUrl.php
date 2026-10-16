@@ -33,9 +33,8 @@ class NormalizeUrl
         }
 
         if ($clean !== $path) {
-            // A known redirect for the clean path: go straight there (one hop, not a chain).
-            $known = Redirect::findForPath($clean);
-            if ($known && $known->to_path !== null) {
+            // A known redirect (or 410) for the clean path: answer it now (one hop, not a chain).
+            if ($known = Redirect::findForPath($clean)) {
                 return $known->toResponse();
             }
             $query = $request->getQueryString();
