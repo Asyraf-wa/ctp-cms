@@ -1,9 +1,17 @@
 # PRD — CTP (Code The Pixel) Tutorial CMS
 
-> **Status:** v0.2 (draft) · **Date:** 2026-10-16 · **Owner:** Asyraf Wahi Anuar
+> **Status:** v0.3 (draft) · **Date:** 2026-10-16 · **Owner:** Asyraf Wahi Anuar
 > See [ARCHITECTURE.md](ARCHITECTURE.md) · [DESIGN.md](DESIGN.md) · [TASKS.md](TASKS.md)
 
 ### Changelog
+- **v0.3 (2026-10-16):**
+  - **Tutorials at the root URL `domain/{slug}`** (D9)
+  - a pro **contact form** (CONTACT)
+  - ribbon background colour
+  - Kudos confirmed
+  - the legacy blog posts are not imported
+  - lost legacy images handled with placeholders
+  - no staging; the owner runs the live deploy
 - **v0.2 (2026-10-16):** Added the Settings page (SET: general, meta, topbar notification, ribbon), authors shown on articles (AUTHOR), menu management (MENU) and slugs with slug history (SLUG). The open questions became a decisions log: cPanel Git deploy, MySQL 8.0.44, legacy `body` column, no newsletter.
 - **v0.1 (2026-10-16):** First draft. Stack is Laravel + Filament. The site is in English only. Legacy articles are imported. Projects and Blog start fresh. Nerd Stats is removed.
 
@@ -183,7 +191,7 @@ Full schema: [ARCHITECTURE.md §4](ARCHITECTURE.md).
 
 ### GEO — Generative Engine Optimisation (AI search)
 - **GEO-01** `/llms.txt`: a site summary with curated links to key tutorials and series. `/llms-full.txt` holds the full Markdown of every published article.
-- **GEO-02** A **Markdown version** of every article at `/{type}/{slug}.md`, linked with `<link rel="alternate" type="text/markdown">`.
+- **GEO-02** A **Markdown version** of every article at `/{slug}.md` (tutorials and pages) or `/blog/{slug}.md`, linked with `<link rel="alternate" type="text/markdown">`.
 - **GEO-03** TL;DR / Key takeaways block (ART-06) in a clearly marked `<section>` near the top.
 - **GEO-04** Explicit facts on the page: "Tested with" versions, published or updated dates, a strong author page with credentials and links.
 - **GEO-05** An **AI crawler policy** in settings: allow or block GPTBot, ClaudeBot, PerplexityBot, Google-Extended and CCBot individually. This writes `robots.txt`.
@@ -233,9 +241,10 @@ A single Filament settings page with tabs. Values are stored in the `settings` t
   - title (max ~20 chars)
   - link URL
   - open in new tab
-  - colour (`primary`, `warning`, `danger`)
+  - **background colour**: a colour picker with presets (brand teal, amber, red, slate, plus custom hex)
+  - **text colour**: `auto` by default, which picks white or near-black for the best contrast (WCAG AA). It can be overridden
 
-  It is hidden on mobile below 640 px, or shrunk to a small badge.
+  It is hidden on mobile below 640 px, or shrunk to a small badge. The admin shows a live preview of the ribbon.
 - **SET-05 Social links:** GitHub, X, LinkedIn, YouTube, Facebook, Instagram, TikTok and others. They are used in the footer, the author box fallback and `Organization.sameAs`.
 - **SET-06 Analytics & scripts:**
   - head and body script fields (CTP SaaS snippet, Plausible or GA4)
@@ -252,7 +261,7 @@ A single Filament settings page with tabs. Values are stored in the `settings` t
   - avatar, name and job title in the article meta row
   - a full **author box** after the article (bio, social links, "More from {name}")
 - **AUTHOR-02** Each admin user has a **profile**: display name, slug, avatar (from the media library, falling back to the Google avatar), job title, short bio, long bio, website, social links.
-- **AUTHOR-03** **Author page** at `/authors/{slug}`, listing the author's articles. It carries `Person` JSON-LD and feeds E-E-A-T and GEO.
+- **AUTHOR-03** **Author page** at `/author/{slug}`, listing the author's articles. It carries `Person` JSON-LD and feeds E-E-A-T and GEO.
 - **AUTHOR-04** More than one author is possible by adding emails to `ADMIN_EMAILS`. Everyone gets the same admin rights in v1 (no roles).
 - **AUTHOR-05** Legacy articles are assigned to the default author on import.
 
@@ -273,9 +282,48 @@ A single Filament settings page with tabs. Values are stored in the `settings` t
 
 ### SLUG — Slugs & Permalinks
 - **SLUG-01** Every public entity (article, category, tag, series, project, page, author) has a **slug**. It is generated from the title, can be edited, is lowercase kebab-case ASCII, and is unique within its type.
-- **SLUG-02** Reserved slugs are blocked for pages: `admin`, `api`, `feed`, `search`, `tutorials` and others.
+- **SLUG-02** **Root URLs (D9):** tutorials and static pages live at `domain/{slug}` and share **one slug namespace**, so they can never collide. Every route prefix (`blog`, `tag`, `category`, `admin`, `contact`…) is **reserved automatically** and can't be used as a slug. Details in [ARCH §6](ARCHITECTURE.md).
 - **SLUG-03** **Slug history:** changing the slug of published content automatically creates a 301 redirect from the old URL (`redirects.source = slug`). Links never break.
 - **SLUG-04** The admin warns before a published slug is changed.
+
+### CONTACT — Contact Form (`/contact`)
+A professional contact page, not a bare form.
+
+- **CONTACT-01 Layout:** two columns on desktop, stacked on mobile.
+  - **Left (context):**
+    - short intro
+    - **"What can I help with?"** topic cards
+    - typical reply time (from settings, e.g. "1–3 working days")
+    - email address (click to copy)
+    - social links
+    - a **"Before you ask"** box: tutorial questions get the fastest answer in that tutorial's comments, which also helps other readers. It links to search
+  - **Right:** the form in a card.
+- **CONTACT-02 Fields:**
+  - **topic** (segmented buttons: General, Tutorial question, Collaboration / Hire, Speaking / Workshop, Report a problem, Other)
+  - name, email
+  - company (optional, shown for Collaboration and Speaking)
+  - **related article** (an autocomplete search over tutorials, shown for Tutorial question and Report a problem)
+  - message with a live character counter (20–5,000)
+  - **PDPA consent** checkbox, linking to the privacy policy
+- **CONTACT-03 UX:**
+  - inline validation on blur
+  - accessible error summary
+  - the submit button shows a loading state
+  - the draft is kept in localStorage if the user navigates away
+  - a **success screen** ("Thanks, {name}. Message received.") with the expected reply time and links to popular tutorials
+  - prefill from the query (`/contact?topic=collaboration`), so other pages can deep-link to it
+- **CONTACT-04 Anti-spam:** Turnstile (invisible or managed mode), a honeypot, a **minimum time-to-submit** (more than 3 s), a rate limit (3 per hour per IP), a link-count and keyword heuristic, and messages marked as spam kept out of the inbox.
+- **CONTACT-05 Email:**
+  - a notification to `notification_email` (from settings), with reply-to set to the sender
+  - an **auto-reply** to the sender with a copy of their message and the expected reply time (branded HTML email; can be turned off)
+- **CONTACT-06 Admin inbox (Filament):**
+  - list with an unread badge in the navigation
+  - filter by topic and status (`new`, `read`, `replied`, `archived`, `spam`)
+  - detail view with the related article link
+  - **Reply** action that sends an email from the admin and stores the reply
+  - Mark as spam, Archive
+  - dashboard widget
+- **CONTACT-07 Privacy:** the IP is stored only as a salted hash. Messages are **purged automatically after 12 months** by the scheduler (PDPA). The legacy contacts are not imported.
 
 ### ADM — Admin Dashboard
 - **ADM-01** Widgets:
@@ -290,7 +338,7 @@ A single Filament settings page with tabs. Values are stored in the `settings` t
 The full mapping is in [ARCH §10](ARCHITECTURE.md). The legacy dump has 64 articles, 6 categories, 118 tags and a settings row.
 
 - **MIG-01** The legacy dump (`legacy/codethepixel_full.sql`, CakePHP / ReCRUD v2) is loaded into a separate `ctp_legacy` database in Docker.
-- **MIG-02** `php artisan ctp:import-legacy` imports:
+- **MIG-02** `php artisan ctp:import-legacy` imports the **tutorials only** (categories 1–4 and 6). The 4 Blog-category posts are skipped (D10). It imports:
   - categories
   - tags (`tags_tags` / `tags_tagged`), with unused tags dropped and duplicates merged
   - articles: content from the **`body`** column, `hits` → `views`, `kudos` → `kudos`, `meta_key` and `meta_description` → SEO
@@ -299,7 +347,7 @@ The full mapping is in [ARCH §10](ARCHITECTURE.md). The legacy dump has 64 arti
   It is idempotent (upserts by `legacy_id`) and supports `--dry-run`.
 - **MIG-03** Images:
   - posters are downloaded from the live site (still online)
-  - inline images are imported from `legacy/webroot/`, a copy of the old hosting folders, because **they already 404 on the live site**
+  - the 25 inline images **already 404 on the live site and in the Wayback Machine**. The importer tries `legacy/webroot/`, then the live URL, then the Wayback Machine, and finally inserts a "Screenshot unavailable" placeholder and flags the article (D11)
   - all of them go into the media library, and `src` is rewritten
 - **MIG-04** The legacy HTML converter turns `<strong>` / 14pt spans into **real H2/H3**, which the TOC and SEO need because the legacy bodies have no headings. It also:
   - splits `<br><br>` into paragraphs
@@ -308,8 +356,9 @@ The full mapping is in [ARCH §10](ARCHITECTURE.md). The legacy dump has 64 arti
   - strips the inline styles and Bootstrap / Font Awesome classes
   - cleans up tables
 - **MIG-05** It creates **301 redirects** for every legacy URL:
-  - `/codethepixel/articles/{Slug}` → `/tutorials/{slug}` (or `/blog/{slug}`)
-  - `/codethepixel/articles?tag=x` → `/tags/x`
+  - `/codethepixel/articles/{Slug}` → `/{slug}`
+  - `/codethepixel/articles?tag=x` → `/tag/x`
+  - the 4 legacy blog posts: *Using Emmet in VS Code* → the related Emmet tutorial; the other 3 return **410 Gone**
   - `/codethepixel` (with any query) → `/`
   - legacy poster image URLs → their new media URLs
 - **MIG-06** An import report lists the counts, warnings (missing images, unconverted HTML, headings guessed) and a checklist of the articles that need manual review.
@@ -345,7 +394,7 @@ The full mapping is in [ARCH §10](ARCHITECTURE.md). The legacy dump has 64 arti
 | **3. SEO & GEO** | Meta, JSON-LD, sitemaps, feeds, OG images, llms.txt, redirects, 404 log | Rich Results Test passes. Sitemaps validate. |
 | **4. Comments & extras** | Comments, moderation, dashboard, backups, cache | A comment can go through moderation end to end. A backup is restored successfully. |
 | **5. Migration** | Legacy import, redirects, content QA | Every legacy URL returns a 301 to a 200 page. |
-| **6. Launch** | Deploy to shared hosting, DNS, Search Console, monitoring | Production is live. Sitemaps are submitted. There are no 404s in the first week's log that weren't triaged. |
+| **6. Launch prep** | `.cpanel.yml`, CI `production` build, deploy guide (`docs/DEPLOY.md`), launch checklist. **The owner runs the live deploy** | Production is live. Sitemaps are submitted. There are no 404s in the first week's log that weren't triaged. |
 
 ## 8. Success Metrics
 - Organic clicks (Search Console) back to the pre-migration baseline within 4 weeks, then growing.
@@ -375,11 +424,14 @@ The full mapping is in [ARCH §10](ARCHITECTURE.md). The legacy dump has 64 arti
 | D5 | Newsletter | **No.** RSS is enough, because nobody would maintain a newsletter. |
 | D6 | Language | English only. |
 | D7 | Projects & Blog | Kept, but start fresh (not imported). |
+| D8 | Kudos | **Yes:** the "This helped me" button (ART-12). Legacy kudos are imported. |
+| D9 | URL structure | **Tutorials and pages at `domain/{slug}`.** Blog at `/blog/{slug}`, projects at `/projects/{slug}`, archives at `/category/x` and `/tag/x`. Shared slug namespace and auto-reserved words ([ARCH §6](ARCHITECTURE.md)). |
+| D10 | Legacy blog posts | **Not imported.** The blog starts empty. Their URLs are redirected (Emmet) or return 410. |
+| D11 | Lost legacy images | Fallback chain, then a placeholder plus `needs_review`. Screenshots are redone by hand when needed. |
+| D12 | Ribbon | Top-right corner ribbon with a configurable background colour (SET-04). |
+| D13 | Contact | Pro contact form with an admin inbox (CONTACT). |
+| D14 | Legacy FAQs and Books | Not needed. Not imported. |
+| D15 | Staging and live deploy | **No staging.** Development is local in Docker. The owner does the live deploy; we supply `.cpanel.yml`, the CI workflow and a deploy guide. |
 
 ## 11. Open Questions
-1. **Legacy inline images:** all 25 of them already 404 on the live site. Can you download the old `webroot/upload/images/`, `webroot/tutorial/` and `webroot/img/` folders from cPanel into `legacy/webroot/`? If they are lost, those articles get an "image missing" placeholder and are flagged.
-2. **The 4 legacy "Blog" posts** (First Blog Post, Releasing ReCRUD V2, Using Emmet in VS Code, @codethepixel YouTube Channel): import them as the first blog entries, or drop them? (D7 said the blog starts fresh.) *Proposal: import them as `blog`. They have traffic and redirects matter.*
-3. **Ribbon:** a diagonal corner ribbon (assumed in SET-04), or something else?
-4. **Contact page:** the legacy site had a contact form (183 messages). Keep a contact form (Turnstile, email to `notification_email`, stored in the admin), or use only a `mailto:` link?
-5. **Legacy FAQs (4) and Books (11):** what are they on the old site, and are they still needed (a "Books I recommend" page)?
-6. **Kudos button (ART-12):** keep it? The data already exists.
+_None at the moment._ New questions are added here as they come up during the build.

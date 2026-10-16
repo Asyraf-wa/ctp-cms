@@ -80,6 +80,22 @@
   - Live and Code buttons
 - **Comment:** Gravatar, name ("Author" badge for the owner), relative time, body, Reply.
 - **Empty states and skeletons** for search and lists.
+- **Topbar notification:** full-width, 40px, with an icon by style (info, success, warning, maintenance) and a soft tinted background (the callout colours). Inline link, and a dismiss ✕ when that's enabled. It sits above the header and doesn't overlap it.
+- **Ribbon:** a 45° band in the top-right corner, 160px long, `position: fixed` above the header, 12px uppercase semibold text.
+  - background from settings; text colour auto-picked to reach ≥ 4.5:1
+  - subtle shadow
+  - on hover, the band darkens 8%
+  - below 640 px it becomes a small rounded badge next to the logo
+- **Contact page:**
+  - left column: an intro headline, topic cards (icon, title, one-line description; clicking one preselects the topic), a reply-time chip, an email with a copy button, social icons, and a "Before you ask" callout
+  - right column: the form card
+    - topic as segmented pill buttons
+    - 2-column name and email
+    - fields that appear for some topics slide in with a 200 ms height animation
+    - textarea with a live counter
+    - consent checkbox
+    - full-width primary submit with a spinner
+  - success state: replaces the card with a check-circle animation, a thank-you line, the reply time and 3 popular tutorials
 
 ## 6. Page Styles
 - **Tutorials:** 3-column layout (the template, improved).

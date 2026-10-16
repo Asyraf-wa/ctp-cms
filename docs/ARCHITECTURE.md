@@ -101,7 +101,11 @@ redirects        id, from_path (unique), to_path, status_code (301|302|410), hit
 not_found_logs   id, path (unique), hits, referrer, last_seen_at
 article_views    article_id, date, views                    -- daily rollups for dashboard charts
 settings         group, name, payload (json), locked        -- spatie/laravel-settings
-                 groups: general, seo, notice (topbar), ribbon, social, scripts, integrations
+                 groups: general, seo, notice (topbar), ribbon (title, link, new_tab, bg_color, text_color auto), social, scripts, integrations, contact
+root_slugs       slug (unique), sluggable_type (article|page), sluggable_id   -- D9 shared root namespace
+contact_messages id, topic enum(general,tutorial_question,collaboration,speaking,bug_report,other), name, email,
+                 company, article_url, message, status enum(new,read,replied,archived,spam),
+                 ip_hash, user_agent, consent_at, replied_at, reply_body, timestamps   -- purged after 12 months
 menus            id, location (unique: header, footer_1, footer_2, footer_3, legal), name, timestamps
 menu_items       id, menu_id, parent_id (max depth 2), sort, label,
                  type enum(url,route,article,category,tag,series,page,project),
@@ -125,24 +129,41 @@ The result is stored in `body_rendered`. A `RenderArticle` job re-renders all ar
 
 ## 6. URL Structure
 
+**Decision D9: tutorials live at the root (`domain/{slug}`).** Tutorials are the core content, so they get the shortest URL. Every other content type has a prefix, so it never competes for the root namespace.
+
 | URL | Page |
 |---|---|
 | `/` | Home |
+| **`/{slug}`** | **Tutorial**, such as `codethepixel.com/cakephp-4-crud` |
+| **`/{slug}`** | **Static page**, such as `/about` or `/privacy`. Same namespace as tutorials (see the rules below) |
+| `/{slug}.md` | Markdown version of a tutorial or page (GEO) |
 | `/tutorials` | Tutorials index (`?category=&tag=&difficulty=&sort=`) |
-| `/tutorials/{slug}` | Tutorial |
-| `/tutorials/{slug}.md` | Markdown version (GEO) |
-| `/categories/{slug}` | Category archive (nested: `/categories/{parent}/{child}`? No: flat slugs, breadcrumbs show the hierarchy) |
-| `/tags/{slug}` | Tag archive |
+| `/category/{slug}` | Category archive (flat slugs; breadcrumbs show the hierarchy) |
+| `/tag/{slug}` | Tag archive |
 | `/series`, `/series/{slug}` | Series index and detail |
 | `/blog`, `/blog/{slug}`, `/blog/{slug}.md` | Blog |
 | `/projects`, `/projects/{slug}` | Projects |
-| `/authors/{slug}` | Author profile and their articles || `/search?q=` | Search results; `/api/search?q=` returns JSON for the Ctrl+K palette |
-| `/{page-slug}` | Static pages (about, privacy…), resolved last |
-| `/feed`, `/feed/blog`, `/feed/categories/{slug}` | RSS/Atom |
+| `/author/{slug}` | Author profile and their articles |
+| `/contact` | Contact form (a built-in route) |
+| `/search?q=` | Search results. `/api/search?q=` returns JSON for the Ctrl+K palette |
+| `/feed`, `/feed/blog`, `/feed/category/{slug}` | RSS/Atom |
 | `/sitemap.xml` (+ children), `/robots.txt`, `/llms.txt`, `/llms-full.txt` | SEO/GEO |
 | `/og/{type}/{id}.png` | Generated OG images (cached on disk) |
+| `/media/...` | Uploaded media |
 | `/admin/*` | Filament |
 | `/auth/google/redirect`, `/auth/google/callback` | Admin login |
+
+**Rules that make `/{slug}` safe:**
+
+1. **One shared namespace.** A `root_slugs` table (`slug` unique, `sluggable_type`, `sluggable_id`) holds every tutorial and page slug. A tutorial and a page can never share a slug. A unique index enforces it at DB level.
+2. **Reserved words, generated automatically.** At boot, the first path segment of every registered route (`tutorials`, `blog`, `category`, `tag`, `series`, `projects`, `author`, `contact`, `search`, `feed`, `admin`, `api`, `auth`, `media`, `og`, `build`, `storage`, `sitemap.xml`…) is collected and blocked as a slug. A static list adds future-proof words (`login`, `docs`, `shop`, `account`). Validation rejects them in the admin.
+3. **The catch-all route is registered last** (`Route::get('/{slug}', …)->where('slug', '[a-z0-9-]+')`). It resolves `root_slugs` and dispatches to the tutorial or page controller. Missing slugs fall through to the redirect check and the 404 log.
+4. **Adding a new section later** (for example `/courses`) first runs `php artisan ctp:check-slug-conflicts`, which lists any existing tutorial or page that would be shadowed. A Pest test fails CI if a route and a slug collide.
+5. Slug history (SLUG-03) applies here too: renaming `/old-slug` creates `/old-slug` → `/new-slug` as a 301.
+
+**Trade-offs we accept:**
+- Search Console can't filter "all tutorials" by folder. Use the tutorials sitemap as a filter instead, which works the same way.
+- The URL doesn't say the content type. That's fine for readers, and the breadcrumbs and JSON-LD say it explicitly.
 
 **Middleware order on public routes:**
 
@@ -291,7 +312,7 @@ The dumps live in `legacy/` (git-ignored):
 | 2 Joomla! (3) | Category **Joomla** |
 | 3 Tools & Software (3) | Category **Tools & Software** |
 | 4 Misc (11) | Category **Misc**. Re-categorise by hand after the import |
-| 5 Blog (4) | **`type = blog`**, no category. These 4 posts become the first blog entries (open question: keep or drop) |
+| 5 Blog (4) | **Not imported** (D10: the blog starts fresh). Redirects: *Using Emmet in VS Code* → the tutorial *Boost Your Productivity with Emmet in VS Code*. The other 3 return **410 Gone** |
 | 6 User Interface (1) | Category **User Interface** |
 
 ### 10.3 Legacy HTML Converter (`App\Legacy\HtmlCleaner`)
@@ -313,14 +334,20 @@ Conversion rules, in order:
 8. **iframe:** a CodePen embed becomes the CodePen block (click to load).
 9. Unknown elements (a demo `<form>`, an `h-captcha` div) are escaped into a code block or removed, and listed in the report.
 
-> **Images are missing:** all 25 inline images in `body` **already return 404 on the live site**. The image files must come from the old hosting's file system. Copy the old `webroot/upload/images/`, `webroot/tutorial/` and `webroot/img/` folders into `legacy/webroot/` (cPanel File Manager, then Compress, then Download). The importer reports any image it still cannot find.
+> **Images are missing (D11):** all 25 inline images (in about 12 articles, mostly CakePHP 4) **already return 404 on the live site, and the Wayback Machine has no copy either** (checked 2026-10-16). The importer tries each source in order:
+> 1. `legacy/webroot/` (if the old files turn up later)
+> 2. the live URL
+> 3. the Wayback Machine `id_` raw URL
+> 4. a **placeholder figure** ("Screenshot unavailable"), with the article flagged `needs_review`
+>
+> The report lists every affected article, so screenshots can be redone or the image removed. Many of these are deprecated CakePHP 4 tutorials anyway.
 
 ### 10.4 Redirects created (`source = legacy`)
 
 | Old | New |
 |---|---|
-| `/codethepixel/articles/{Slug}` | `/tutorials/{slug}` or `/blog/{slug}` |
-| `/codethepixel/articles?tag={tag}` | `/tags/{tag}` |
+| `/codethepixel/articles/{Slug}` | `/{slug}` (lowercase) |
+| `/codethepixel/articles?tag={tag}` | `/tag/{tag}` |
 | `/codethepixel/articles` | `/tutorials` |
 | `/codethepixel` (and `?page=N`, `?sort=…`) | `/` |
 | `/files/Articles/poster/{Slug}/{file}` | the new media URL (images keep their search traffic) |
