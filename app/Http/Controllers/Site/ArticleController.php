@@ -28,6 +28,7 @@ class ArticleController extends Controller
                 ? $article->series->articles()->published()->get(['id', 'type', 'title', 'slug', 'series_position'])
                 : collect(),
             'related' => $this->related($article),
+            'comments' => $article->comments()->approved()->whereNull('parent_id')->with(['user', 'replies.user'])->oldest()->get(),
             ...$this->neighbours($article),
         ];
 

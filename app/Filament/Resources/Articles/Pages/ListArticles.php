@@ -25,10 +25,10 @@ class ListArticles extends ListRecords
     {
         return [
             'all' => Tab::make('All'),
-            'tutorials' => Tab::make('Tutorials')->modifyQueryUsing(fn (Builder $q) => $q->where('type', ArticleType::Tutorial)),
-            'blog' => Tab::make('Blog')->modifyQueryUsing(fn (Builder $q) => $q->where('type', ArticleType::Blog)),
-            'drafts' => Tab::make('Drafts')->modifyQueryUsing(fn (Builder $q) => $q->where('status', ArticleStatus::Draft)),
-            'scheduled' => Tab::make('Scheduled')->modifyQueryUsing(fn (Builder $q) => $q->where('status', ArticleStatus::Scheduled)),
+            'tutorials' => Tab::make('Tutorials')->modifyQueryUsing(fn (Builder $query) => $query->where('type', ArticleType::Tutorial)),
+            'blog' => Tab::make('Blog')->modifyQueryUsing(fn (Builder $query) => $query->where('type', ArticleType::Blog)),
+            'drafts' => Tab::make('Drafts')->modifyQueryUsing(fn (Builder $query) => $query->where('status', ArticleStatus::Draft)),
+            'scheduled' => Tab::make('Scheduled')->modifyQueryUsing(fn (Builder $query) => $query->where('status', ArticleStatus::Scheduled)),
         ];
     }
 }

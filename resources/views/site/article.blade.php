@@ -51,6 +51,10 @@
             <x-article.ai-tools :article="$article" compact class="not-prose mt-6 xl:hidden" />
         @endunless
         <x-article.footer :article="$article" :previous="$previous" :next="$next" />
+
+        @unless ($preview)
+            <x-comments.section :article="$article" :comments="$comments" />
+        @endunless
     </article>
 
     <x-article.related :articles="$related" />

@@ -14,7 +14,10 @@ use App\Models\User;
 use App\Seo\IndexNow;
 use App\Seo\Llms;
 use App\Seo\Sitemap;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Intervention\Image\Drivers\Gd\Driver as GdDriver;
 use Intervention\Image\ImageManager;
@@ -35,6 +38,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // CMT-02, CONTACT-04: per-IP limits for public forms.
+        RateLimiter::for('comments', fn (Request $request) => Limit::perMinutes(10, 10)->by('comments|'.$request->ip()));
+        RateLimiter::for('contact', fn (Request $request) => Limit::perHour(3)->by('contact|'.$request->ip()));
+
         // Short, stable type names in polymorphic columns (root_slugs, menu_items).
         Relation::morphMap([
             'page' => Page::class,

@@ -20,7 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->prepend(NormalizeUrl::class); // global: it must run before route matching
 
         // View beacon and kudos (ART-10, ART-12) are posted from response-cached pages.
-        $middleware->validateCsrfTokens(except: ['api/articles/*/view', 'api/articles/*/kudos']);
+        $middleware->validateCsrfTokens(except: ['api/articles/*/view', 'api/articles/*/kudos', 'api/articles/*/comments', 'api/contact']);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Redirects are only looked up when nothing else matched, so real pages always win (SEO-11, SLUG-03).

@@ -664,4 +664,45 @@
         filter: none;
         opacity: 1;
     }
+
+    /* Comment bodies (Markdown-lite) */
+    .comment-body {
+        @apply text-[0.95rem] leading-relaxed text-foreground;
+    }
+
+    .comment-body > * + * {
+        @apply mt-3;
+    }
+
+    .comment-body a {
+        @apply text-primary underline underline-offset-2;
+    }
+
+    .comment-body code {
+        @apply rounded-xs bg-brand-soft px-1 py-0.5 font-mono text-[0.85em] text-brand-soft-foreground;
+    }
+
+    .comment-body pre {
+        @apply overflow-x-auto rounded-md border border-code-border bg-code-bg p-4 text-[0.8125rem] text-code-fg;
+    }
+
+    .comment-body pre code {
+        @apply bg-transparent p-0 text-inherit;
+    }
+
+    .comment-body blockquote {
+        @apply border-l-2 border-border pl-3 text-muted-foreground;
+    }
+
+    .comment-body :is(ul, ol) {
+        @apply list-outside pl-5;
+    }
+
+    .comment-body ul {
+        @apply list-disc;
+    }
+
+    .comment-body ol {
+        @apply list-decimal;
+    }
 }

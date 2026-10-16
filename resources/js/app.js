@@ -184,6 +184,119 @@ Alpine.data('kudos', (endpoint, initial, id) => ({
     },
 }));
 
+// Cloudflare Turnstile, loaded only when a form that needs it is used (CMT-02, CONTACT-04).
+let turnstileLoading;
+window.loadTurnstile = () => turnstileLoading ??= new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+    script.async = true;
+    script.onload = () => resolve(window.turnstile);
+    script.onerror = reject;
+    document.head.append(script);
+});
+
+// Comment form (CMT-01). Posted with fetch: article pages are cached, so there is no CSRF token to rely on.
+Alpine.data('commentForm', (endpoint, turnstileKey) => ({
+    name: '', email: '', body: '', notify: false, website: '',
+    busy: false, message: '', error: false, errors: {}, replyTo: null,
+    startedAt: Date.now(), widget: null,
+
+    init() {
+        try {
+            const saved = JSON.parse(localStorage.getItem('ctp-commenter') ?? '{}');
+            this.name = saved.name ?? ''; this.email = saved.email ?? '';
+            this.body = localStorage.getItem(`ctp-draft:${endpoint}`) ?? '';
+        } catch {}
+        this.$watch('body', (value) => { try { localStorage.setItem(`ctp-draft:${endpoint}`, value); } catch {} });
+        window.addEventListener('comment-reply', (e) => this.reply(e.detail));
+        if (turnstileKey) this.$refs.form.addEventListener('focusin', () => this.mountTurnstile(), { once: true });
+    },
+
+    async mountTurnstile() {
+        if (this.widget !== null) return;
+        try {
+            const turnstile = await window.loadTurnstile();
+            this.widget = turnstile.render(this.$refs.turnstile, { sitekey: turnstileKey, theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light', size: 'flexible' });
+        } catch {}
+    },
+
+    reply({ id, name }) {
+        this.replyTo = { id, name };
+        document.querySelector(`[data-reply-slot="${id}"]`)?.append(this.$refs.form);
+        this.$nextTick(() => this.$refs.body.focus());
+    },
+
+    cancelReply() {
+        this.replyTo = null;
+        this.$refs.home.append(this.$refs.form);
+    },
+
+    validate() {
+        this.errors = {};
+        if (this.name.trim().length < 2) this.errors.name = 'Please enter your name.';
+        if (!/^\S+@\S+\.\S+$/.test(this.email.trim())) this.errors.email = 'Please enter a valid email.';
+        if (this.body.trim().length < 2) this.errors.body = 'Write a little more.';
+        return Object.keys(this.errors).length === 0;
+    },
+
+    async submit() {
+        this.message = '';
+        if (!this.validate()) return;
+        this.busy = true;
+        try { localStorage.setItem('ctp-commenter', JSON.stringify({ name: this.name, email: this.email })); } catch {}
+
+        try {
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                body: JSON.stringify({
+                    name: this.name, email: this.email, body: this.body, notify_replies: this.notify,
+                    parent_id: this.replyTo?.id ?? null, website: this.website, _elapsed: Date.now() - this.startedAt,
+                    'cf-turnstile-response': this.widget !== null ? window.turnstile?.getResponse(this.widget) : null,
+                }),
+            });
+            const data = await res.json().catch(() => ({}));
+
+            if (res.status === 422) {
+                this.errors = Object.fromEntries(Object.entries(data.errors ?? {}).map(([k, v]) => [k, v[0]]));
+                this.error = true;
+                this.message = data.errors ? 'Please check the highlighted fields.' : (data.message ?? 'Please try again.');
+            } else if (!res.ok) {
+                this.error = true;
+                this.message = res.status === 429 ? 'Too many comments in a short time. Please wait a few minutes.' : (data.message ?? 'Something went wrong. Please try again.');
+            } else {
+                this.error = false;
+                this.message = data.message;
+                if (data.html) this.insert(data.html, data.id);
+                this.body = '';
+                try { localStorage.removeItem(`ctp-draft:${endpoint}`); } catch {}
+            }
+        } catch {
+            this.error = true;
+            this.message = 'You seem to be offline. Your comment is kept here; try again in a moment.';
+        } finally {
+            this.busy = false;
+            if (this.widget !== null) window.turnstile?.reset(this.widget);
+        }
+    },
+
+    insert(html, id) {
+        const list = this.$root.querySelector('[data-comment-list]');
+        this.$root.querySelector('[data-no-comments]')?.remove();
+        const wrap = document.createElement('div');
+        wrap.innerHTML = html;
+        const slot = this.replyTo ? list.querySelector(`[data-reply-slot="${this.replyTo.id}"]`) : null;
+        if (slot) {
+            wrap.firstElementChild.classList.add('ml-6', 'sm:ml-14', 'border-l-2', 'border-border', 'pl-4', 'sm:pl-6');
+            slot.before(wrap.firstElementChild);
+            this.cancelReply();
+        } else {
+            list.append(wrap.firstElementChild);
+        }
+        document.getElementById(`comment-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    },
+}));
+
 // Copy buttons on code blocks and terminals (PUB-04). Line numbers are not copied.
 document.addEventListener('click', async (event) => {
     const button = event.target.closest('[data-copy-code], [data-copy-text]');

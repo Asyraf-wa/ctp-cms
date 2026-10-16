@@ -9,6 +9,7 @@ use App\Http\Controllers\Seo\SitemapController;
 use App\Http\Controllers\Site\ArchiveController;
 use App\Http\Controllers\Site\ArticleController;
 use App\Http\Controllers\Site\AuthorController;
+use App\Http\Controllers\Site\CommentController;
 use App\Http\Controllers\Site\EngagementController;
 use App\Http\Controllers\Site\HomeController;
 use App\Http\Controllers\Site\OgImageController;
@@ -53,6 +54,9 @@ Route::middleware('throttle:30,1')->group(function () {
     Route::post('api/articles/{article}/view', [EngagementController::class, 'view'])->whereNumber('article')->name('api.articles.view');
     Route::post('api/articles/{article}/kudos', [EngagementController::class, 'kudos'])->whereNumber('article')->name('api.articles.kudos');
 });
+// CMT-01, CMT-02: same no-CSRF reasoning as above; stricter limit.
+Route::post('api/articles/{article}/comments', [CommentController::class, 'store'])->whereNumber('article')->middleware('throttle:comments')->name('api.articles.comments');
+Route::get('comments/unsubscribe/{token}', [CommentController::class, 'unsubscribe'])->where('token', '[a-z0-9]{40}')->name('comments.unsubscribe');
 Route::get('author/{slug}', [AuthorController::class, 'show'])->where('slug', $slug)->name('authors.show');
 
 Route::middleware('throttle:10,1')->prefix('auth/google')->name('auth.google.')->group(function () {

@@ -21,6 +21,8 @@ class IntegrationSettings extends Settings
 
     public ?int $comments_auto_close_days;
 
+    public bool $comments_notify_admin;
+
     public ?string $turnstile_site_key;
 
     public ?string $turnstile_secret_key;

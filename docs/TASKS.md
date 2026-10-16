@@ -137,9 +137,9 @@
 ---
 
 ## Phase 4 — Comments, Settings & Ops
-- [ ] T4.01 Comments: form, Turnstile, honeypot, rate limit, Markdown-lite rendering, one level of threading (CMT-01, 02)
-- [ ] T4.02 Moderation resource with an "Author" reply (CMT-03)
-- [ ] T4.03 Comment email notifications (CMT-04, 05)
+- [x] T4.01 Comments: form, Turnstile, honeypot, rate limit, Markdown-lite rendering, one level of threading (CMT-01, 02)
+- [x] T4.02 Moderation resource with an "Author" reply (CMT-03)
+- [x] T4.03 Comment email notifications (CMT-04, 05)
 - [ ] T4.04 Dashboard widgets (ADM-01)
 - [ ] T4.05 Response cache, cleared on any content change (OPS-04)
 - [ ] T4.06 Security headers and CSP (OPS-05)

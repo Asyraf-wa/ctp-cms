@@ -9,6 +9,7 @@ use App\Models\Concerns\HasRenderedBody;
 use App\Models\Concerns\HasSlug;
 use App\Models\Concerns\TracksMediaUsage;
 use App\Models\Contracts\HasPublicPath;
+use App\Settings\IntegrationSettings;
 use App\Support\Sidebar;
 use App\Support\Slugs\RootSlugs;
 use Carbon\CarbonInterface;
@@ -147,6 +148,24 @@ class Article extends Model implements HasPublicPath, HasRichContent
     public function primaryTechnology(): ?Technology
     {
         return $this->technologies->first() ?? $this->category?->technology;
+    }
+
+    /** @return HasMany<Comment, $this> */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    // CMT-05: on site-wide, on for this article, and not past the auto-close window.
+    public function commentsOpen(): bool
+    {
+        $settings = app(IntegrationSettings::class);
+        $days = $settings->comments_auto_close_days;
+
+        return $settings->comments_enabled
+            && $this->comments_enabled
+            && $this->isPubliclyVisible()
+            && (! $days || ! $this->published_at || $this->published_at->gt(now()->subDays($days)));
     }
 
     /** @return BelongsToMany<Project, $this> */

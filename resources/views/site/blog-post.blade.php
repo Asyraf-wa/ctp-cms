@@ -33,6 +33,10 @@
             <x-article.ai-tools :article="$article" compact class="not-prose mt-6" />
         @endunless
         <x-article.footer :article="$article" :previous="$previous" :next="$next" />
+
+        @unless ($preview)
+            <x-comments.section :article="$article" :comments="$comments" />
+        @endunless
     </article>
 
     <div class="mx-auto max-w-5xl px-4 pb-12 sm:px-6">

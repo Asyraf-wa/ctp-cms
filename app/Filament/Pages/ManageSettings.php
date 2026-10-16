@@ -320,6 +320,8 @@ class ManageSettings extends Page
                     Toggle::make('comments_enabled')->label('Allow comments site-wide'),
                     TextInput::make('comments_auto_close_days')->label('Close comments after (days)')->numeric()->minValue(1)
                         ->helperText('Empty = never.'),
+                    Toggle::make('comments_notify_admin')->label('Email me about new comments')
+                        ->helperText('Sent to the notification email (General tab). First-time commenters wait for approval.'),
                 ]),
                 Section::make('Cloudflare Turnstile')->description('Spam protection for comments and the contact form.')->columns(2)->schema([
                     TextInput::make('turnstile_site_key')->label('Site key'),
