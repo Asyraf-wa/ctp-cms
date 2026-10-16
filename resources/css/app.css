@@ -625,4 +625,8 @@
     .lightbox__close {
         @apply fixed top-4 right-4 flex size-10 items-center justify-center rounded-full bg-white/10 text-2xl leading-none text-white hover:bg-white/20;
     }
+
+    .search-hit mark {
+        @apply rounded-[3px] bg-brand-soft px-0.5 text-brand-soft-foreground;
+    }
 }

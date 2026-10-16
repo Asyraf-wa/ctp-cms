@@ -70,6 +70,7 @@
     </main>
 
     <x-site.footer />
+    <x-site.search-palette />
 
     {{-- Back to top (PUB-05) --}}
     <button type="button" x-data="{ show: false }" @scroll.window.throttle.150ms="show = window.scrollY > 900"

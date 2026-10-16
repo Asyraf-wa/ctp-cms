@@ -10,7 +10,7 @@
         <div class="h-full origin-left scale-x-0 bg-primary" data-reading-progress></div>
     </div>
 
-    <article class="mx-auto max-w-3xl px-4 pt-10 pb-4 sm:px-6" data-article>
+    <article class="mx-auto max-w-3xl px-4 pt-10 pb-4 sm:px-6" data-article @unless ($preview) data-view-beacon="{{ route('api.articles.view', $article) }}" @endunless>
         <header class="mb-10 text-center">
             <x-site.breadcrumbs :items="[['Blog', url('/blog')], [$article->title, null]]" class="mb-6 hidden justify-center sm:flex [&_li:last-child]:max-w-[28ch] [&_li:last-child_span]:truncate" />
             <a href="{{ url('/blog') }}" class="text-sm font-semibold tracking-wide text-primary uppercase hover:underline">Blog</a>
@@ -30,6 +30,7 @@
         <x-article.intro :article="$article" />
 
         <div class="prose-ctp prose-lg mt-8" data-article-body>{!! $article->body_rendered !!}</div>
+        <x-article.kudos :article="$article" :preview="$preview" />
         <x-article.footer :article="$article" :previous="$previous" :next="$next" />
     </article>
 

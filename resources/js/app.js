@@ -63,6 +63,127 @@ Alpine.data('toc', () => ({
     },
 }));
 
+// Ctrl/⌘ K search palette (PUB-06). Results come from /api/search; recent searches stay in this browser.
+Alpine.data('searchPalette', (endpoint, searchUrl) => ({
+    isOpen: false,
+    q: '',
+    groups: [],
+    items: [],
+    active: -1,
+    loading: false,
+    searched: false,
+    recent: [],
+    searchUrl,
+    controller: null,
+
+    init() {
+        try { this.recent = JSON.parse(localStorage.getItem('ctp-recent') ?? '[]').slice(0, 5); } catch { this.recent = []; }
+
+        // Any [data-search-trigger] form (header, hero, 404) opens the palette instead of submitting.
+        document.addEventListener('focusin', (e) => {
+            const form = e.target.closest?.('[data-search-trigger]');
+            if (form && e.target.matches('input')) {
+                e.target.blur();
+                this.open(e.target.value);
+            }
+        });
+    },
+
+    shortcut(e) {
+        const typing = e.target.closest?.('input, textarea, select, [contenteditable]');
+        if ((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey)) {
+            e.preventDefault();
+            this.isOpen ? this.close() : this.open();
+        } else if (e.key === '/' && !typing && !this.isOpen) {
+            e.preventDefault();
+            this.open();
+        }
+    },
+
+    open(q = '') {
+        this.isOpen = true;
+        if (q) { this.q = q; this.fetchResults(); }
+        this.$nextTick(() => this.$refs.input?.focus());
+    },
+
+    close() {
+        this.isOpen = false;
+    },
+
+    async fetchResults() {
+        const q = this.q.trim();
+        if (q.length < 2) { this.groups = []; this.items = []; this.active = -1; this.searched = false; return; }
+
+        this.controller?.abort();
+        this.controller = new AbortController();
+        this.loading = true;
+        try {
+            const res = await fetch(`${endpoint}?q=${encodeURIComponent(q)}`, { signal: this.controller.signal, headers: { Accept: 'application/json' } });
+            const data = await res.json();
+            let index = 0;
+            this.groups = data.groups.map((g) => ({ ...g, items: g.items.map((item) => ({ ...item, index: index++ })) }));
+            this.items = this.groups.flatMap((g) => g.items);
+            this.active = this.items.length ? 0 : -1;
+            this.searched = true;
+        } catch (e) {
+            if (e.name !== 'AbortError') { this.groups = []; this.items = []; }
+        } finally {
+            this.loading = false;
+        }
+    },
+
+    move(step) {
+        if (!this.items.length) return;
+        this.active = (this.active + step + this.items.length) % this.items.length;
+        document.getElementById(`palette-item-${this.active}`)?.scrollIntoView({ block: 'nearest' });
+    },
+
+    remember() {
+        const q = this.q.trim();
+        if (q.length < 2) return;
+        this.recent = [q, ...this.recent.filter((t) => t !== q)].slice(0, 5);
+        try { localStorage.setItem('ctp-recent', JSON.stringify(this.recent)); } catch {}
+    },
+
+    go() {
+        this.remember();
+        const item = this.items[this.active];
+        window.location = item ? item.url : `${this.searchUrl}?q=${encodeURIComponent(this.q.trim())}`;
+    },
+}));
+
+// ART-12 kudos. Remembered per browser so the button stays "given" on cached pages.
+Alpine.data('kudos', (endpoint, initial, id) => ({
+    count: initial,
+    given: false,
+    busy: false,
+    pop: false,
+
+    init() {
+        try { this.given = JSON.parse(localStorage.getItem('ctp-kudos') ?? '[]').includes(id); } catch {}
+    },
+
+    async give() {
+        if (this.given || this.busy || !endpoint) return;
+        this.busy = true;
+        try {
+            const res = await fetch(endpoint, { method: 'POST', headers: { Accept: 'application/json' } });
+            if (!res.ok) return;
+            const data = await res.json();
+            this.count = data.count;
+            this.given = true;
+            this.pop = true;
+            setTimeout(() => (this.pop = false), 900);
+            try {
+                const ids = JSON.parse(localStorage.getItem('ctp-kudos') ?? '[]');
+                localStorage.setItem('ctp-kudos', JSON.stringify([...new Set([...ids, id])].slice(-500)));
+            } catch {}
+        } finally {
+            this.busy = false;
+        }
+    },
+}));
+
 // Copy buttons on code blocks and terminals (PUB-04). Line numbers are not copied.
 document.addEventListener('click', async (event) => {
     const button = event.target.closest('[data-copy-code], [data-copy-text]');
@@ -111,6 +232,21 @@ if (progress && article) {
     document.addEventListener('scroll', () => requestAnimationFrame(update), { passive: true });
     window.addEventListener('resize', update);
     update();
+}
+
+// View beacon (ART-10): counted after 5 s of the page being visible, which filters most bots and bounces.
+const beacon = document.querySelector('[data-view-beacon]');
+if (beacon) {
+    let visibleFor = 0;
+    let sent = false;
+    const timer = setInterval(() => {
+        if (document.visibilityState === 'visible') visibleFor += 1;
+        if (visibleFor >= 5 && !sent) {
+            sent = true;
+            clearInterval(timer);
+            navigator.sendBeacon?.(beacon.dataset.viewBeacon) || fetch(beacon.dataset.viewBeacon, { method: 'POST', keepalive: true });
+        }
+    }, 1000);
 }
 
 // Heading anchors (PUB-05): a "#" link on every H2–H4 that has an id.

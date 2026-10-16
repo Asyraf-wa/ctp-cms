@@ -2,6 +2,7 @@
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\TruncatingTestCase;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +18,9 @@ use Tests\TestCase;
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->in('Feature');
+
+// FULLTEXT search needs committed rows (see TruncatingTestCase).
+pest()->extend(TruncatingTestCase::class)->in('Search');
 
 /*
 |--------------------------------------------------------------------------

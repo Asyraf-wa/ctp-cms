@@ -4,8 +4,6 @@
 
 {{-- Layout follows tutorial_web_template.html: shrinks on scroll (py-6 → py-3, logo 3xl → xl). --}}
 <header x-data="{ scrolled: false, open: false }"
-    @keydown.window.ctrl.k.prevent="$refs.q.offsetParent ? $refs.q.focus() : (window.location = @js(url('/search')))"
-    @keydown.window.meta.k.prevent="$refs.q.offsetParent ? $refs.q.focus() : (window.location = @js(url('/search')))"
     x-init="scrolled = window.scrollY > 50"
     @scroll.window.throttle.50ms="scrolled = window.scrollY > 50"
     @keydown.escape.window="open = false"
@@ -49,17 +47,17 @@
         </nav>
 
         <div class="flex shrink-0 items-center gap-2 sm:gap-3">
-            {{-- Plain GET form, so search works without JS; Ctrl/⌘ K focuses it (PUB-06). --}}
-            <form action="{{ url('/search') }}" method="get" role="search" class="relative hidden xl:block">
+            {{-- Plain GET form, so search works without JS; with JS it opens the Ctrl/⌘ K palette (PUB-06). --}}
+            <form action="{{ url('/search') }}" method="get" role="search" class="relative hidden xl:block" data-search-trigger>
                 <label for="site-search" class="sr-only">Search tutorials</label>
-                <input x-ref="q" id="site-search" name="q" type="search" placeholder="Search..." autocomplete="off"
+                <input id="site-search" name="q" type="search" placeholder="Search..." autocomplete="off"
                     class="w-56 rounded-full border border-transparent bg-muted py-2 pr-16 pl-4 text-sm text-foreground transition-all placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none dark:border-border">
                 <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                     <span class="hidden rounded border border-border bg-card px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground lg:block">Ctrl K</span>
                 </div>
             </form>
 
-            <a href="{{ url('/search') }}" aria-label="Search"
+            <a href="{{ url('/search') }}" aria-label="Search" @click.prevent="$dispatch('open-search')"
                 class="hidden rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent sm:inline-flex xl:hidden">
                 <x-lucide-search class="size-5" />
             </a>

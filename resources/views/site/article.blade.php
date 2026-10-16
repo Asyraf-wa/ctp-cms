@@ -25,7 +25,7 @@
 
     <x-article.mobile-bar :categories="$categories" :toc="$article->toc ?? []" />
 
-    <article class="rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 sm:p-8" data-article>
+    <article class="rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 sm:p-8" data-article @unless ($preview) data-view-beacon="{{ route('api.articles.view', $article) }}" @endunless>
         <header>
             {{-- Long titles make the breadcrumb noisy on phones; the category link covers it there. --}}
             <x-site.breadcrumbs :items="$crumbs" class="mb-5 hidden sm:block [&_li:last-child]:max-w-[24ch] [&_li:last-child_span]:truncate" />
@@ -55,6 +55,7 @@
             {!! $article->body_rendered !!}
         </div>
 
+        <x-article.kudos :article="$article" :preview="$preview" />
         <x-article.footer :article="$article" :previous="$previous" :next="$next" />
     </article>
 

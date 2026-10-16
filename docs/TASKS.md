@@ -103,13 +103,13 @@
 - [x] T2.04 Mobile: sidebar drawer and collapsible TOC (PUB-03)
 - [x] T2.05 Code block UX: copy, label, line numbers, highlight lines, wrap toggle (PUB-04)
 - [x] T2.06 Reading progress, Focus mode, lightbox, heading anchors, back-to-top (PUB-05)
-- [ ] T2.07 Ctrl+K search palette, the `/api/search` endpoint and the `/search` page (FULLTEXT) (PUB-06)
+- [x] T2.07 Ctrl+K search palette, the `/api/search` endpoint and the `/search` page (FULLTEXT) (PUB-06)
 - [x] T2.08 Category, tag and series archive pages (PUB-07)
 - [x] T2.09 Blog index and post, single-column style (PUB-08)
 - [x] T2.10 Projects index (filter by tech) and project detail (PUB-09)
 - [x] T2.11 Static pages, About page, **author page `/author/{slug}`**, author meta row and author box on articles (PUB-10, AUTHOR-01, 03)
-- [ ] T2.12 404, 500 and maintenance pages (PUB-12)
-- [ ] T2.13 View beacon and daily rollup (ART-10). Kudos button (ART-12)
+- [x] T2.12 404, 500 and maintenance pages (PUB-12)
+- [x] T2.13 View beacon and daily rollup (ART-10). Kudos button (ART-12)
 - [ ] T2.14 Accessibility pass: keyboard, focus, skip link, reduced motion, contrast check in both themes
 
 **Exit criteria:** every page is responsive (360 px → 1440 px) in light and dark mode. Lighthouse ≥ 95 on the home and article pages (mobile).

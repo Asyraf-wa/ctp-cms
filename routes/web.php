@@ -4,10 +4,12 @@ use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Site\ArchiveController;
 use App\Http\Controllers\Site\ArticleController;
 use App\Http\Controllers\Site\AuthorController;
+use App\Http\Controllers\Site\EngagementController;
 use App\Http\Controllers\Site\HomeController;
 use App\Http\Controllers\Site\PageController;
 use App\Http\Controllers\Site\ProjectController;
 use App\Http\Controllers\Site\RootSlugController;
+use App\Http\Controllers\Site\SearchController;
 use App\Http\Controllers\Site\TutorialController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +24,13 @@ Route::get('series/{slug}', [ArchiveController::class, 'series'])->where('slug',
 Route::get('blog', [ArticleController::class, 'blogIndex'])->name('blog.index');
 Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');
 Route::get('projects/{slug}', [ProjectController::class, 'show'])->where('slug', $slug)->name('projects.show');
+Route::get('search', [SearchController::class, 'page'])->name('search');
+Route::get('api/search', [SearchController::class, 'api'])->middleware('throttle:60,1')->name('api.search');
+// ART-10, ART-12. No CSRF token (pages are cached); the controller checks origin and filters bots.
+Route::middleware('throttle:30,1')->group(function () {
+    Route::post('api/articles/{article}/view', [EngagementController::class, 'view'])->whereNumber('article')->name('api.articles.view');
+    Route::post('api/articles/{article}/kudos', [EngagementController::class, 'kudos'])->whereNumber('article')->name('api.articles.kudos');
+});
 Route::get('author/{slug}', [AuthorController::class, 'show'])->where('slug', $slug)->name('authors.show');
 
 Route::middleware('throttle:10,1')->prefix('auth/google')->name('auth.google.')->group(function () {

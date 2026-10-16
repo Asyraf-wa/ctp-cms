@@ -1,0 +1,5 @@
+@extends('errors.minimal')
+@section('title', 'Back soon')
+@section('code', 'Maintenance')
+@section('heading', 'Back in a few minutes')
+@section('message', 'Code The Pixel is being updated. Your tutorial will be right here when we are done.')
