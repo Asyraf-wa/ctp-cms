@@ -1,0 +1,94 @@
+name: ctp
+
+x-app: &app
+  build:
+    context: ./docker/php
+    args:
+      UID: ${UID:-1000}
+      GID: ${GID:-1000}
+  image: ctp/app:dev
+  volumes:
+    - ./:/var/www/html
+  depends_on:
+    mysql:
+      condition: service_healthy
+  restart: unless-stopped
+
+services:
+  app:
+    <<: *app
+
+  nginx:
+    image: nginx:1.29-alpine
+    ports:
+      - "${APP_PORT:-8100}:80"
+    volumes:
+      - ./:/var/www/html:ro
+      # A directory, not a single file: editors replace files, and a single-file bind
+      # mount keeps the old one until the container is recreated.
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - app
+    restart: unless-stopped
+
+  vite:
+    <<: *app
+    user: "${UID:-1000}:${GID:-1000}"
+    command: ["npm", "run", "dev"]
+    ports:
+      - "${VITE_PORT:-5183}:5183"
+
+  # Dev only: production has no worker, the scheduler runs queue:work --stop-when-empty from cron.
+  queue:
+    <<: *app
+    user: "${UID:-1000}:${GID:-1000}"
+    command: ["php", "artisan", "queue:listen", "--tries=3", "--sleep=1"]
+
+  scheduler:
+    <<: *app
+    user: "${UID:-1000}:${GID:-1000}"
+    command: ["php", "artisan", "schedule:work"]
+
+  # Same version as production (MySQL 8.0.44).
+  mysql:
+    image: mysql:8.0.44
+    environment:
+      MYSQL_DATABASE: ctp
+      MYSQL_USER: ctp
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: root
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    ports:
+      - "${DB_FORWARD_PORT:-3317}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  phpmyadmin:
+    image: phpmyadmin:5.2
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: root
+      UPLOAD_LIMIT: 64M
+    ports:
+      - "${PMA_PORT:-8101}:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "${MAILPIT_PORT:-8125}:8025"
+    restart: unless-stopped
+
+volumes:
+  mysql-data:

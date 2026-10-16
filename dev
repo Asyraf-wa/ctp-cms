@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# Dev shortcuts. Everything runs inside Docker; no local PHP/Node needed.
+# Usage: ./dev <command> [args...]
+set -euo pipefail
+cd "$(dirname "$0")"
+
+DC="docker compose"
+USR="$(id -u):$(id -g)"
+
+cmd="${1:-help}"
+shift || true
+
+case "$cmd" in
+  up)        $DC up -d "$@" ;;
+  down)      $DC down "$@" ;;
+  restart)   $DC restart "$@" ;;
+  build)     $DC build "$@" ;;
+  ps)        $DC ps ;;
+  logs)      $DC logs -f --tail=100 "$@" ;;
+  sh)        $DC exec --user "$USR" app bash ;;
+  artisan|a) $DC exec --user "$USR" app php artisan "$@" ;;
+  composer)  $DC run --rm --no-deps --user "$USR" -e COMPOSER_HOME=/tmp/composer app composer "$@" ;;
+  npm)       $DC run --rm --no-deps --user "$USR" -e HOME=/tmp app npm "$@" ;;
+  migrate)   $DC exec --user "$USR" app php artisan migrate "$@" ;;
+  fresh)     $DC exec --user "$USR" app php artisan migrate:fresh --seed ;;
+  test)      $DC exec --user "$USR" app php artisan test "$@" ;;
+  lint)      $DC exec --user "$USR" app vendor/bin/pint --parallel ;;
+  stan)      $DC exec --user "$USR" app vendor/bin/phpstan analyse --memory-limit=1G "$@" ;;
+  mysql)     $DC exec mysql mysql -uroot -proot "$@" ;;
+  legacy-import)
+             # Load the legacy CakePHP dump into ctp_legacy (PRD MIG-01). Re-runnable: drops and recreates.
+             dump="${1:-legacy/codethepixel_full.sql}"
+             [ -f "$dump" ] || { echo "Missing $dump"; exit 1; }
+             $DC exec -T mysql mysql -uroot -proot -e 'DROP DATABASE IF EXISTS ctp_legacy; CREATE DATABASE ctp_legacy CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci; GRANT ALL ON ctp_legacy.* TO "ctp"@"%";'
+             $DC exec -T mysql mysql -uroot -proot ctp_legacy < "$dump"
+             echo "Loaded $dump into ctp_legacy" ;;
+  *)
+    cat <<'HELP'
+Usage: ./dev <command> [args]
+
+  up | down | restart | build | ps    Manage services
+  logs [service]                      Follow logs (e.g. ./dev logs vite)
+  sh                                  Shell inside the app container
+  artisan <args>  (alias: a)          php artisan ...
+  composer <args>                     composer ...
+  npm <args>                          npm ...
+  migrate                             Run migrations
+  fresh                               Drop all tables, migrate and seed
+  test [args]                         Run the test suite (Pest)
+  lint                                Format PHP (Pint)
+  stan                                Static analysis (Larastan)
+  mysql [args]                        MySQL shell as root
+  legacy-import [dump.sql]            Load the legacy dump into ctp_legacy
+
+URLs:  app http://localhost:8100  ·  phpMyAdmin http://localhost:8101  ·  Mailpit http://localhost:8125
+HELP
+    ;;
+esac
