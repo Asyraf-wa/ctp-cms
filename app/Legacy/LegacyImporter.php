@@ -462,7 +462,7 @@ class LegacyImporter
 
             // Poster URLs keep their image-search traffic (the poster is in the library even when not featured).
             $media = filled($row->poster) && (int) $row->category_id !== self::BLOG_CATEGORY ? $this->posterMedia((string) $row->poster) : null;
-            if ($media && filled($row->poster)) {
+            if ($media) {
                 $dir = basename(str_replace('\\', '/', (string) $row->poster_dir));
                 $this->redirect('/files/Articles/poster/'.$dir.'/'.$row->poster, (string) parse_url($media->url(), PHP_URL_PATH));
                 $this->redirect('/files/Articles/poster/'.rawurlencode($dir).'/'.rawurlencode((string) $row->poster), (string) parse_url($media->url(), PHP_URL_PATH));
