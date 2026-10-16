@@ -506,7 +506,33 @@
     }
 
     .prose-ctp .table-wrap table {
+        @apply my-0 w-full text-sm;
+    }
+
+    /* The typography plugin drops the padding of the first and last column; cells get even padding here,
+       and the <p> the editor puts inside each cell loses its paragraph margins. */
+    .prose-ctp .table-wrap :is(th, td) {
+        @apply border-border px-4 py-2.5 align-top;
+    }
+
+    .prose-ctp .table-wrap :is(th, td) + :is(th, td) {
+        @apply border-l;
+    }
+
+    .prose-ctp .table-wrap :is(th, td) > p {
         @apply my-0;
+    }
+
+    .prose-ctp .table-wrap :is(th, td) > p + p {
+        @apply mt-2;
+    }
+
+    .prose-ctp .table-wrap tr:has(th) {
+        @apply bg-surface-2;
+    }
+
+    .prose-ctp .table-wrap th {
+        @apply text-left font-semibold text-foreground;
     }
 
     .prose-ctp details {
