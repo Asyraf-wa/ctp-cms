@@ -1,105 +1,107 @@
-{{-- Home (PUB-01, DESIGN §6). --}}
+{{--
+    Home (PUB-01, D20): the tutorial layout with no images. Categories left, the 10 latest
+    tutorials with category tabs in the centre, discovery panels right.
+--}}
 @inject('general', 'App\Settings\GeneralSettings')
-<x-layouts.site>
-    <section class="hero-mesh border-b border-border">
-        <div class="mx-auto max-w-[1440px] px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-            <div class="mx-auto max-w-3xl text-center">
-                <p class="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card/70 px-3 py-1 text-sm font-medium text-brand-soft-foreground backdrop-blur">
-                    <x-lucide-sparkles class="size-4" /> {{ number_format($tutorialCount) }} hands-on tutorials
-                </p>
-                <h1 class="text-4xl font-bold tracking-tight text-balance text-foreground sm:text-5xl">{{ $general->slogan ?: $general->site_name }}</h1>
-                @if ($general->description)
-                    <p class="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-pretty text-muted-foreground">{{ $general->description }}</p>
-                @endif
-                <x-site.search-trigger class="mx-auto mt-8 max-w-2xl" />
-                @if ($categories->isNotEmpty())
-                    <div class="mt-6 flex flex-wrap justify-center gap-2 text-sm">
-                        <span class="text-muted-foreground">Popular:</span>
-                        @foreach ($categories->sortByDesc('tutorial_count')->take(4) as $category)
-                            <a href="{{ url($category->publicPath()) }}" class="rounded-full border border-border bg-card/70 px-3 py-0.5 font-medium text-foreground hover:border-primary hover:text-primary">{{ $category->name }}</a>
-                        @endforeach
-                    </div>
-                @endif
+@php($tz = config('ctp.display_timezone'))
+<x-layouts.tutorial :title="null" :robots="$active ? 'noindex, follow' : null">
+    <x-slot:left>
+        <x-site.category-sidebar :categories="$sidebar" />
+    </x-slot:left>
+
+    <x-article.mobile-bar :categories="$sidebar" />
+
+    {{-- Slim intro: one h1 and the search, for first-time visitors and search engines. --}}
+    <section class="mb-6 rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
+        <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div class="min-w-0">
+                <h1 class="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{{ $general->slogan ?: $general->site_name }}</h1>
+                <p class="mt-1.5 text-muted-foreground">{{ number_format($tutorialCount) }} practical, tested tutorials on CakePHP, Laravel, Joomla! and web tools.</p>
             </div>
+            <x-site.search-trigger class="w-full shrink-0 lg:w-80 [&_button]:hidden [&_input]:py-3 [&_input]:pr-4 [&_input]:text-sm" placeholder="Search tutorials…" />
         </div>
     </section>
 
-    <div class="mx-auto max-w-[1440px] px-4 pb-8 sm:px-6 lg:px-8">
-        @if ($featured->isNotEmpty())
-            <x-site.section title="Featured tutorials" class="!mt-12">
-                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    @foreach ($featured as $article)
-                        <x-card.article :article="$article" :eager="$loop->first" />
-                    @endforeach
-                </div>
-            </x-site.section>
-        @endif
+    <section class="rounded-2xl border border-border bg-card shadow-sm" aria-labelledby="latest-heading">
+        <div class="flex flex-col gap-4 border-b border-border px-6 pt-6 sm:px-8">
+            <div class="flex items-center justify-between gap-4">
+                <h2 id="latest-heading" class="text-lg font-bold tracking-tight text-foreground">Latest {{ $active ? $active->name.' ' : '' }}tutorials</h2>
+                <a href="{{ $active ? url($active->publicPath()) : url('/tutorials') }}" class="hidden shrink-0 items-center gap-1 text-sm font-semibold text-primary hover:text-primary-hover sm:inline-flex">
+                    View all <x-lucide-arrow-right class="size-4" />
+                </a>
+            </div>
+            {{-- Category tabs: plain links (?category=), so they work without JS and can be shared. --}}
+            <nav class="no-scrollbar -mb-px flex gap-1 overflow-x-auto" aria-label="Filter by category">
+                @foreach ([null, ...$categories] as $tab)
+                    @php($isActive = $tab?->id === $active?->id)
+                    <a href="{{ $tab ? url('/').'?category='.$tab->slug : url('/') }}" @if ($isActive) aria-current="page" @endif
+                        @class([
+                            'tech-hover inline-flex shrink-0 items-center gap-1.5 border-b-2 px-3 pb-3 text-sm font-medium whitespace-nowrap transition-colors',
+                            'border-primary text-primary' => $isActive,
+                            'border-transparent text-muted-foreground hover:border-border hover:text-foreground' => ! $isActive,
+                        ])>
+                        @if ($tab?->technology)
+                            <x-site.tech-icon :technology="$tab->technology" size="size-3.5" />
+                        @endif
+                        {{ $tab?->name ?? 'All' }}
+                        @if ($tab)
+                            <span class="ml-1 text-xs tabular-nums opacity-70">{{ $tab->tutorial_count }}</span>
+                        @endif
+                    </a>
+                @endforeach
+            </nav>
+        </div>
 
-        <x-site.section title="Latest tutorials" :href="url('/tutorials')" link-label="All tutorials" @class(['!mt-12' => $featured->isEmpty()])>
-            @if ($latest->isNotEmpty())
-                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    @foreach ($latest as $article)
-                        <x-card.article :article="$article" :eager="$featured->isEmpty() && $loop->first" />
-                    @endforeach
-                </div>
-            @else
-                <x-site.empty icon="book-open" title="No tutorials yet">The first tutorials are on their way.</x-site.empty>
-            @endif
-        </x-site.section>
-
-        @if ($categories->isNotEmpty())
-            <x-site.section title="Explore by category">
-                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    @foreach ($categories as $category)
-                        <a href="{{ url($category->publicPath()) }}" class="group flex items-start gap-4 rounded-xl border border-border bg-card p-5 shadow-xs transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0">
-                            <span class="flex size-11 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-primary">
-                                @if ($category->technology)
-                                    <x-site.tech-icon :technology="$category->technology" size="size-5" />
-                                @else
-                                    <x-dynamic-component :component="'lucide-'.($category->icon ?: 'folder')" class="size-5" />
+        @if ($latest->isNotEmpty())
+            <ol>
+                @foreach ($latest as $article)
+                    <li class="group relative flex gap-4 border-b border-border px-6 py-4 transition-colors last:border-b-0 hover:bg-surface-2 sm:px-8">
+                        <x-site.article-logo :article="$article" class="mt-0.5 group-hover:bg-card" />
+                        <div class="min-w-0 flex-1">
+                            <div class="mb-1 flex flex-wrap items-center gap-2 text-xs">
+                                @if ($article->is_pinned)
+                                    <x-lucide-pin class="size-3.5 text-primary" aria-label="Pinned" />
                                 @endif
-                            </span>
-                            <span class="min-w-0">
-                                <span class="block font-semibold text-foreground group-hover:text-primary">{{ $category->name }}</span>
-                                <span class="block text-sm text-muted-foreground">{{ $category->tutorial_count }} {{ Str::plural('tutorial', $category->tutorial_count) }}</span>
-                                @if ($category->description)
-                                    <span class="mt-1 line-clamp-2 block text-sm text-muted-foreground">{{ $category->description }}</span>
+                                @if ($article->category)
+                                    <span class="font-semibold tracking-wide text-primary uppercase">{{ $article->category->name }}</span>
                                 @endif
-                            </span>
-                        </a>
-                    @endforeach
-                </div>
-            </x-site.section>
+                                <x-site.difficulty :level="$article->difficulty" />
+                            </div>
+                            <h3 class="font-semibold text-foreground">
+                                <a href="{{ url($article->publicPath()) }}" class="after:absolute after:inset-0 group-hover:text-primary focus:outline-none focus-visible:underline">{{ $article->title }}</a>
+                            </h3>
+                            @if ($article->excerpt)
+                                <p class="mt-1 line-clamp-1 text-sm text-muted-foreground">{{ $article->excerpt }}</p>
+                            @endif
+                            <p class="mt-1.5 flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
+                                <time datetime="{{ $article->published_at->toAtomString() }}">{{ $article->published_at->timezone($tz)->format('M j, Y') }}</time>
+                                <span aria-hidden="true">·</span> {{ $article->readingMinutes() }} min read
+                                @if ($article->technologies->count() > 1)
+                                    <span aria-hidden="true">·</span>
+                                    <span class="sr-only">Uses</span>{{ $article->technologies->pluck('name')->join(', ') }}
+                                @endif
+                            </p>
+                        </div>
+                    </li>
+                @endforeach
+            </ol>
+            <div class="border-t border-border px-6 py-4 sm:px-8">
+                <a href="{{ $active ? url($active->publicPath()) : url('/tutorials') }}" class="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:text-primary-hover">
+                    {{ $active ? 'All '.$active->name.' tutorials' : 'View all tutorials' }} <x-lucide-arrow-right class="size-4" />
+                </a>
+            </div>
+        @else
+            <div class="p-6 sm:p-8">
+                <x-site.empty icon="book-open" title="No tutorials yet">New tutorials will show up here.</x-site.empty>
+            </div>
         @endif
+    </section>
 
-        @if ($series->isNotEmpty())
-            <x-site.section title="Learning paths" description="Step-by-step series, in reading order." :href="url('/series')" link-label="All series">
-                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    @foreach ($series as $item)
-                        <x-card.series :series="$item" />
-                    @endforeach
-                </div>
-            </x-site.section>
-        @endif
+    {{-- Below xl the right column moves under the list. --}}
+    <x-home.side-panels :levels="$levels" :tags="$tags" :popular="$popular" :series="$series" id-prefix="m"
+        class="mt-8 grid gap-8 rounded-2xl border border-border bg-card p-6 shadow-sm sm:grid-cols-2 sm:p-8 xl:hidden" />
 
-        @if ($posts->isNotEmpty())
-            <x-site.section title="From the blog" :href="url('/blog')" link-label="All posts">
-                <div class="grid gap-6 md:grid-cols-3">
-                    @foreach ($posts as $post)
-                        <x-card.article :article="$post" />
-                    @endforeach
-                </div>
-            </x-site.section>
-        @endif
-
-        @if ($projects->isNotEmpty())
-            <x-site.section title="Projects" description="Things built along the way." :href="url('/projects')" link-label="All projects">
-                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    @foreach ($projects as $project)
-                        <x-card.project :project="$project" />
-                    @endforeach
-                </div>
-            </x-site.section>
-        @endif
-    </div>
-</x-layouts.site>
+    <x-slot:right>
+        <x-home.side-panels :levels="$levels" :tags="$tags" :popular="$popular" :series="$series" class="space-y-8" />
+    </x-slot:right>
+</x-layouts.tutorial>

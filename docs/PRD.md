@@ -119,14 +119,10 @@ Full schema: [ARCHITECTURE.md §4](ARCHITECTURE.md).
 - **TAX-03** Series: title, description, cover, and an ordered list of tutorials. Each article in a series shows a "Part X of Y" navigator.
 
 ### PUB — Public Site
-- **PUB-01** **Home:**
-  - hero with a short intro and the search trigger
-  - featured or pinned tutorials
-  - latest tutorials
-  - categories grid with counts
-  - series
-  - latest blog posts
-  - featured projects
+- **PUB-01** **Home** (D20): the 3-column tutorial layout, text only.
+  - Left: the category accordion.
+  - Centre: a slim intro (h1, tutorial count, search), then the 10 latest tutorials (pinned first) with category tabs (`/?category=…`, not indexed). Each row shows the main technology logo.
+  - Right: Level, Popular tags, Popular this month (30-day views) and Learning paths.
 - **PUB-02** **Tutorials index:** filter by category, tag and difficulty; sort by latest or popular; paginated. Facet state is kept in the URL.
 - **PUB-03** **Article page (3 columns, based on the template):**
   - Left: category tree as an accordion. The current article and category are expanded.
@@ -435,6 +431,7 @@ The full mapping is in [ARCH §10](ARCHITECTURE.md). The legacy dump has 64 arti
 | D17 | Dev ports | app 8100 · phpMyAdmin 8101 · Mailpit 8125 · MySQL 3317 · Vite 5183 (8080/8081/3306 are taken on this machine). |
 | D18 | Technology logos | A **Technologies** list (brand logos from Simple Icons, CC0, bundled; or an uploaded SVG; or a Lucide icon) replaces free-text "Tested with" and project stacks. Tutorials pick an ordered tech stack with optional versions; the first logo shows in lists, the whole stack in the article's right column. Categories may link one technology as their logo, which is also the fallback for tutorials without a stack (all legacy articles). Logos are grey and take the brand colour on hover. |
 | D19 | Sidebar length | Tutorials per category in the left sidebar is a setting (Site settings → Layout), default 5. |
+| D20 | Home page | **Text-only home in the tutorial layout** instead of an image-card magazine page: it matches the template, legacy articles have no covers, and it is lighter (148 KiB, Lighthouse mobile 99/100/100/100). Blog and projects are reached from the menu and footer. |
 | D15 | Staging and live deploy | **No staging.** Development is local in Docker. The owner does the live deploy; we supply `.cpanel.yml`, the CI workflow and a deploy guide. |
 
 ## 11. Open Questions

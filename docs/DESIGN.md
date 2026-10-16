@@ -114,10 +114,9 @@
 - **Tutorials:** 3-column layout (the template, improved).
 - **Blog:** single column, larger type (`prose-lg`), no sidebars, optional cover hero. It should feel like a journal.
 - **Projects:** a showcase grid with bigger imagery. The detail page has a hero, an "At a glance" side panel (stack, status, links, dates) and a gallery lightbox.
-- **Home:**
-  - hero with a subtle teal gradient mesh and a large search trigger
-  - "Latest" grid, then "Explore by category" tiles with icons, then "Learning paths" (series)
-  - "From the blog", then "Projects" strip
+- **Home** (D20): the tutorial layout with no images.
+  - Left: category accordion. Centre: a slim intro card (h1, count, search), then a "Latest tutorials" card with category tabs (underline style) and 10 text rows: logo tile, category + level, title, one-line excerpt, date and reading time.
+  - Right: Level (coloured dots and counts), Popular tags, Popular this month (numbered), Learning paths. Below xl these panels move under the list.
 
 ## 7. Motion
 - 150–300 ms ease-out for hover, accordion and theme changes. Everything respects `prefers-reduced-motion`.

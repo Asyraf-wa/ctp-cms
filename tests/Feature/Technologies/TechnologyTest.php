@@ -87,7 +87,7 @@ it('shows the main logo in lists and the whole stack on the tutorial page', func
     $article = Article::factory()->published()->create(['title' => 'Laravel Queues', 'category_id' => $this->cake->id]);
     $article->techStack()->createMany([['technology_id' => $laravel->id, 'version' => '13.x', 'sort' => 0], ['technology_id' => $php->id, 'sort' => 1]]);
 
-    $this->get('/preview/home')->assertOk()->assertSee('--tech: #FF2D20', false);
+    $this->get('/')->assertOk()->assertSee('--tech: #FF2D20', false);
 
     $html = $this->get('/'.$article->slug)->assertOk()->assertSee('Tech stack')->getContent();
     $start = strpos($html, 'id="tech-stack-heading"');
@@ -101,7 +101,7 @@ it('uses the category technology for tutorials without a stack and in the sideba
     $article = Article::factory()->published()->create(['title' => 'Bake Basics', 'category_id' => $this->cake->id]);
 
     expect($article->fresh()->primaryTechnology()->is($cake))->toBeTrue();
-    $this->get('/preview/home')->assertSee('--tech: #D33C43', false);
+    $this->get('/')->assertSee('--tech: #D33C43', false);
     $html = $this->get('/'.$article->slug)->getContent();
     $start = strpos($html, 'aria-label="Categories"');
     expect(substr($html, $start, strpos($html, '</aside>', $start) - $start))->toContain('--tech: #D33C43');

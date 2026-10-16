@@ -17,16 +17,18 @@ beforeEach(function () {
     $this->tools = Category::factory()->create(['name' => 'Tools']);
 });
 
-it('renders the home page with featured, latest and categories but no drafts', function () {
-    Article::factory()->published()->create(['title' => 'Featured Bake', 'category_id' => $this->cake->id, 'is_featured' => true]);
+it('renders the home page: latest tutorials, pinned first, no drafts and no images', function () {
+    Article::factory()->published(now()->subDays(5))->create(['title' => 'Pinned Bake', 'category_id' => $this->cake->id, 'is_pinned' => true]);
     Article::factory()->published()->create(['title' => 'Latest Tools', 'category_id' => $this->tools->id]);
     Article::factory()->create(['title' => 'Secret Draft', 'category_id' => $this->cake->id]);
-    Article::factory()->published()->blog()->create(['title' => 'Journal Entry']);
-    Project::factory()->create(['title' => 'Pixel Maps']);
 
     $this->get('/')->assertOk()
-        ->assertSeeInOrder(['Featured tutorials', 'Featured Bake', 'Latest tutorials', 'Latest Tools', 'Explore by category', 'From the blog', 'Journal Entry', 'Projects', 'Pixel Maps'])
-        ->assertDontSee('Secret Draft');
+        ->assertSee('index, follow', false)
+        ->assertSeeInOrder(['Latest tutorials', 'Pinned Bake', 'Latest Tools'])
+        ->assertDontSee('Secret Draft')
+        ->assertDontSee('<img', false);
+
+    $this->get('/preview/home')->assertRedirect('/')->assertStatus(301);
 });
 
 it('filters tutorials by category (with children), level and tag, keeping filters in the URL', function () {
@@ -126,18 +128,18 @@ it('reserves the new section names for root slugs', function () {
     }
 });
 
-it('renders the text-only home sample with category tabs and discovery panels', function () {
+it('shows category tabs and discovery panels on the home page', function () {
     Article::factory()->published()->create(['title' => 'Login Plugin', 'category_id' => $this->auth->id, 'difficulty' => Difficulty::Advanced]);
     Article::factory()->published()->create(['title' => 'VS Code Setup', 'category_id' => $this->tools->id, 'views' => 50]);
     Article::factory()->create(['title' => 'Secret Draft', 'category_id' => $this->cake->id]);
 
-    $this->get('/preview/home')->assertOk()
-        ->assertSee('noindex, follow', false)
+    $this->get('/')->assertOk()
         ->assertSee(['Latest tutorials', 'Login Plugin', 'VS Code Setup', 'Level', 'Advanced', 'Popular this month'])
         ->assertDontSee('Secret Draft')
         ->assertDontSee('<img', false);
 
     // The CakePHP tab includes its child category.
-    $html = $this->get('/preview/home?category=cakephp')->assertOk()->assertSee('Latest CakePHP tutorials')->getContent();
+    // A filtered home is not indexed (it duplicates the category page).
+    $html = $this->get('/?category=cakephp')->assertOk()->assertSee('Latest CakePHP tutorials')->assertSee('noindex, follow', false)->getContent();
     expect(substr($html, strpos($html, '<ol>'), 2000))->toContain('Login Plugin')->not->toContain('VS Code Setup');
 });

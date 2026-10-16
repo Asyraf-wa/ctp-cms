@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Site;
 use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\Category;
-use App\Models\Project;
 use App\Models\Series;
 use App\Models\Tag;
 use App\Support\Sidebar;
@@ -14,48 +13,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-// PRD PUB-01, DESIGN §6: hero, featured, latest, categories, learning paths, blog, projects.
+// PRD PUB-01: the home page (D20: text-only, tutorial layout).
 class HomeController extends Controller
 {
-    public function __invoke(): View
-    {
-        $featured = Article::published()->tutorials()->forCards()
-            ->where(fn (Builder $q) => $q->where('is_featured', true)->orWhere('is_pinned', true))
-            ->orderByDesc('is_pinned')->latest('published_at')->limit(3)->get();
-
-        $latest = Article::published()->tutorials()->forCards()
-            ->whereNotIn('id', $featured->modelKeys())
-            ->latest('published_at')->limit(6)->get();
-
-        $categories = Category::query()->roots()->ordered()->with(['children', 'technology.iconMedia'])->get()
-            ->map(function (Category $category) {
-                $category->setAttribute('tutorial_count', Article::published()->tutorials()->whereIn('category_id', $category->familyIds())->count());
-
-                return $category;
-            })
-            ->filter(fn (Category $c) => $c->getAttribute('tutorial_count') > 0)
-            ->values();
-
-        $series = Series::query()->orderBy('sort')->with('cover')
-            ->withCount(['articles' => fn ($q) => $q->published()])
-            ->get()->filter(fn (Series $s) => $s->getAttribute('articles_count') > 0)->take(3)->values();
-
-        return view('site.home', [
-            'featured' => $featured,
-            'latest' => $latest,
-            'categories' => $categories,
-            'series' => $series,
-            'posts' => Article::published()->blogPosts()->forCards()->latest('published_at')->limit(3)->get(),
-            'projects' => Project::published()->with(['cover', 'technologies.iconMedia'])->orderByDesc('is_featured')->orderBy('sort')->limit(3)->get(),
-            'tutorialCount' => Article::published()->tutorials()->count(),
-        ]);
-    }
-
     /**
-     * Sample of a text-only home in the 3-column tutorial layout (/preview/home, not indexed):
-     * categories left, 10 latest tutorials with category tabs in the centre, discovery panels right.
+     * Text-only home in the 3-column tutorial layout: categories left, the 10 latest tutorials
+     * with category tabs in the centre, discovery panels right. No images, so it stays light.
      */
-    public function preview(Request $request): View
+    public function __invoke(Request $request): View
     {
         $categories = Category::query()->roots()->ordered()->with(['children', 'technology.iconMedia'])->get()
             ->map(function (Category $category) {
@@ -83,7 +48,7 @@ class HomeController extends Controller
             ->orderByDesc('views_30d')->orderByDesc('views')->latest('published_at')
             ->limit(5)->get();
 
-        return view('site.home-preview', [
+        return view('site.home', [
             'sidebar' => Sidebar::categories(open: $active),
             'categories' => $categories,
             'active' => $active,
