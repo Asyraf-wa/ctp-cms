@@ -54,7 +54,7 @@
 
     {{-- Back to top (PUB-05) --}}
     <button type="button" x-data="{ show: false }" @scroll.window.throttle.150ms="show = window.scrollY > 900"
-        x-show="show" x-cloak x-transition.opacity @click="window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); document.getElementById('main')?.focus({ preventScroll: true })"
+        x-show="show" x-cloak x-transition.opacity @click="window.scrollTo({ top: 0, behavior: 'smooth' }); document.getElementById('main')?.focus({ preventScroll: true })"
         class="fixed right-4 bottom-4 z-30 inline-flex size-11 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-md transition-colors hover:border-primary hover:text-primary sm:right-6 sm:bottom-6"
         aria-label="Back to top">
         <x-lucide-arrow-up class="size-5" />
