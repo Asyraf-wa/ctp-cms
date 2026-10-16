@@ -47,6 +47,17 @@ return [
             'report' => false,
         ],
 
+        // Media library (PRD MED). If the host blocks symlinks, point MEDIA_ROOT at public/media
+        // and MEDIA_URL at {APP_URL}/media (ARCH §9).
+        'media' => [
+            'driver' => 'local',
+            'root' => env('MEDIA_ROOT', storage_path('app/public/media')),
+            'url' => env('MEDIA_URL', rtrim(env('APP_URL', 'http://localhost'), '/').'/storage/media'),
+            'visibility' => 'public',
+            'throw' => true,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

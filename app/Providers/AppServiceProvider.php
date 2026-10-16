@@ -3,12 +3,15 @@
 namespace App\Providers;
 
 use App\Models\Category;
+use App\Models\Media;
 use App\Models\Page;
 use App\Models\Series;
 use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
+use Intervention\Image\Drivers\Gd\Driver as GdDriver;
+use Intervention\Image\ImageManager;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,7 +20,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // GD: available on every shared host. Reading applies EXIF orientation.
+        $this->app->singleton(ImageManager::class, fn () => new ImageManager(new GdDriver));
     }
 
     /**
@@ -32,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
             'category' => Category::class,
             'tag' => Tag::class,
             'series' => Series::class,
+            'media' => Media::class,
         ]);
     }
 }
