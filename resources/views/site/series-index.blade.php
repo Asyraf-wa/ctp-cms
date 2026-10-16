@@ -6,7 +6,7 @@
         @if ($series->isNotEmpty())
             <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 @foreach ($series as $item)
-                    <x-card.series :series="$item" />
+                    <x-card.series :series="$item" heading="h2" />
                 @endforeach
             </div>
         @else

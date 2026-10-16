@@ -110,9 +110,10 @@
 - [x] T2.11 Static pages, About page, **author page `/author/{slug}`**, author meta row and author box on articles (PUB-10, AUTHOR-01, 03)
 - [x] T2.12 404, 500 and maintenance pages (PUB-12)
 - [x] T2.13 View beacon and daily rollup (ART-10). Kudos button (ART-12)
-- [ ] T2.14 Accessibility pass: keyboard, focus, skip link, reduced motion, contrast check in both themes
+- [x] T2.14 Accessibility pass: keyboard, focus, skip link, reduced motion, contrast check in both themes
 
 **Exit criteria:** every page is responsive (360 px → 1440 px) in light and dark mode. Lighthouse ≥ 95 on the home and article pages (mobile).
+*Status (2026-10-16): met. axe-core (WCAG 2.1 AA + best practice) reports no violations on 13 page types in light and dark at 1440 px and 360 px, with no horizontal overflow. Lighthouse mobile with a production build: home 98 / 100 / 100 / 100, article 98 / 100 / 100 / 100 (performance, accessibility, best practices, SEO). Deferred to their phases: “Copy page as Markdown” (Phase 3, `.md` endpoint) and comments (Phase 4).*
 
 ---
 

@@ -3,7 +3,7 @@
     the Ctrl/⌘ K palette takes over when it is available (data-search-trigger).
 --}}
 @props(['placeholder' => 'Search tutorials, e.g. “CakePHP authentication”', 'value' => null, 'palette' => true])
-<form action="{{ url('/search') }}" method="get" role="search" {{ $attributes->class('relative') }} @if ($palette) data-search-trigger @endif>
+<form action="{{ url('/search') }}" method="get" role="search" aria-label="Search tutorials" {{ $attributes->class('relative') }} @if ($palette) data-search-trigger @endif>
     <label for="hero-search" class="sr-only">Search tutorials</label>
     <x-lucide-search class="pointer-events-none absolute top-1/2 left-5 size-5 -translate-y-1/2 text-muted-foreground" />
     <input id="hero-search" name="q" type="search" value="{{ $value }}" placeholder="{{ $placeholder }}" autocomplete="off"

@@ -55,7 +55,7 @@ class TerminalBlock extends RichContentCustomBlock
         return <<<HTML
             <figure class="terminal">
             <figcaption class="terminal__bar"><span class="terminal__dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="terminal__title">{$title}</span><button type="button" class="code-block__copy" data-copy-text="{$copy}" aria-label="Copy commands">Copy</button></figcaption>
-            <pre class="terminal__body"><code>{$commands}{$output}</code></pre>
+            <pre class="terminal__body" tabindex="0"><code>{$commands}{$output}</code></pre>
             </figure>
             HTML;
     }

@@ -10,7 +10,7 @@
 
             <div x-show="isOpen" x-trap.noscroll="isOpen" x-transition.duration.150ms
                 class="relative w-full max-w-2xl overflow-hidden rounded-xl border border-border bg-card shadow-lg" @keydown.escape.prevent.stop="close()">
-                <form @submit.prevent="go()" class="flex items-center gap-3 border-b border-border px-4" role="search">
+                <form @submit.prevent="go()" class="flex items-center gap-3 border-b border-border px-4" role="search" aria-label="Quick search">
                     <x-lucide-search class="size-5 shrink-0 text-muted-foreground" />
                     <label for="palette-q" class="sr-only">Search</label>
                     <input id="palette-q" x-ref="input" x-model="q" @input.debounce.150ms="fetchResults()" type="search" autocomplete="off" spellcheck="false"

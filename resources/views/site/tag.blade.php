@@ -9,7 +9,7 @@
         @if ($articles->isNotEmpty())
             <div class="rounded-xl border border-border bg-card px-5 sm:px-6">
                 @foreach ($articles as $article)
-                    <x-card.article-row :article="$article" />
+                    <x-card.article-row :article="$article" heading="h2" />
                 @endforeach
             </div>
             {{ $articles->links('site.partials.pagination') }}

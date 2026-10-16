@@ -19,7 +19,7 @@
         @if ($projects->isNotEmpty())
             <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                 @foreach ($projects as $project)
-                    <x-card.project :project="$project" :eager="$loop->first" />
+                    <x-card.project :project="$project" :eager="$loop->first" heading="h2" />
                 @endforeach
             </div>
         @else

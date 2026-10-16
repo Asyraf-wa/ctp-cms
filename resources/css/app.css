@@ -629,4 +629,11 @@
     .search-hit mark {
         @apply rounded-[3px] bg-brand-soft px-0.5 text-brand-soft-foreground;
     }
+
+    /* Scrollable code is focusable for keyboard scrolling (WCAG 2.1.1). */
+    .code-block pre:focus-visible,
+    .terminal__body:focus-visible {
+        outline: 2px solid #5eead4;
+        outline-offset: -2px;
+    }
 }

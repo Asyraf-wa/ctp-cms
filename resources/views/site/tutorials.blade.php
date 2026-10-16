@@ -95,7 +95,7 @@
                 @if ($articles->isNotEmpty())
                     <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                         @foreach ($articles as $article)
-                            <x-card.article :article="$article" :eager="$loop->first" />
+                            <x-card.article :article="$article" :eager="$loop->first" heading="h2" />
                         @endforeach
                     </div>
                     {{ $articles->links('site.partials.pagination') }}

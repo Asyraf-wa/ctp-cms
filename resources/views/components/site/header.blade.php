@@ -48,7 +48,7 @@
 
         <div class="flex shrink-0 items-center gap-2 sm:gap-3">
             {{-- Plain GET form, so search works without JS; with JS it opens the Ctrl/⌘ K palette (PUB-06). --}}
-            <form action="{{ url('/search') }}" method="get" role="search" class="relative hidden xl:block" data-search-trigger>
+            <form action="{{ url('/search') }}" method="get" role="search" aria-label="Site search" class="relative hidden xl:block" data-search-trigger>
                 <label for="site-search" class="sr-only">Search tutorials</label>
                 <input id="site-search" name="q" type="search" placeholder="Search..." autocomplete="off"
                     class="w-56 rounded-full border border-transparent bg-muted py-2 pr-16 pl-4 text-sm text-foreground transition-all placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none dark:border-border">
@@ -98,7 +98,7 @@
                     <x-lucide-x class="size-5" />
                 </button>
             </div>
-            <form action="{{ url('/search') }}" method="get" role="search" class="border-b border-border p-4">
+            <form action="{{ url('/search') }}" method="get" role="search" aria-label="Mobile search" class="border-b border-border p-4">
                 <label for="mobile-search" class="sr-only">Search tutorials</label>
                 <input id="mobile-search" name="q" type="search" placeholder="Search..."
                     class="w-full rounded-full bg-muted px-4 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none">

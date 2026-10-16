@@ -1,5 +1,5 @@
 {{-- Article card (DESIGN §5): cover, category + difficulty, title, two-line excerpt, date and reading time. --}}
-@props(['article', 'eager' => false, 'showCover' => true])
+@props(['article', 'eager' => false, 'showCover' => true, 'heading' => 'h3'])
 @php($url = url($article->publicPath() ?? '/'))
 <article {{ $attributes->class('group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-xs transition duration-200 hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0') }}>
     @if ($showCover)
@@ -17,10 +17,10 @@
                 <span class="inline-flex items-center gap-1 text-xs text-muted-foreground"><x-lucide-pin class="size-3" /> Pinned</span>
             @endif
         </div>
-        <h3 class="text-lg leading-snug font-semibold text-foreground">
+        <{{ $heading }} class="text-lg leading-snug font-semibold text-foreground">
             {{-- The whole card is clickable through this link's ::after. --}}
             <a href="{{ $url }}" class="after:absolute after:inset-0 group-hover:text-primary focus:outline-none focus-visible:after:rounded-xl focus-visible:after:ring-2 focus-visible:after:ring-ring">{{ $article->title }}</a>
-        </h3>
+        </{{ $heading }}>
         @if ($article->excerpt)
             <p class="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{{ $article->excerpt }}</p>
         @endif

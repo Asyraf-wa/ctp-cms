@@ -87,7 +87,7 @@ class CodeHighlighter
         return <<<HTML
             <figure class="{$classes}" data-language="{$language}">
             <figcaption class="code-block__header">{$file}{$lang}<button type="button" class="code-block__copy" data-copy-code aria-label="Copy code">Copy</button></figcaption>
-            <div class="code-block__body">{$overlay}<pre><code class="language-{$language}">{$html}</code></pre></div>
+            <div class="code-block__body">{$overlay}<pre tabindex="0"><code class="language-{$language}">{$html}</code></pre></div>
             </figure>
             HTML;
     }

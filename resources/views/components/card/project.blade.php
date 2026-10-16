@@ -1,12 +1,12 @@
 {{-- Project card (DESIGN §5): cover, name + status, tagline, stack chips, Live and Code. --}}
-@props(['project', 'eager' => false])
+@props(['project', 'eager' => false, 'heading' => 'h3'])
 <article {{ $attributes->class('group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-xs transition duration-200 hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0') }}>
     <x-site.cover :media="$project->cover" icon="rocket" :eager="$eager" />
     <div class="flex flex-1 flex-col p-5">
         <div class="flex items-start justify-between gap-3">
-            <h3 class="text-lg leading-snug font-semibold text-foreground">
+            <{{ $heading }} class="text-lg leading-snug font-semibold text-foreground">
                 <a href="{{ url($project->publicPath()) }}" class="after:absolute after:inset-0 group-hover:text-primary focus:outline-none focus-visible:after:rounded-xl focus-visible:after:ring-2 focus-visible:after:ring-ring">{{ $project->title }}</a>
-            </h3>
+            </{{ $heading }}>
             <x-site.project-status :status="$project->status" class="mt-0.5 shrink-0" />
         </div>
         @if ($project->tagline)

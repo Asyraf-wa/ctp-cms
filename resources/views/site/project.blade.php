@@ -84,7 +84,8 @@
                         <div class="grid gap-4 sm:grid-cols-2" data-gallery>
                             @foreach ($gallery as $item)
                                 <figure class="overflow-hidden rounded-xl border border-border bg-card">
-                                    <a href="{{ $item['media']->url() }}" data-lightbox="{{ $item['caption'] ?: $item['media']->alt }}" class="block">
+                                    <a href="{{ $item['media']->url() }}" data-lightbox="{{ $item['caption'] ?: $item['media']->alt }}" class="block"
+                                        aria-label="View larger: {{ $item['caption'] ?: ($item['media']->alt ?: 'screenshot '.$loop->iteration) }}">
                                         <x-site.cover :media="$item['media']" sizes="(min-width: 640px) 50vw, 100vw" />
                                     </a>
                                     @if ($item['caption'])

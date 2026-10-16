@@ -245,6 +245,8 @@ Constraints: PHP 8.4, MySQL 8.0.44, **no Node, no Supervisor, cron only**. Deplo
 | `main` | Source code, release-ready | Merge from `develop` |
 | `production` | **Built release**: source, `vendor/` (no dev) and `public/build/` (Vite output) | **GitHub Actions only**, on every push to `main` |
 
+**Compression and caching.** `public/.htaccess` turns on `mod_deflate` and sets `Cache-Control` (a year, `immutable`, for the hashed `/build/` files; 30 days for `/storage/` and `/media/`). The dev nginx config mirrors these rules, so local Lighthouse runs match production. Without compression, the 130 KB stylesheet alone costs about 10 Lighthouse points on mobile.
+
 The server has no Node, so `public/build` must arrive pre-built. Composer *may* exist on the host (`/opt/cpanel/composer/bin/composer`). Shipping `vendor/` in the `production` branch removes that dependency entirely. T0.13 confirms it.
 
 **Flow**

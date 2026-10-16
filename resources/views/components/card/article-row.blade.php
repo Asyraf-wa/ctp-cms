@@ -1,5 +1,5 @@
 {{-- Compact list row for archives and search: title, excerpt, meta. No cover. --}}
-@props(['article'])
+@props(['article', 'heading' => 'h3'])
 <article class="group relative flex gap-4 border-b border-border py-5 last:border-b-0">
     <div class="min-w-0 flex-1">
         <div class="mb-1 flex flex-wrap items-center gap-2 text-xs">
@@ -8,9 +8,9 @@
             @endif
             <x-site.difficulty :level="$article->difficulty" />
         </div>
-        <h3 class="font-semibold text-foreground">
+        <{{ $heading }} class="font-semibold text-foreground">
             <a href="{{ url($article->publicPath() ?? '/') }}" class="after:absolute after:inset-0 group-hover:text-primary focus:outline-none focus-visible:underline">{{ $article->title }}</a>
-        </h3>
+        </{{ $heading }}>
         @if ($article->excerpt)
             <p class="mt-1 line-clamp-2 text-sm text-muted-foreground">{{ $article->excerpt }}</p>
         @endif
