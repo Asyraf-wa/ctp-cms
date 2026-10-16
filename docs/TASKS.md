@@ -8,24 +8,24 @@
 ## Phase 0 — Setup & Foundations
 
 ### 0A. Repo & Docker
-- [ ] T0.01 `git init`, GitHub repo `Asyraf-wa/ctp` (private), `main` and `develop` branches, `.gitignore` (incl. `legacy/`)
-- [ ] T0.02 `docker-compose.yml`: app (php 8.4-fpm), nginx :8080, **mysql:8.0.44**, **phpMyAdmin :8081**, node (Vite), mailpit :8025, scheduler (OPS-01)
-- [ ] T0.03 `./dev` helper script (`up`, `down`, `artisan`, `composer`, `npm`, `test`, `fresh`, `legacy-import`)
-- [ ] T0.04 Install Laravel 13 in `src/`. MySQL connection plus a second `legacy` connection
-- [ ] T0.05 Pest, Larastan, Pint. GitHub Actions CI (lint + tests)
+- [x] T0.01 `git init`, `main` and `develop` branches, `.gitignore` (incl. `legacy/`). *GitHub remote `Asyraf-wa/ctp` (private) still to be created and pushed by the owner (no `gh` CLI here)*
+- [x] T0.02 `docker-compose.yml`: app (php 8.4-fpm), nginx :8080, **mysql:8.0.44**, **phpMyAdmin :8081**, node (Vite), mailpit :8025, scheduler (OPS-01)
+- [x] T0.03 `./dev` helper script (`up`, `down`, `artisan`, `composer`, `npm`, `test`, `fresh`, `legacy-import`)
+- [x] T0.04 Install Laravel 13 (13.36) at the repo root. MySQL, `ctp_testing` and the `ctp_legacy` DB (loaded with `./dev legacy-import`)
+- [x] T0.05 Pest 4 (on MySQL), Larastan level 6, Pint. GitHub Actions CI (lint, stan, build, tests)
 
 ### 0B. Theme & Layout
-- [ ] T0.06 Tailwind v4 tokens from [DESIGN.md](DESIGN.md), typography plugin themed, Inter and JetBrains Mono self-hosted
-- [ ] T0.07 Base layout: header (shrink on scroll), footer, Light/Dark/System toggle with no flash, mobile nav drawer
-- [ ] T0.08 Placeholder CTP logo mark (gradient), favicon set, web manifest
+- [x] T0.06 Tailwind v4 tokens from [DESIGN.md](DESIGN.md), typography plugin themed, Inter and JetBrains Mono self-hosted
+- [x] T0.07 Base layout: header (shrink on scroll), footer, Light/Dark/System toggle with no flash, mobile nav drawer
+- [x] T0.08 Placeholder CTP logo mark (gradient), favicon set, web manifest
 
 ### 0C. Admin & Auth
-- [ ] T0.09 Install Filament 5 at `/admin`. Teal/Slate theme, Inter
-- [ ] T0.10 Google OAuth via Socialite with the `ADMIN_EMAILS` allow-list (AUTH-01..03)
-- [ ] T0.11 Local-only Quick login (AUTH-04)
+- [x] T0.09 Install Filament 5 at `/admin`. Teal/Slate theme, Inter
+- [x] T0.10 Google OAuth via Socialite with the `ADMIN_EMAILS` allow-list (AUTH-01..03)
+- [x] T0.11 Local-only Quick login (AUTH-04)
 
 ### 0D. Spikes
-- [ ] T0.12 **Editor spike:** Filament RichEditor with a custom code block (language and filename), a callout block and a media-picker action. Test it with a sample of legacy HTML. Decide between RichEditor and TinyMCE (EDIT-01)
+- [x] T0.12 **Editor spike:** Filament RichEditor with a custom code block (language and filename), a callout block and a media-picker action. Test it with a sample of legacy HTML. Decide between RichEditor and TinyMCE (EDIT-01). → **RichEditor (D16)**, results in ARCH §5.1
 - [ ] T0.13 **Hosting check (cPanel):**
   - cPanel Git can clone a private repo with a deploy key
   - `.cpanel.yml` tasks run `php artisan`
@@ -37,7 +37,7 @@
 
   Document the results in ARCH §9. *Owner: Asyraf, any time before Phase 6. It doesn't block development.*
 
-**Exit criteria:** `./dev up` starts every service. phpMyAdmin is reachable (`localhost:8081`). Google login works and other emails are rejected. The editor decision is recorded.
+**Exit criteria:** `./dev up` starts every service. phpMyAdmin is reachable (`localhost:8101`). Google login works and other emails are rejected. The editor decision is recorded.
 
 ---
 

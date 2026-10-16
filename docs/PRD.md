@@ -92,9 +92,9 @@ Full schema: [ARCHITECTURE.md §4](ARCHITECTURE.md).
 - **ART-12** **Kudos button** ("This helped me 👏"), carried over from the legacy site (11k kudos). One per visitor per article (cookie plus IP hash), a count shown under the article, and an admin "most helpful" widget. It is a cheap quality signal that shows which tutorials work.
 
 ### EDIT — Editor
-- **EDIT-01** WYSIWYG rich editor. Primary candidate: the **Filament RichEditor (TipTap)**. A spike decides (T0.12).
+- **EDIT-01** WYSIWYG rich editor: the **Filament RichEditor (TipTap)**, stored as JSON (D16, [ARCH §5.1](ARCHITECTURE.md)).
 - **EDIT-02** Toolbar: headings H2–H4, bold, italic, strike, inline code, link, lists, blockquote, table, horizontal rule, undo/redo.
-- **EDIT-03** **Code block** with a language selector and an optional filename. Highlighting is done server-side at render time.
+- **EDIT-03** **Code block** as a custom block that edits in a real code editor (Filament `CodeEditor`, CodeMirror), with language, filename, highlighted lines and line numbers. The native code block remains for quick pastes. Highlighting is done server-side at render time.
 - **EDIT-04** **Insert from Media Library** opens the media manager modal and inserts a responsive image with alt text and caption. Drag-drop or paste uploads straight into the library.
 - **EDIT-05** Custom blocks:
   - **Callout** (note, tip, warning, danger)
@@ -431,6 +431,8 @@ The full mapping is in [ARCH §10](ARCHITECTURE.md). The legacy dump has 64 arti
 | D12 | Ribbon | Top-right corner ribbon with a configurable background colour (SET-04). |
 | D13 | Contact | Pro contact form with an admin inbox (CONTACT). |
 | D14 | Legacy FAQs and Books | Not needed. Not imported. |
+| D16 | Editor | **Filament RichEditor (TipTap), stored as JSON**, with custom blocks (Code with CodeEditor, Callout, Tabs, Terminal, Steps, YouTube, CodePen) and a Media Library tool. Verified against real legacy articles (T0.12). |
+| D17 | Dev ports | app 8100 · phpMyAdmin 8101 · Mailpit 8125 · MySQL 3317 · Vite 5183 (8080/8081/3306 are taken on this machine). |
 | D15 | Staging and live deploy | **No staging.** Development is local in Docker. The owner does the live deploy; we supply `.cpanel.yml`, the CI workflow and a deploy guide. |
 
 ## 11. Open Questions

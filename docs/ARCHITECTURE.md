@@ -10,10 +10,10 @@
 | Framework | **Laravel 13** | Same major version as the CTP SaaS project. |
 | Admin | **Filament 5** at `/admin` | Forms, tables, rich editor and widgets out of the box. Teal and slate theme. |
 | Admin auth | **Laravel Socialite** (Google) and an email allow-list | No passwords to leak. |
-| Public frontend | **Blade + Tailwind CSS v4 + Alpine.js** | Server-rendered HTML for SEO, a tiny JS bundle, and no Node needed at runtime. Not Inertia/Vue: the public site is content, not an app. |
+| Public frontend | **Blade + Tailwind CSS v4 + Alpine.js** (plugins: collapse, focus) | Server-rendered HTML for SEO, a tiny JS bundle, and no Node needed at runtime. Not Inertia/Vue: the public site is content, not an app. |
 | Typography | `@tailwindcss/typography` (themed `prose`) | Article body. |
 | Icons | Lucide (`mallardduck/blade-lucide-icons`) | Same icon set as the SaaS. |
-| Editor | Filament **RichEditor (TipTap)** with custom blocks. **Fallback: TinyMCE** (self-hosted) | Decided by the spike T0.12. |
+| Editor | Filament **RichEditor (TipTap)**, stored as **JSON**, with custom blocks and tools (see §5.1) | Decided by the spike T0.12 (D16). TinyMCE isn't needed. |
 | Syntax highlighting | **`tempest/highlight`** (PHP, server-side) | No client JS. Works on shared hosting. Output is cached. |
 | Images | **`intervention/image` v3 (GD driver)** | WebP variants and OG image generation without Imagick or Chrome. |
 | Search | MySQL **FULLTEXT** through Laravel Scout's `database` engine | No external service. Enough for hundreds of articles. |
@@ -46,10 +46,10 @@
 ctp/
 ├─ docker/              # php (8.4-fpm), nginx, mysql config
 ├─ docker-compose.yml
-├─ dev                  # helper script: ./dev up|down|artisan|composer|npm|test|fresh|legacy-import
+├─ dev                  # helper script: ./dev up|down|artisan|composer|npm|test|lint|stan|mysql|legacy-import
 ├─ docs/                # PRD, ARCHITECTURE, DESIGN, TASKS
-├─ legacy/              # the legacy .sql dump goes here (git-ignored)
-└─ src/                 # the Laravel application (the root of the shared hosting deploy)
+├─ legacy/              # the legacy .sql dumps (git-ignored)
+└─ (Laravel app at the repo root: simpler for cPanel Git and .cpanel.yml)
    ├─ app/
    │  ├─ Filament/      # Resources: Articles, Categories, Tags, Series, Media, Comments, Projects, Pages, Redirects, NotFoundLogs, Settings
    │  ├─ Content/       # Rendering pipeline (see §5): HtmlSanitizer, CodeHighlighter, TocBuilder, ImageResolver, MarkdownExporter
@@ -127,6 +127,28 @@ The editor HTML is processed **once on save**, never on every request:
 
 The result is stored in `body_rendered`. A `RenderArticle` job re-renders all articles after pipeline changes (`php artisan ctp:rerender`).
 
+### 5.1 Editor (spike T0.12, 2026-10-16, decision D16)
+
+**Filament 5 RichEditor** (TipTap). The editor state is stored as **TipTap JSON** (`->json()`). The render pipeline produces the HTML.
+
+What was verified by round-tripping 4 real legacy articles (ids 9, 30, 45, 66) through the editor schema (HTML → JSON → HTML):
+
+| Content | Result |
+|---|---|
+| Paragraphs, `<br>`, `<strong>`, links, images, tables (30 cells) | Kept exactly |
+| Code text inside `<pre><code>` | **Identical**. Only `\r\n` becomes `\n`, which is what we want |
+| Code language | **Lost** in the legacy form `<pre class="language-php"><code>` (Prism style). It **is kept** when on `<code class="language-php">`, so the converter moves it (§10.3) |
+| Inline `style`, `<span>` | Dropped. Fine, because the converter strips them anyway |
+| `<iframe>` (CodePen) | Dropped, so the converter must turn it into the CodePen custom block **before** loading it into the editor |
+
+**Features we build on (all native Filament 5 APIs, no third-party plugin):**
+- **Custom blocks** (`RichContentCustomBlock`): an editor modal form, a preview in the editor, and `toHtml()` for output.
+  - **Code**: Filament's `CodeEditor` (CodeMirror) for the code, plus language, filename, highlight lines and line numbers
+  - Callout, Code tabs, Terminal, Steps, YouTube, CodePen
+- **Custom tool** (`RichEditorTool` + an Action), modelled on `AttachFilesAction` and `EditorCommand`: **Insert from Media Library** opens our picker and inserts the image node with `data-media-id`.
+- The native `codeBlock` stays for quick pasted snippets. The pipeline highlights both kinds.
+- Tables, links and H2–H4 are native.
+
 ## 6. URL Structure
 
 **Decision D9: tutorials live at the root (`domain/{slug}`).** Tutorials are the core content, so they get the shortest URL. Every other content type has a prefix, so it never competes for the root namespace.
@@ -199,11 +221,12 @@ Filament's `canAccessPanel()` re-checks the allow-list. In the local environment
 | Service | Image | Port |
 |---|---|---|
 | `app` | php:8.4-fpm with extensions gd (webp, avif), intl, pdo_mysql, zip, exif, bcmath, opcache | — |
-| `nginx` | nginx:alpine | **8080** |
-| `mysql` | **mysql:8.0.44** (same as production) | 3306 |
-| `phpmyadmin` | phpmyadmin:latest | **8081** |
-| `node` | node:22-alpine (`npm run dev`, Vite HMR) | 5173 |
-| `mailpit` | axllent/mailpit | **8025** |
+| `nginx` | nginx:alpine | **8100** |
+| `mysql` | **mysql:8.0.44** (same as production) | **3317** |
+| `phpmyadmin` | phpmyadmin:5.2 | **8101** |
+| `vite` | the app image, which includes Node 22 (`npm run dev`, HMR) | **5183** |
+| `mailpit` | axllent/mailpit | **8125** |
+| `queue` | the app image, `queue:listen` (dev only) | — |
 | `scheduler` | same as `app`, runs `schedule:work` | — |
 
 A second database, `ctp_legacy`, is created in the same MySQL for the import.
@@ -321,17 +344,18 @@ The legacy body was written in TinyMCE. **It has no `<h1>`–`<h6>` at all.** It
 
 Conversion rules, in order:
 
+0. **Normalise line endings** (`\r\n` → `\n`).
 1. **Split `<br><br>` runs into paragraphs.** A single `<br>` inside text stays.
 2. **Headings:** a `<strong>…</strong>` that stands alone on its line (at the start of a `<p>`, or between `<br>`s), or inside `<span style="font-size: 14pt">`, becomes `<h2>`. A `<strong>` inside a coloured span (`#3598db`) becomes `<h3>`. A threshold of under 80 characters and no ending period avoids false positives.
 3. **"File Location: …\path\file.php"** right before a `<pre>` becomes the code block's `data-filename` (backslashes become `/`), and the text line is removed.
-4. **Code blocks:**
+4. **Code blocks** become the **Code custom block** (config: language, filename, code). If one is left as a native code block, the language class **moves from `<pre>` to `<code>`** (otherwise TipTap drops it, see §5.1):
    - `language-markup` becomes `language-html`
    - `line-numbers` sets the line-numbers flag
    - the code text is kept byte-for-byte (entity-decoded once)
 5. **Strip:** every `style`, `class` (Bootstrap and Font Awesome), `&nbsp;` runs, empty `<p>`, and `<span>` wrappers with no meaning.
 6. **Tables:** keep the structure and drop the widths and heights. Wrap the table for horizontal scroll. Promote the first row to `<thead>` when it is all `<strong>`.
 7. **Images:** `src` values `/ctp/webroot/upload/images/tutorial/...`, `/ctp/webroot/tutorial/...` and `../img/tutorial/...` are looked up in `legacy/webroot/` (see below) and imported into the media library (folder `legacy/{slug}`). `src` becomes `data-media-id`. The old `alt` is kept, or the alt is generated from the filename and flagged for review.
-8. **iframe:** a CodePen embed becomes the CodePen block (click to load).
+8. **iframe:** a CodePen embed becomes the CodePen block (click to load). This must happen **before** the editor schema sees the HTML, because the schema drops `<iframe>`.
 9. Unknown elements (a demo `<form>`, an `h-captcha` div) are escaped into a code block or removed, and listed in the report.
 
 > **Images are missing (D11):** all 25 inline images (in about 12 articles, mostly CakePHP 4) **already return 404 on the live site, and the Wayback Machine has no copy either** (checked 2026-10-16). The importer tries each source in order:
