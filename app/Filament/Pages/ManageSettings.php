@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Models\User;
+use App\Settings\ContactSettings;
 use App\Settings\DisplaySettings;
 use App\Settings\GeneralSettings;
 use App\Settings\IntegrationSettings;
@@ -56,6 +57,7 @@ class ManageSettings extends Page
     private const GROUPS = [
         'general' => GeneralSettings::class,
         'display' => DisplaySettings::class,
+        'contact' => ContactSettings::class,
         'seo' => SeoSettings::class,
         'notice' => NoticeSettings::class,
         'ribbon' => RibbonSettings::class,
@@ -109,6 +111,7 @@ class ManageSettings extends Page
                     ->tabs([
                         $this->generalTab(),
                         $this->layoutTab(),
+                        $this->contactTab(),
                         $this->seoTab(),
                         $this->noticeTab(),
                         $this->ribbonTab(),
@@ -194,6 +197,22 @@ class ManageSettings extends Page
                             ->required()->integer()->minValue(1)->maxValue(DisplaySettings::SIDEBAR_MAX)
                             ->suffix('tutorials')
                             ->helperText('The newest tutorials listed under each category before the “View all” link. The tutorial being read is always shown.'),
+                    ]),
+            ]),
+        ]);
+    }
+
+    private function contactTab(): Tab
+    {
+        return Tab::make('Contact')->icon(Heroicon::OutlinedEnvelope)->schema([
+            Group::make()->statePath('contact')->schema([
+                Section::make('Contact page')->description(new HtmlString('Shown on <a href="'.e(url('/contact')).'" target="_blank" class="text-primary-600 underline">/contact</a>. Messages go to the notification email (General tab).'))
+                    ->schema([
+                        Textarea::make('intro')->label('Introduction')->rows(3)->maxLength(400),
+                        TextInput::make('reply_time')->label('Typical reply time')->required()->maxLength(60)
+                            ->helperText('Completes “Usually replies within …”, e.g. 1–3 working days.'),
+                        Toggle::make('auto_reply')->label('Send an automatic confirmation to the sender')
+                            ->helperText('A branded email with a copy of their message and the reply time.'),
                     ]),
             ]),
         ]);

@@ -10,6 +10,7 @@ use App\Http\Controllers\Site\ArchiveController;
 use App\Http\Controllers\Site\ArticleController;
 use App\Http\Controllers\Site\AuthorController;
 use App\Http\Controllers\Site\CommentController;
+use App\Http\Controllers\Site\ContactController;
 use App\Http\Controllers\Site\EngagementController;
 use App\Http\Controllers\Site\HomeController;
 use App\Http\Controllers\Site\OgImageController;
@@ -56,6 +57,9 @@ Route::middleware('throttle:30,1')->group(function () {
 });
 // CMT-01, CMT-02: same no-CSRF reasoning as above; stricter limit.
 Route::post('api/articles/{article}/comments', [CommentController::class, 'store'])->whereNumber('article')->middleware('throttle:comments')->name('api.articles.comments');
+// CONTACT-01..05
+Route::get('contact', [ContactController::class, 'show'])->name('contact');
+Route::post('api/contact', [ContactController::class, 'store'])->middleware('throttle:20,60')->name('api.contact');
 Route::get('comments/unsubscribe/{token}', [CommentController::class, 'unsubscribe'])->where('token', '[a-z0-9]{40}')->name('comments.unsubscribe');
 Route::get('author/{slug}', [AuthorController::class, 'show'])->where('slug', $slug)->name('authors.show');
 

@@ -297,6 +297,131 @@ Alpine.data('commentForm', (endpoint, turnstileKey) => ({
     },
 }));
 
+// Contact form (CONTACT-02, CONTACT-03): live validation, error summary, draft, autocomplete, success screen.
+Alpine.data('contactForm', (config) => ({
+    topic: config.topic, name: '', email: '', company: '', message: '', consent: false, website: '',
+    article: config.article, articleQuery: '', results: [],
+    errors: {}, touched: {}, summary: [], serverError: '', busy: false, sent: false, sentName: '',
+    min: config.min, max: config.max, startedAt: Date.now(), widget: null,
+    draftKey: 'ctp-contact-draft',
+
+    init() {
+        try {
+            const draft = JSON.parse(localStorage.getItem(this.draftKey) ?? '{}');
+            ['name', 'email', 'company', 'message'].forEach((k) => { if (draft[k]) this[k] = draft[k]; });
+            // ?topic= in the link wins over a saved draft.
+            if (draft.topic && !new URLSearchParams(location.search).has('topic')) this.topic = draft.topic;
+        } catch {}
+        this.$watch(() => [this.topic, this.name, this.email, this.company, this.message].join('|'), () => this.saveDraft());
+        if (config.turnstile) this.$refs.form.addEventListener('focusin', () => this.mountTurnstile(), { once: true });
+    },
+
+    shows(field) { return !!config.topics[this.topic]?.[field]; },
+
+    pick(topic, scroll = true) {
+        this.topic = topic;
+        if (scroll && window.matchMedia('(max-width: 1023px)').matches) this.$refs.form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    },
+
+    placeholder() {
+        return {
+            tutorial: 'Which step are you on, what did you expect and what happened instead? Paste the error message if there is one.',
+            problem: 'What is wrong, and where? A link or the section heading helps.',
+            collaboration: 'Tell me about the project, the timeline and how I can help.',
+            speaking: 'The event, the audience, the date and the topic you have in mind.',
+        }[this.topic] ?? 'How can I help?';
+    },
+
+    saveDraft() {
+        try { localStorage.setItem(this.draftKey, JSON.stringify({ topic: this.topic, name: this.name, email: this.email, company: this.company, message: this.message })); } catch {}
+    },
+
+    rules: {
+        name: (v) => v.trim().length >= 2 || 'Please enter your name.',
+        email: (v) => /^\S+@\S+\.\S+$/.test(v.trim()) || 'Please enter a valid email address.',
+        message: function (v) { return v.trim().length >= this.min || `Please write at least ${this.min} characters so I can help.`; },
+        consent: (v) => v === true || 'Please agree to the privacy policy so I can store and answer your message.',
+    },
+
+    check(field) {
+        const result = this.rules[field].call(this, this[field]);
+        if (result === true) delete this.errors[field]; else this.errors[field] = result;
+        this.errors = { ...this.errors };
+        return result === true;
+    },
+
+    touch(field) {
+        this.touched[field] = true;
+        this.check(field);
+    },
+
+    focusField(field) { document.getElementById(`f-${field}`)?.focus(); },
+
+    async findArticles() {
+        const q = this.articleQuery.trim();
+        if (q.length < 2) { this.results = []; return; }
+        try {
+            const data = await (await fetch(`${config.search}?q=${encodeURIComponent(q)}`, { headers: { Accept: 'application/json' } })).json();
+            this.results = (data.groups ?? []).filter((g) => g.label === 'Tutorials' || g.label === 'Blog').flatMap((g) => g.items).slice(0, 8);
+        } catch { this.results = []; }
+    },
+
+    async mountTurnstile() {
+        if (this.widget !== null) return;
+        try {
+            const turnstile = await window.loadTurnstile();
+            this.widget = turnstile.render(this.$refs.turnstile, { sitekey: config.turnstile, theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light' });
+        } catch {}
+    },
+
+    async submit() {
+        this.serverError = '';
+        const ok = ['name', 'email', 'message', 'consent'].map((f) => this.check(f)).every(Boolean);
+        this.summary = Object.entries(this.errors).map(([field, message]) => ({ field, message }));
+        if (!ok) { this.$nextTick(() => this.$refs.summary.focus()); return; }
+
+        this.busy = true;
+        try {
+            const res = await fetch(config.endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                body: JSON.stringify({
+                    topic: this.topic, name: this.name, email: this.email, message: this.message, consent: this.consent,
+                    company: this.shows('company') ? this.company : null,
+                    article_id: this.shows('article') ? this.article?.id ?? null : null,
+                    website: this.website, _elapsed: Date.now() - this.startedAt,
+                    'cf-turnstile-response': this.widget !== null ? window.turnstile?.getResponse(this.widget) : null,
+                }),
+            });
+            const data = await res.json().catch(() => ({}));
+            if (res.status === 422 && data.errors) {
+                this.errors = Object.fromEntries(Object.entries(data.errors).map(([k, v]) => [k, v[0]]));
+                this.summary = Object.entries(this.errors).map(([field, message]) => ({ field, message }));
+                this.$nextTick(() => this.$refs.summary.focus());
+            } else if (!res.ok) {
+                this.serverError = data.message ?? 'Something went wrong. Please try again.';
+            } else {
+                this.sentName = data.name ?? this.name;
+                this.sent = true;
+                this.message = ''; this.summary = [];
+                try { localStorage.removeItem(this.draftKey); } catch {}
+                this.$nextTick(() => { this.$refs.success.focus(); this.$refs.success.scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+            }
+        } catch {
+            this.serverError = 'You seem to be offline. Your message is kept in this browser; try again in a moment.';
+        } finally {
+            this.busy = false;
+            if (this.widget !== null) window.turnstile?.reset(this.widget);
+        }
+    },
+
+    reset() {
+        this.sent = false;
+        this.consent = false;
+        this.startedAt = Date.now();
+    },
+}));
+
 // Copy buttons on code blocks and terminals (PUB-04). Line numbers are not copied.
 document.addEventListener('click', async (event) => {
     const button = event.target.closest('[data-copy-code], [data-copy-text]');

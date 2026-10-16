@@ -38,9 +38,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // CMT-02, CONTACT-04: per-IP limits for public forms.
+        // CMT-02: per-IP limit for comments (the contact form counts successful sends itself).
         RateLimiter::for('comments', fn (Request $request) => Limit::perMinutes(10, 10)->by('comments|'.$request->ip()));
-        RateLimiter::for('contact', fn (Request $request) => Limit::perHour(3)->by('contact|'.$request->ip()));
 
         // Short, stable type names in polymorphic columns (root_slugs, menu_items).
         Relation::morphMap([

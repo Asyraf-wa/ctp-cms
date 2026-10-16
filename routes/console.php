@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\ContactMessage;
 use App\Models\NotFoundLog;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -22,3 +23,6 @@ Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=3')->every
 // SEO-11: drop old, rarely hit 404 log rows (scanner noise that slipped through, one-off typos).
 Schedule::call(fn () => NotFoundLog::where('last_seen_at', '<', now()->subDays(90))->where('hits', '<', 5)->delete())
     ->name('prune-404-log')->weekly();
+
+// CONTACT-07: contact messages older than 12 months are deleted (PDPA).
+Schedule::command('model:prune', ['--model' => [ContactMessage::class]])->daily()->at('03:00');

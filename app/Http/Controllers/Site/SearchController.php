@@ -39,6 +39,7 @@ class SearchController extends Controller
 
         $results = $this->search->quick($query);
         $article = fn (Article $a) => [
+            'id' => $a->id,
             'title' => $a->title,
             'url' => url($a->publicPath() ?? '/'),
             'excerpt' => str((string) $a->excerpt)->limit(110)->value(),

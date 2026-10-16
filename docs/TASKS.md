@@ -145,11 +145,11 @@
 - [ ] T4.06 Security headers and CSP (OPS-05)
 - [ ] T4.07 Backups to an off-site disk, plus a **test restore** (OPS-03)
 
-- [ ] T4.09 **Contact page** (CONTACT-01..03): two-column layout, topic cards, conditional fields, related-article autocomplete, live validation, draft kept, success screen, `?topic=` prefill
-- [ ] T4.10 Contact anti-spam: Turnstile, honeypot, min time-to-submit, rate limit, heuristics (CONTACT-04)
-- [ ] T4.11 Contact emails: admin notification (reply-to the sender) plus a branded auto-reply (CONTACT-05)
-- [ ] T4.12 Filament **inbox**: unread badge, filters, reply action, spam and archive, dashboard widget (CONTACT-06)
-- [ ] T4.13 Hashed IP, PDPA consent, 12-month auto-purge job (CONTACT-07)
+- [x] T4.09 **Contact page** (CONTACT-01..03): two-column layout, topic cards, conditional fields, related-article autocomplete, live validation, draft kept, success screen, `?topic=` prefill
+- [x] T4.10 Contact anti-spam: Turnstile, honeypot, min time-to-submit, rate limit, heuristics (CONTACT-04)
+- [x] T4.11 Contact emails: admin notification (reply-to the sender) plus a branded auto-reply (CONTACT-05)
+- [x] T4.12 Filament **inbox**: unread badge, filters, reply action, spam and archive, dashboard widget (CONTACT-06)
+- [x] T4.13 Hashed IP, PDPA consent, 12-month auto-purge job (CONTACT-07)
 
 **Exit criteria:** a comment goes from submit to moderate to approve to reply, with an email. A contact message goes from submit to the inbox to a reply, and both emails are received in Mailpit. The cache invalidates on publish. A backup restore is verified.
 
