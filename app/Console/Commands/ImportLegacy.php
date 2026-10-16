@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\File;
     {--dry-run : Report what would happen without writing anything}
     {--force : Re-import articles that were imported before (overwrites edits)}
     {--no-download : Do not fetch posters or screenshots from the network}
+    {--with-posters : Also use each poster as the featured image (posters always go into the media library)}
     {--id=* : Only these legacy article ids}')]
 #[Description('Import tutorials, categories and tags from the legacy CakePHP site')]
 class ImportLegacy extends Command
@@ -24,6 +25,7 @@ class ImportLegacy extends Command
             force: (bool) $this->option('force'),
             downloads: ! $this->option('no-download'),
             only: $this->option('id') ? array_map('intval', $this->option('id')) : null,
+            attachPosters: (bool) $this->option('with-posters'),
         );
 
         foreach ($report->counts as $group => $counts) {

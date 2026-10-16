@@ -62,6 +62,10 @@ class LegacyImporter
 
     private bool $downloads = true;
 
+    // Posters always go into the media library (old poster URLs redirect to them); they become the
+    // featured image only when asked, since the owner chooses featured images by hand.
+    private bool $attachPosters = false;
+
     /** @var array<int, int> legacy category id => new id */
     private array $categoryIds = [];
 
@@ -74,8 +78,9 @@ class LegacyImporter
     public function __construct(private HtmlCleaner $cleaner, private MediaUploader $uploader) {}
 
     /** @param  list<int>|null  $only  legacy article ids */
-    public function run(bool $dryRun = false, bool $force = false, bool $downloads = true, ?array $only = null): ImportReport
+    public function run(bool $dryRun = false, bool $force = false, bool $downloads = true, ?array $only = null, bool $attachPosters = false): ImportReport
     {
+        $this->attachPosters = $attachPosters;
         $this->report = new ImportReport($dryRun);
         $this->dryRun = $dryRun;
         $this->force = $force;
@@ -229,10 +234,12 @@ class LegacyImporter
             'comments_enabled' => true,
             'legacy_id' => (int) $row->id,
         ]);
-        if (! $article->featured_media_id && ($poster = $this->poster($row, $title))) {
-            $article->featured_media_id = $poster->id;
-        } elseif (! $article->featured_media_id) {
+        $poster = $this->poster($row, $title);
+        if (! $poster && filled($row->poster) && $this->downloads) {
             $notes[] = 'Poster could not be downloaded';
+        }
+        if ($this->attachPosters && $poster && ! $article->featured_media_id) {
+            $article->featured_media_id = $poster->id;
         }
         $article->save();
 
@@ -436,7 +443,6 @@ class LegacyImporter
     private function redirects(Collection $articles): void
     {
         $bySlug = Article::whereNotNull('legacy_id')->get(['id', 'slug', 'type', 'legacy_id'])->keyBy('legacy_id');
-        $posterMedia = Article::whereNotNull('legacy_id')->with('featuredMedia')->get()->keyBy('legacy_id');
 
         foreach ($articles as $row) {
             $legacySlug = (string) $row->slug;
@@ -454,8 +460,8 @@ class LegacyImporter
                 $this->redirect($prefix.$legacySlug, $target);
             }
 
-            // Poster URLs keep their image-search traffic.
-            $media = $posterMedia->get($row->id)?->featuredMedia;
+            // Poster URLs keep their image-search traffic (the poster is in the library even when not featured).
+            $media = filled($row->poster) && (int) $row->category_id !== self::BLOG_CATEGORY ? $this->posterMedia((string) $row->poster) : null;
             if ($media && filled($row->poster)) {
                 $dir = basename(str_replace('\\', '/', (string) $row->poster_dir));
                 $this->redirect('/files/Articles/poster/'.$dir.'/'.$row->poster, (string) parse_url($media->url(), PHP_URL_PATH));
@@ -466,6 +472,14 @@ class LegacyImporter
         foreach (['/codethepixel' => '/', '/codethepixel/articles' => '/tutorials', '/articles' => '/tutorials', '/codethepixel/pages/about' => '/about', '/codethepixel/contacts/add' => '/contact'] as $from => $to) {
             $this->redirect($from, $to);
         }
+    }
+
+    private function posterMedia(string $filename): ?Media
+    {
+        $folder = MediaFolder::where('name', 'posters')->value('id');
+
+        return Media::where('filename', $filename)->when($folder, fn ($q) => $q->where('folder_id', $folder))->first()
+            ?? Media::where('filename', $filename)->first();
     }
 
     private function redirect(string $from, ?string $to): void
