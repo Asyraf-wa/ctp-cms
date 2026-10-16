@@ -2,12 +2,10 @@
 
 namespace App\Models;
 
-use App\Content\ArticleRenderer;
-use App\Content\Blocks;
 use App\Enums\ArticleStatus;
 use App\Enums\ArticleType;
 use App\Enums\Difficulty;
-use App\Media\MediaLibraryAttachmentProvider;
+use App\Models\Concerns\HasRenderedBody;
 use App\Models\Concerns\HasSlug;
 use App\Models\Concerns\TracksMediaUsage;
 use App\Models\Contracts\HasPublicPath;
@@ -15,7 +13,6 @@ use App\Support\Sidebar;
 use App\Support\Slugs\RootSlugs;
 use Carbon\CarbonInterface;
 use Database\Factories\ArticleFactory;
-use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
 use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -53,21 +50,7 @@ use Illuminate\Support\Carbon;
 class Article extends Model implements HasPublicPath, HasRichContent
 {
     /** @use HasFactory<ArticleFactory> */
-    use HasFactory, HasSlug, InteractsWithRichContent, SoftDeletes, TracksMediaUsage;
-
-    public const BLOCKS = [
-        Blocks\CodeBlock::class,
-        Blocks\ImageBlock::class,
-        Blocks\CalloutBlock::class,
-        Blocks\CodeTabsBlock::class,
-        Blocks\TerminalBlock::class,
-        Blocks\StepsBlock::class,
-        Blocks\YouTubeBlock::class,
-        Blocks\CodePenBlock::class,
-    ];
-
-    /** @var list<int> media ids found in the body by the last render */
-    protected array $bodyMediaIds = [];
+    use HasFactory, HasRenderedBody, HasSlug, SoftDeletes, TracksMediaUsage;
 
     protected static function booted(): void
     {
@@ -116,14 +99,6 @@ class Article extends Model implements HasPublicPath, HasRichContent
             'needs_review' => 'boolean',
             'comments_enabled' => 'boolean',
         ];
-    }
-
-    public function setUpRichContent(): void
-    {
-        $this->registerRichContent('body')
-            ->json()
-            ->customBlocks(self::BLOCKS)
-            ->fileAttachmentProvider(new MediaLibraryAttachmentProvider);
     }
 
     // --- Relations ---------------------------------------------------------------------------
@@ -252,15 +227,13 @@ class Article extends Model implements HasPublicPath, HasRichContent
 
     public function renderBody(): void
     {
-        $html = $this->body ? $this->getRichContentAttribute('body')->getRenderer()->toUnsafeHtml() : '';
-        $result = app(ArticleRenderer::class)->render($html);
+        $result = $this->renderRichBody();
 
         $this->body_rendered = $result['html'];
         $this->body_text = $result['text'];
         $this->toc = $result['toc'];
         $this->word_count = $result['words'];
         $this->reading_minutes = $result['minutes'];
-        $this->bodyMediaIds = $result['media'];
     }
 
     public function readingMinutes(): int
@@ -288,40 +261,14 @@ class Article extends Model implements HasPublicPath, HasRichContent
 
     public function mediaUsage(): array
     {
-        if (! $this->bodyMediaIds && $this->body) {
-            $this->bodyMediaIds = self::mediaIdsIn($this->body);
-        }
-
         return [
             'featured' => [$this->featured_media_id],
-            'body' => $this->bodyMediaIds,
+            'body' => $this->bodyMediaIds(),
         ];
     }
 
     public function mediaUsageLabel(): string
     {
         return ($this->type === ArticleType::Blog ? 'Blog: ' : 'Tutorial: ').$this->title;
-    }
-
-    /**
-     * Media ids referenced in a TipTap document: editor attachments and Image blocks.
-     *
-     * @param  array<string, mixed>  $node
-     * @return list<int>
-     */
-    public static function mediaIdsIn(array $node): array
-    {
-        $ids = [];
-        if (($node['type'] ?? null) === 'image' && is_numeric($node['attrs']['id'] ?? null)) {
-            $ids[] = (int) $node['attrs']['id'];
-        }
-        if (($node['type'] ?? null) === 'customBlock' && ($node['attrs']['id'] ?? null) === 'image' && is_numeric($node['attrs']['config']['media_id'] ?? null)) {
-            $ids[] = (int) $node['attrs']['config']['media_id'];
-        }
-        foreach ($node['content'] ?? [] as $child) {
-            $ids = [...$ids, ...self::mediaIdsIn($child)];
-        }
-
-        return array_values(array_unique($ids));
     }
 }

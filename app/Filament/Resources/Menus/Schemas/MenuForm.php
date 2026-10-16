@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Menu;
 use App\Models\MenuItem;
 use App\Models\Page;
+use App\Models\Project;
 use App\Models\Series;
 use App\Models\Tag;
 use Filament\Forms\Components\Repeater;
@@ -103,6 +104,7 @@ class MenuForm
             'category' => Category::treeOptions(),
             'tag' => Tag::orderBy('name')->pluck('name', 'id')->all(),
             'series' => Series::orderBy('title')->pluck('title', 'id')->all(),
+            'project' => Project::orderBy('title')->pluck('title', 'id')->all(),
             default => [],
         };
     }

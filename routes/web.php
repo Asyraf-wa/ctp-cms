@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Site\ArticleController;
+use App\Http\Controllers\Site\PageController;
 use App\Http\Controllers\Site\RootSlugController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +22,9 @@ Route::get('preview/articles/{article}', [ArticleController::class, 'preview'])
     ->middleware('signed')
     ->withTrashed()
     ->name('articles.preview');
+Route::get('preview/pages/{page}', [PageController::class, 'preview'])
+    ->middleware('signed')
+    ->name('pages.preview');
 
 // D9: tutorials and pages at domain/{slug}. Must stay the LAST route; every other first segment is reserved.
 Route::get('{slug}', RootSlugController::class)

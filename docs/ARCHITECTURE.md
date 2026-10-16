@@ -84,11 +84,13 @@ categories       id, parent_id, name, slug (unique), description, icon, sort, se
 tags             id, name, slug (unique), description, timestamps
 article_tag      article_id, tag_id
 series           id, title, slug, description, cover_media_id, sort, timestamps
-projects         id, title, slug, tagline, body, cover_media_id, gallery (json media ids), stack (json),
-                 status enum(active,maintained,archived), live_url, repo_url, started_at, ended_at,
-                 is_featured, sort, timestamps
-project_article  project_id, article_id          -- related tutorials
-pages            id, title, slug, body, template, timestamps
+projects         id, title, slug, tagline, body (TipTap json), body_rendered, toc (json), cover_media_id,
+                 gallery (json [{media_id, caption}]), stack (json list of strings),
+                 status (active|maintained|archived), live_url, repo_url, started_at, ended_at,
+                 is_featured, is_published, sort, timestamps
+project_article  project_id, article_id, sort    -- related tutorials, in reading order
+pages            id, title, slug, excerpt, body (TipTap json), body_rendered, toc (json),
+                 template (default|toc|about|wide), is_published, sort, timestamps
 media            id, folder_id, disk, path, filename, mime, size, width, height,
                  alt, title, caption, credit, variants (json), hash (sha1, for dedupe), timestamps
 media_folders    id, parent_id, name, timestamps
@@ -125,7 +127,7 @@ The editor HTML is processed **once on save**, never on every request:
 6. **Expand custom blocks**: callout, code tabs, steps and YouTube (lite embed).
 7. **Exports**: `body_text` (plain, for FULLTEXT and the word count) and a Markdown version, which is generated on demand and cached.
 
-The result is stored in `body_rendered`. A `RenderArticle` job re-renders all articles after pipeline changes (`php artisan ctp:rerender`).
+The result is stored in `body_rendered`. Pages and projects use the same editor and pipeline through the `HasRenderedBody` trait. After pipeline changes, `php artisan ctp:rerender` re-renders articles, pages and projects (`--only=page` to narrow it).
 
 ### 5.1 Editor (spike T0.12, 2026-10-16, decision D16)
 

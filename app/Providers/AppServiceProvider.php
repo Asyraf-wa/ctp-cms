@@ -6,6 +6,7 @@ use App\Models\Article;
 use App\Models\Category;
 use App\Models\Media;
 use App\Models\Page;
+use App\Models\Project;
 use App\Models\SeoMeta;
 use App\Models\Series;
 use App\Models\Tag;
@@ -41,6 +42,7 @@ class AppServiceProvider extends ServiceProvider
             'media' => Media::class,
             'article' => Article::class,
             'seo_meta' => SeoMeta::class,
+            'project' => Project::class,
         ]);
     }
 }

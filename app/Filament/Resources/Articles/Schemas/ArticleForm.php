@@ -6,6 +6,8 @@ use App\Enums\ArticleStatus;
 use App\Enums\ArticleType;
 use App\Enums\Difficulty;
 use App\Filament\Forms\Components\MediaPicker;
+use App\Filament\Support\ContentEditor;
+use App\Filament\Support\SeoSection;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\User;
@@ -14,7 +16,6 @@ use App\Support\Slugs\RootSlugs;
 use Closure;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -44,7 +45,7 @@ class ArticleForm
                     self::tldrSection(),
                     self::tutorialSection(),
                     self::faqSection(),
-                    self::seoSection(),
+                    SeoSection::make(),
                 ])->columnSpan(['lg' => 2]),
 
                 Group::make([
@@ -90,21 +91,7 @@ class ArticleForm
                 ->helperText(fn (string $operation) => $operation === 'edit' ? 'Changing the slug of a published article redirects the old URL automatically.' : null),
             Textarea::make('excerpt')->rows(2)->maxLength(500)
                 ->helperText('One or two sentences for cards, search results and the meta description fallback.'),
-            RichEditor::make('body')->label('Content')
-                ->toolbarButtons([
-                    ['bold', 'italic', 'strike', 'code', 'link'],
-                    ['h2', 'h3', 'h4'],
-                    ['bulletList', 'orderedList', 'blockquote', 'horizontalRule'],
-                    ['codeBlock', 'table', 'attachFiles', 'customBlocks', 'details'],
-                    ['undo', 'redo'],
-                ])
-                ->fileAttachmentsAcceptedFileTypes(['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/avif'])
-                ->fileAttachmentsMaxSize((int) config('ctp.media.max_upload_kb'))
-                ->customBlocksGrid()
-                ->searchableCustomBlocks()
-                ->stickyToolbar()
-                ->extraInputAttributes(['style' => 'min-height: 32rem'])
-                ->helperText('Use “Insert block” for code, images from the library, callouts, steps, terminal output and videos. Pasted or attached images go into the media library.'),
+            ContentEditor::make(),
         ]);
     }
 
@@ -158,33 +145,6 @@ class ArticleForm
                     ])
                     ->itemLabel(fn (array $state) => $state['question'] ?? null)
                     ->collapsible()->defaultItems(0)->addActionLabel('Add question')->reorderable(),
-            ]);
-    }
-
-    private static function seoSection(): Section
-    {
-        return Section::make('Search engines & social')
-            ->description('Leave empty to use the title, excerpt and featured image.')
-            ->collapsed()
-            ->schema([
-                Group::make()->relationship('seo')->columns(2)->schema([
-                    TextInput::make('title')->label('SEO title')->maxLength(70)
-                        ->hint(fn (?string $state) => strlen((string) $state).' / 60')->live(onBlur: true)
-                        ->columnSpanFull(),
-                    Textarea::make('description')->label('Meta description')->rows(2)->maxLength(320)
-                        ->hint(fn (?string $state) => strlen((string) $state).' / 160')->live(onBlur: true)
-                        ->columnSpanFull(),
-                    TextInput::make('keywords')->label('Meta keywords')->columnSpanFull(),
-                    TextInput::make('canonical')->label('Canonical URL')->url()
-                        ->helperText('Only when this article was first published elsewhere.'),
-                    Select::make('robots')->placeholder('Site default')->options([
-                        'index, follow' => 'index, follow',
-                        'noindex, follow' => 'noindex, follow',
-                        'noindex, nofollow' => 'noindex, nofollow',
-                    ]),
-                    MediaPicker::make('og_media_id')->label('Social sharing image')->columnSpanFull()
-                        ->helperText('1200 × 630 works best. Defaults to the featured image, then a generated card.'),
-                ]),
             ]);
     }
 
