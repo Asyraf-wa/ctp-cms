@@ -2,9 +2,12 @@
 
 namespace App\Filament\Resources\Menus\Schemas;
 
+use App\Models\Category;
 use App\Models\Menu;
 use App\Models\MenuItem;
 use App\Models\Page;
+use App\Models\Series;
+use App\Models\Tag;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -95,6 +98,9 @@ class MenuForm
     {
         return match ($type) {
             'page' => Page::orderBy('title')->pluck('title', 'id')->all(),
+            'category' => Category::treeOptions(),
+            'tag' => Tag::orderBy('name')->pluck('name', 'id')->all(),
+            'series' => Series::orderBy('title')->pluck('title', 'id')->all(),
             default => [],
         };
     }

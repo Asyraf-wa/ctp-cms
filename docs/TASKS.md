@@ -59,8 +59,8 @@
 - [x] T1.08 Seed the default menus (header, footer_1..3, legal)
 
 ### 1B. Taxonomy
-- [ ] T1.09 Migrations and models: categories (tree), tags, series (TAX-01..03)
-- [ ] T1.10 Filament resources: Categories (reorder, icon picker), Tags (merge action, counts), Series (ordered articles)
+- [x] T1.09 Migrations and models: categories (tree), tags, series (TAX-01..03)
+- [x] T1.10 Filament resources: Categories (reorder, icon picker), Tags (merge action, counts), Series (ordered articles)
 
 ### 1C. Media Manager
 - [ ] T1.11 `media`, `media_folders` and `media_usages` tables plus models (MED-01)
