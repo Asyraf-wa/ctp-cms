@@ -46,6 +46,10 @@
         </div>
 
         <x-article.kudos :article="$article" :preview="$preview" />
+        @unless ($preview)
+            {{-- Below xl the right column is hidden, so the AI tools sit under the article. --}}
+            <x-article.ai-tools :article="$article" compact class="not-prose mt-6 xl:hidden" />
+        @endunless
         <x-article.footer :article="$article" :previous="$previous" :next="$next" />
     </article>
 
@@ -66,6 +70,12 @@
                 @endif
                 <a href="#main" class="flex items-center gap-2 text-muted-foreground hover:text-primary"><x-lucide-arrow-up-to-line class="size-4" /> Back to top</a>
             </div>
+            @unless ($preview)
+                <div class="mt-6 border-t border-border pt-6">
+                    <p class="mb-2 text-xs font-semibold tracking-wider text-foreground uppercase">Use with AI</p>
+                    <x-article.ai-tools :article="$article" />
+                </div>
+            @endunless
         </x-slot:right>
     @endif
 </x-layouts.tutorial>

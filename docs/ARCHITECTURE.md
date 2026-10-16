@@ -104,8 +104,11 @@ comments         id, article_id, parent_id, author_name, author_email, author_ur
                  status enum(pending,approved,spam), is_author, ip_hash, user_agent, timestamps
 redirects        id, from_path (unique), to_path, status_code (301|302|410), hits, last_hit_at,
                  source enum(manual,legacy,slug), timestamps          -- slug = auto from SLUG-03
-not_found_logs   id, path (unique), hits, referrer, last_seen_at
-article_views    article_id, date, views                    -- daily rollups for dashboard charts
+not_found_logs   id, path_hash (unique), path, hits, referrer (latest external), is_bot, ignored,
+                 first_seen_at, last_seen_at                -- scanner noise is not logged; pruned after 90 days
+article_views    article_id, viewed_on, visitor_hash (HMAC of IP + UA)   -- per-visitor dedupe, kept one day
+article_view_stats article_id, date, views                  -- daily rollups for the dashboard
+article_kudos    article_id, visitor_hash, created_at
 settings         group, name, payload (json), locked        -- spatie/laravel-settings (cached; turnstile secret encrypted)
                  groups: general, seo, notice (topbar), ribbon (title, link, new_tab, bg_color, text_color auto), social, scripts, integrations, contact
 root_slugs       slug (unique), sluggable_type (article|page), sluggable_id   -- D9 shared root namespace
@@ -174,9 +177,11 @@ What was verified by round-tripping 4 real legacy articles (ids 9, 30, 45, 66) t
 | `/author/{slug}` | Author profile and their articles |
 | `/contact` | Contact form (a built-in route) |
 | `/search?q=` | Search results. `/api/search?q=` returns JSON for the Ctrl+K palette |
-| `/feed`, `/feed/blog`, `/feed/category/{slug}` | RSS/Atom |
-| `/sitemap.xml` (+ children), `/robots.txt`, `/llms.txt`, `/llms-full.txt` | SEO/GEO |
-| `/og/{type}/{id}.png` | Generated OG images (cached on disk) |
+| `/feed`, `/feed/blog`, `/feed/category/{slug}`, `/feed/atom` | RSS 2.0 (full content) and Atom |
+| `/sitemap.xml`, `/sitemaps/{pages,articles,categories,tags,series,projects,authors}.xml` | Sitemap index and children (with `image:image`) |
+| `/robots.txt`, `/llms.txt`, `/llms-full.txt`, `/{indexnow-key}.txt` | SEO/GEO, generated from settings and content |
+| `/og/{type}-{id}-{hash}.png` | Generated OG cards; the hash changes with the text, so they are cached for a year |
+| `/preview/home` | 301 to `/` (former home sample) |
 | `/media/...` | Uploaded media |
 | `/admin/*` | Filament |
 | `/auth/google/redirect`, `/auth/google/callback` | Admin login |
@@ -192,6 +197,8 @@ What was verified by round-tripping 4 real legacy articles (ids 9, 30, 45, 66) t
 **Trade-offs we accept:**
 - Search Console can't filter "all tutorials" by folder. Use the tutorials sitemap as a filter instead, which works the same way.
 - The URL doesn't say the content type. That's fine for readers, and the breadcrumbs and JSON-LD say it explicitly.
+
+**URL normalisation (SEO-10).** A global middleware sends a 301 for uppercase letters, trailing slashes and doubled slashes on GET/HEAD (the admin, Livewire and files are left alone). When the clean path has a redirect, it goes straight to the target, so legacy mixed-case URLs take one hop.
 
 **Middleware order on public routes:**
 

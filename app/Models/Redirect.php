@@ -37,13 +37,14 @@ class Redirect extends Model
     public static function record(string $from, ?string $to, string $source = self::SOURCE_MANUAL, int $status = 301): ?self
     {
         $from = self::normalizePath($from);
-        $to = $to === null ? null : self::normalizePath($to);
+        // External targets (https://…) are kept as given; internal ones are normalised like $from.
+        $to = $to === null ? null : (preg_match('#^https?://#i', $to) && ! str_starts_with(strtolower($to), strtolower(url('/'))) ? $to : self::normalizePath($to));
 
         if ($from === $to) {
             return null;
         }
 
-        if ($to !== null) {
+        if ($to !== null && str_starts_with($to, '/')) {
             static::where('from_path', $to)->delete();
             static::where('to_path', $from)->update(['to_path' => $to]);
         }

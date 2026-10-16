@@ -12,6 +12,7 @@ use App\Models\Series;
 use App\Models\Tag;
 use App\Models\User;
 use App\Seo\IndexNow;
+use App\Seo\Llms;
 use App\Seo\Sitemap;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
@@ -47,10 +48,14 @@ class AppServiceProvider extends ServiceProvider
             'project' => Project::class,
         ]);
 
-        // SEO-05, SEO-08: content changes refresh the sitemaps and ping IndexNow.
+        // SEO-05, SEO-08, GEO-01: content changes refresh the sitemaps and llms.txt, and ping IndexNow.
         foreach ([Article::class, Page::class, Project::class, Category::class, Tag::class, Series::class, User::class] as $model) {
-            $model::saved(fn () => Sitemap::flush());
-            $model::deleted(fn () => Sitemap::flush());
+            $flush = function (): void {
+                Sitemap::flush();
+                Llms::flush();
+            };
+            $model::saved($flush);
+            $model::deleted($flush);
         }
         foreach ([Article::class, Page::class, Project::class] as $model) {
             $model::saved(fn ($record) => IndexNow::changed($record));

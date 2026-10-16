@@ -77,7 +77,7 @@ class ProjectResource extends Resource
                                 ->grid(['default' => 1, 'md' => 2])
                                 ->defaultItems(0)->reorderable()->addActionLabel('Add screenshot'),
                         ]),
-                    SeoSection::make('the name and pitch'),
+                    SeoSection::make('the name and pitch', descriptionField: 'tagline', pathPrefix: '/projects/', bodyField: null),
                 ])->columnSpan(['lg' => 2]),
 
                 Group::make([

@@ -29,6 +29,9 @@
 
         <div class="prose-ctp prose-lg mt-8" data-article-body>{!! $article->body_rendered !!}</div>
         <x-article.kudos :article="$article" :preview="$preview" />
+        @unless ($preview)
+            <x-article.ai-tools :article="$article" compact class="not-prose mt-6" />
+        @endunless
         <x-article.footer :article="$article" :previous="$previous" :next="$next" />
     </article>
 

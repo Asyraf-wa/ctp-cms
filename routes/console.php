@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\NotFoundLog;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -17,3 +18,7 @@ Schedule::command('ctp:rollup-views')->dailyAt('00:15')->withoutOverlapping();
 // ARCH §9: shared hosting has no queue worker. Each minute the scheduler drains the queue
 // (image variants, IndexNow, mail) and stops before the next run. Dev has its own queue container.
 Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=3')->everyMinute()->withoutOverlapping()->environments(['production']);
+
+// SEO-11: drop old, rarely hit 404 log rows (scanner noise that slipped through, one-off typos).
+Schedule::call(fn () => NotFoundLog::where('last_seen_at', '<', now()->subDays(90))->where('hits', '<', 5)->delete())
+    ->name('prune-404-log')->weekly();

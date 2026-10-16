@@ -119,19 +119,20 @@
 
 ## Phase 3 — SEO & GEO
 - [x] T3.01 MetaBuilder: title, description, canonical, robots, OG and Twitter, with fallbacks (SEO-01)
-- [ ] T3.02 Admin SEO tab: counters, SERP preview, social preview, checklist (SEO-02)
+- [x] T3.02 Admin SEO tab: counters, SERP preview, social preview, checklist (SEO-02)
 - [x] T3.03 OG image generator (GD, brand template) with cache (SEO-03)
 - [x] T3.04 JSON-LD builders for every page type (SEO-04)
 - [x] T3.05 Sitemaps (index plus children, images) (SEO-05)
 - [x] T3.06 `robots.txt` from settings, including the AI crawler policy (SEO-06, GEO-05)
 - [x] T3.07 RSS/Atom feeds (SEO-07)
 - [x] T3.08 IndexNow on publish (SEO-08)
-- [ ] T3.09 URL normalisation middleware, Redirect manager and 404 log (SEO-10, 11)
-- [ ] T3.10 `llms.txt`, `llms-full.txt` and the `.md` article endpoints with `rel=alternate` (GEO-01, 02)
-- [ ] T3.11 "Copy as Markdown" and "Open in ChatGPT/Claude" buttons (GEO-07)
-- [ ] T3.12 Internal link suggestions in the editor sidebar (SEO-12)
+- [x] T3.09 URL normalisation middleware, Redirect manager and 404 log (SEO-10, 11)
+- [x] T3.10 `llms.txt`, `llms-full.txt` and the `.md` article endpoints with `rel=alternate` (GEO-01, 02)
+- [x] T3.11 "Copy as Markdown" and "Open in ChatGPT/Claude" buttons (GEO-07)
+- [x] T3.12 Internal link suggestions in the editor sidebar (SEO-12)
 
 **Exit criteria:** Google Rich Results Test passes for a tutorial, a blog post and a project. Sitemaps validate. The `.md` and `llms.txt` endpoints serve correct content.
+*Status (2026-10-16): sitemaps validate against the sitemaps.org and Google image XSDs; `.md`, `llms.txt` and `llms-full.txt` are covered by tests; JSON-LD for TechArticle, BlogPosting, FAQPage, HowTo, BreadcrumbList, SoftwareSourceCode, CollectionPage and ProfilePage is asserted in tests. **Still to do after deploy:** run Google's Rich Results Test on one tutorial, one blog post and one project (it needs a public URL).*
 
 ---
 

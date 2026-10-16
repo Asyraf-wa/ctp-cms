@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Seo\FeedController;
 use App\Http\Controllers\Seo\IndexNowKeyController;
+use App\Http\Controllers\Seo\MarkdownController;
 use App\Http\Controllers\Seo\RobotsController;
 use App\Http\Controllers\Seo\SitemapController;
 use App\Http\Controllers\Site\ArchiveController;
@@ -37,6 +38,11 @@ Route::get('feed', [FeedController::class, 'all'])->name('feed');
 Route::get('feed/atom', [FeedController::class, 'atom'])->name('feed.atom');
 Route::get('feed/blog', [FeedController::class, 'blog'])->name('feed.blog');
 Route::get('feed/category/{slug}', [FeedController::class, 'category'])->where('slug', $slug)->name('feed.category');
+// GEO-01, GEO-02 (before the IndexNow key route: "llms-full" also looks like a key).
+Route::get('llms.txt', [MarkdownController::class, 'index'])->name('llms');
+Route::get('llms-full.txt', [MarkdownController::class, 'full'])->name('llms.full');
+Route::get('blog/{slug}.md', [MarkdownController::class, 'blog'])->where('slug', $slug)->name('blog.markdown');
+Route::get('{slug}.md', [MarkdownController::class, 'root'])->where('slug', $slug)->name('root-slug.markdown');
 Route::get('{key}.txt', IndexNowKeyController::class)->where('key', '[A-Za-z0-9-]{8,128}')->name('indexnow.key');
 
 Route::get('og/{key}.png', OgImageController::class)->where('key', '[a-z]+-\d+-[a-f0-9]{8}')->name('og');

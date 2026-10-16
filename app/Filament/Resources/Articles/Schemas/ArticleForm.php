@@ -13,6 +13,7 @@ use App\Filament\Support\TechnologyPicker;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\User;
+use App\Seo\LinkSuggestions;
 use App\Settings\GeneralSettings;
 use App\Support\Slugs\RootSlugs;
 use Closure;
@@ -26,6 +27,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Html as HtmlBlock;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Get;
@@ -48,7 +50,7 @@ class ArticleForm
                     self::tldrSection(),
                     self::tutorialSection(),
                     self::faqSection(),
-                    SeoSection::make(),
+                    SeoSection::make(pathPrefix: fn (Get $get) => in_array($get('type'), [ArticleType::Blog, ArticleType::Blog->value], true) ? '/blog/' : '/'),
                 ])->columnSpan(['lg' => 2]),
 
                 Group::make([
@@ -57,6 +59,7 @@ class ArticleForm
                     Section::make('Featured image')->schema([
                         MediaPicker::make('featured_media_id')->hiddenLabel(),
                     ]),
+                    self::linkSuggestionsSection(),
                     self::optionsSection(),
                 ])->columnSpan(['lg' => 1]),
             ]);
@@ -92,7 +95,7 @@ class ArticleForm
                     }
                 })
                 ->helperText(fn (string $operation) => $operation === 'edit' ? 'Changing the slug of a published article redirects the old URL automatically.' : null),
-            Textarea::make('excerpt')->rows(2)->maxLength(500)
+            Textarea::make('excerpt')->rows(2)->maxLength(500)->live(onBlur: true)
                 ->helperText('One or two sentences for cards, search results and the meta description fallback.'),
             ContentEditor::make(),
         ]);
@@ -172,15 +175,34 @@ class ArticleForm
         ]);
     }
 
+    // SEO-12: related published articles to link to, from the unsaved title, tags and category.
+    private static function linkSuggestionsSection(): Section
+    {
+        return Section::make('Link suggestions')
+            ->description('Copy a link, select words in the content and press the link button.')
+            ->collapsible()->collapsed()
+            ->schema([
+                HtmlBlock::make(fn (Get $get, ?Article $record) => view('filament.seo.link-suggestions', [
+                    'suggestions' => LinkSuggestions::for(
+                        $record?->getKey(),
+                        $get('title'),
+                        array_values(array_filter((array) $get('tags'))),
+                        filled($get('category_id')) ? (int) $get('category_id') : null,
+                        is_array($get('body')) ? $get('body') : null,
+                    ),
+                ])->render()),
+            ]);
+    }
+
     private static function organisationSection(): Section
     {
         return Section::make('Organisation')->schema([
-            Select::make('category_id')->label('Category')
+            Select::make('category_id')->label('Category')->live()
                 ->options(fn () => Category::treeOptions())
                 ->searchable()
                 ->required(fn (Get $get) => self::isTutorial($get))
                 ->visible(fn (Get $get) => self::isTutorial($get)),
-            Select::make('tags')->relationship('tags', 'name')->multiple()->searchable()->preload()
+            Select::make('tags')->relationship('tags', 'name')->multiple()->searchable()->preload()->live()
                 ->createOptionForm([TextInput::make('name')->required()->maxLength(60)]),
             // The first row is the main technology: its logo shows in lists. Versions show as "Tested with".
             Repeater::make('techStack')->label('Tech stack')

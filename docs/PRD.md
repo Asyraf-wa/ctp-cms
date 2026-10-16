@@ -167,7 +167,7 @@ Full schema: [ARCHITECTURE.md §4](ARCHITECTURE.md).
 ### SEO — Search Engine Optimisation
 - **SEO-01** Per entity: meta title, meta description (with character counters), canonical, robots (index or noindex), OG image override. Each has fallbacks.
 - **SEO-02** **Google SERP preview** and **social card preview** in the admin. An SEO checklist covers title length, description, alt text on images, one H1 only, internal links and a slug that has a keyword.
-- **SEO-03** **Auto-generated OG images** (1200×630): brand template with title, category and logo, rendered with GD. They are cached and regenerated when the title changes.
+- **SEO-03** **Auto-generated OG images** (1200×630): brand template with title, category and logo, rendered with GD. They are cached and regenerated when the title changes. They are the default social image (D21).
 - **SEO-04** JSON-LD:
   - `WebSite` + `SearchAction`
   - `Organization` / `Person`
@@ -432,6 +432,7 @@ The full mapping is in [ARCH §10](ARCHITECTURE.md). The legacy dump has 64 arti
 | D18 | Technology logos | A **Technologies** list (brand logos from Simple Icons, CC0, bundled; or an uploaded SVG; or a Lucide icon) replaces free-text "Tested with" and project stacks. Tutorials pick an ordered tech stack with optional versions; the first logo shows in lists, the whole stack in the article's right column. Categories may link one technology as their logo, which is also the fallback for tutorials without a stack (all legacy articles). Logos are grey and take the brand colour on hover. |
 | D19 | Sidebar length | Tutorials per category in the left sidebar is a setting (Site settings → Layout), default 5. |
 | D20 | Home page | **Text-only home in the tutorial layout** instead of an image-card magazine page: it matches the template, legacy articles have no covers, and it is lighter (148 KiB, Lighthouse mobile 99/100/100/100). Blog and projects are reached from the menu and footer. |
+| D21 | Social images | **The generated brand card is the default social image** (override per item with "Social sharing image"). Featured images are not used by default: their 1200×630 variant is WebP, which LinkedIn and some chat apps ignore, and the card always shows the title. |
 | D15 | Staging and live deploy | **No staging.** Development is local in Docker. The owner does the live deploy; we supply `.cpanel.yml`, the CI workflow and a deploy guide. |
 
 ## 11. Open Questions

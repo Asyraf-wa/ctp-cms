@@ -42,7 +42,7 @@ class AdminPanelProvider extends PanelProvider
                 'info' => Color::Blue,
             ])
             ->font('Inter')
-            ->navigationGroups(['Content', 'Media', 'Settings'])
+            ->navigationGroups(['Content', 'Media', 'SEO', 'Settings'])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
