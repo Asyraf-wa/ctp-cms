@@ -95,17 +95,17 @@
 - [x] T2.00 Header and footer read from MENU; topbar notification and ribbon wired in (PUB-13, 14)
 - [x] T2.01 Home page (PUB-01)
 - [x] T2.02 Tutorials index with filters, sorting and pagination (PUB-02)
-- [ ] T2.03 Article page, 3 columns (PUB-03):
+- [x] T2.03 Article page, 3 columns (PUB-03):
   - category accordion
   - TOC with scroll-spy
   - meta row, TL;DR, Tested-with, series navigator
   - prev/next, tags, author box, related articles
-- [ ] T2.04 Mobile: sidebar drawer and collapsible TOC (PUB-03)
-- [ ] T2.05 Code block UX: copy, label, line numbers, highlight lines, wrap toggle (PUB-04)
-- [ ] T2.06 Reading progress, Focus mode, lightbox, heading anchors, back-to-top (PUB-05)
+- [x] T2.04 Mobile: sidebar drawer and collapsible TOC (PUB-03)
+- [x] T2.05 Code block UX: copy, label, line numbers, highlight lines, wrap toggle (PUB-04)
+- [x] T2.06 Reading progress, Focus mode, lightbox, heading anchors, back-to-top (PUB-05)
 - [ ] T2.07 Ctrl+K search palette, the `/api/search` endpoint and the `/search` page (FULLTEXT) (PUB-06)
 - [x] T2.08 Category, tag and series archive pages (PUB-07)
-- [ ] T2.09 Blog index and post, single-column style (PUB-08)
+- [x] T2.09 Blog index and post, single-column style (PUB-08)
 - [x] T2.10 Projects index (filter by tech) and project detail (PUB-09)
 - [x] T2.11 Static pages, About page, **author page `/author/{slug}`**, author meta row and author box on articles (PUB-10, AUTHOR-01, 03)
 - [ ] T2.12 404, 500 and maintenance pages (PUB-12)

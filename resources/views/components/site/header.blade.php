@@ -66,13 +66,15 @@
 
             <x-site.theme-toggle />
 
-            <button type="button" x-data="{ full: false }" x-show="document.fullscreenEnabled"
-                @fullscreenchange.document="full = !!document.fullscreenElement"
-                @click="full ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {})"
-                :title="full ? 'Exit fullscreen' : 'Fullscreen'" :aria-label="full ? 'Exit fullscreen' : 'Fullscreen'"
-                class="hidden rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent focus:ring-4 focus:ring-line-strong focus:outline-none lg:inline-flex">
-                <x-lucide-maximize class="size-5" x-show="!full" />
-                <x-lucide-minimize class="size-5" x-show="full" x-cloak />
+            {{-- Focus mode (PUB-05) replaces the template's fullscreen button; only on pages with sidebars. --}}
+            <button type="button" x-show="$store.focus.available" x-cloak @click="$store.focus.toggle()"
+                :aria-pressed="$store.focus.on ? 'true' : 'false'"
+                :title="$store.focus.on ? 'Exit focus mode (Esc)' : 'Focus mode: hide the sidebars'"
+                :aria-label="$store.focus.on ? 'Exit focus mode' : 'Focus mode'"
+                class="hidden rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent focus:ring-4 focus:ring-line-strong focus:outline-none lg:inline-flex"
+                :class="$store.focus.on && 'bg-brand-soft text-primary'">
+                <x-lucide-scan-eye class="size-5" x-show="!$store.focus.on" />
+                <x-lucide-minimize-2 class="size-5" x-show="$store.focus.on" x-cloak />
             </button>
 
             <a href="{{ url('/feed') }}"

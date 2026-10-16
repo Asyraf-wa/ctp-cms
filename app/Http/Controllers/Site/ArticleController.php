@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Support\Sidebar;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 
 // PRD PUB-03 (tutorial page) and PUB-08 (blog post). Phase 2 polishes the layout.
 class ArticleController extends Controller
@@ -21,6 +22,10 @@ class ArticleController extends Controller
             'article' => $article,
             'preview' => $preview,
             'categories' => $article->type === ArticleType::Tutorial ? Sidebar::categories($article) : [],
+            'seriesParts' => $article->series
+                ? $article->series->articles()->published()->get(['id', 'type', 'title', 'slug', 'series_position'])
+                : collect(),
+            'related' => $this->related($article),
             ...$this->neighbours($article),
         ];
 
@@ -46,6 +51,40 @@ class ArticleController extends Controller
     public function preview(Article $article): View
     {
         return $this->show($article, preview: true);
+    }
+
+    /**
+     * Up to three articles of the same type sharing the most tags, then the same category,
+     * topped up with the latest ones (blog posts often have neither).
+     *
+     * @return Collection<int, Article>
+     */
+    private function related(Article $article): Collection
+    {
+        $tagIds = $article->tags->modelKeys();
+
+        $related = Article::published()->forCards()
+            ->where('type', $article->type)
+            ->whereKeyNot($article->id)
+            ->where(fn ($q) => $q
+                ->whereHas('tags', fn ($q) => $q->whereIn('tags.id', $tagIds))
+                ->when($article->category_id, fn ($q) => $q->orWhere('category_id', $article->category_id)))
+            ->withCount(['tags as shared_tags' => fn ($q) => $q->whereIn('tags.id', $tagIds)])
+            ->orderByDesc('shared_tags')
+            ->latest('published_at')
+            ->limit(3)
+            ->get();
+
+        if ($related->count() < 3) {
+            $related = $related->concat(Article::published()->forCards()
+                ->where('type', $article->type)
+                ->whereKeyNot([$article->id, ...$related->modelKeys()])
+                ->latest('published_at')
+                ->limit(3 - $related->count())
+                ->get());
+        }
+
+        return $related;
     }
 
     /** @return array{previous: ?Article, next: ?Article} */

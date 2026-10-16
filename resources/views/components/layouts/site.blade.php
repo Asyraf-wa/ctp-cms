@@ -40,6 +40,7 @@
             try {
                 mode = localStorage.getItem('theme') ?? 'system';
                 if (localStorage.getItem('ctp-notice') === @js($notice->hash())) root.dataset.noticeDismissed = '';
+                if (localStorage.getItem('ctp-focus') === '1') root.classList.add('focus-mode');
             } catch {}
             root.classList.toggle('dark', mode === 'dark' || (mode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches));
         })();
@@ -64,11 +65,19 @@
     <x-site.header />
     <x-site.ribbon />
 
-    <main id="main" {{ $attributes->class('flex-1') }}>
+    <main id="main" tabindex="-1" {{ $attributes->class('flex-1 focus:outline-none') }}>
         {{ $slot }}
     </main>
 
     <x-site.footer />
+
+    {{-- Back to top (PUB-05) --}}
+    <button type="button" x-data="{ show: false }" @scroll.window.throttle.150ms="show = window.scrollY > 900"
+        x-show="show" x-cloak x-transition.opacity @click="window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); document.getElementById('main')?.focus({ preventScroll: true })"
+        class="fixed right-4 bottom-4 z-30 inline-flex size-11 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-md transition-colors hover:border-primary hover:text-primary sm:right-6 sm:bottom-6"
+        aria-label="Back to top">
+        <x-lucide-arrow-up class="size-5" />
+    </button>
     {!! $scripts->body_scripts !!}
 </body>
 </html>

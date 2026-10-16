@@ -539,4 +539,90 @@
     .prose-ctp > :first-child {
         margin-top: 0;
     }
+
+    /* Focus mode (PUB-05) */
+    /* !important: the asides carry lg:block / xl:block utilities, which outrank this layer. */
+    .focus-mode [data-sidebar] {
+        display: none !important;
+    }
+
+    .focus-mode [data-focus-main] {
+        max-width: 56rem;
+        margin-inline: auto;
+    }
+
+    /* Heading anchors */
+    .heading-anchor {
+        @apply ml-2 font-normal text-muted-foreground no-underline opacity-0 transition-opacity hover:text-primary focus-visible:opacity-100;
+    }
+
+    .prose-ctp :is(h2, h3, h4):hover .heading-anchor {
+        @apply opacity-100;
+    }
+
+    .prose-ctp :is(h2, h3, h4)[id] {
+        scroll-margin-top: 6rem;
+    }
+
+    /* Code wrap toggle */
+    .code-block__wrap {
+        @apply ml-auto shrink-0 rounded-sm border border-code-border px-2 py-0.5 font-sans text-[11px] font-semibold text-[#cbd5e1] transition-colors hover:border-[#5eead4] hover:text-[#5eead4];
+    }
+
+    .code-block__wrap[aria-pressed='true'] {
+        @apply border-[#5eead4] text-[#5eead4];
+    }
+
+    .code-block__lang + .code-block__wrap,
+    .code-block__wrap + .code-block__copy {
+        @apply ml-0;
+    }
+
+    .code-block--wrap pre {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+    }
+
+    .code-block--wrap .code-block__mark {
+        display: none;
+    }
+
+    /* Zoomable images */
+    [data-article-body] img:not(a img),
+    .prose-ctp figure img:not(a img),
+    img[data-zoomable] {
+        cursor: zoom-in;
+    }
+
+    /* Lightbox */
+    .lightbox {
+        @apply m-auto max-h-none max-w-none border-0 bg-transparent p-4 outline-none;
+        width: 100vw;
+        height: 100dvh;
+    }
+
+    .lightbox[open] {
+        @apply flex items-center justify-center;
+    }
+
+    .lightbox::backdrop {
+        background: rgb(2 6 23 / 0.88);
+    }
+
+    .lightbox figure {
+        @apply m-0 flex max-h-full flex-col items-center gap-3;
+    }
+
+    .lightbox img {
+        @apply max-h-[85dvh] max-w-full rounded-md object-contain shadow-lg;
+        cursor: zoom-out;
+    }
+
+    .lightbox figcaption {
+        @apply text-center text-sm text-slate-300;
+    }
+
+    .lightbox__close {
+        @apply fixed top-4 right-4 flex size-10 items-center justify-center rounded-full bg-white/10 text-2xl leading-none text-white hover:bg-white/20;
+    }
 }
