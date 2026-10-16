@@ -37,8 +37,10 @@
     <If "%{REQUEST_URI} =~ m#^/(storage|media)/#">
         Header set Cache-Control "public, max-age=2592000"
     </If>
-    Header always set X-Content-Type-Options "nosniff"
-    Header always set X-Frame-Options "SAMEORIGIN"
-    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    # Same values as App\Http\Middleware\SecurityHeaders; "set" (not "always set") replaces the app's header
+    # instead of adding a second copy, and still covers static files.
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
 

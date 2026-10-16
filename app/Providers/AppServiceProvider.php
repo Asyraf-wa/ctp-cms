@@ -4,23 +4,31 @@ namespace App\Providers;
 
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\Comment;
 use App\Models\Media;
+use App\Models\Menu;
+use App\Models\MenuItem;
 use App\Models\Page;
 use App\Models\Project;
+use App\Models\Redirect;
 use App\Models\SeoMeta;
 use App\Models\Series;
 use App\Models\Tag;
+use App\Models\Technology;
 use App\Models\User;
 use App\Seo\IndexNow;
 use App\Seo\Llms;
 use App\Seo\Sitemap;
+use App\Support\SiteCache;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Intervention\Image\Drivers\Gd\Driver as GdDriver;
 use Intervention\Image\ImageManager;
+use Spatie\LaravelSettings\Events\SettingsSaved;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -63,6 +71,14 @@ class AppServiceProvider extends ServiceProvider
             $model::saved($flush);
             $model::deleted($flush);
         }
+
+        // OPS-04: anything readers can see empties the full-page cache.
+        foreach ([Article::class, Page::class, Project::class, Category::class, Tag::class, Series::class, User::class,
+            Comment::class, Menu::class, MenuItem::class, Technology::class, Media::class, Redirect::class] as $model) {
+            $model::saved(fn () => SiteCache::flush());
+            $model::deleted(fn () => SiteCache::flush());
+        }
+        Event::listen(SettingsSaved::class, fn () => SiteCache::flush());
         foreach ([Article::class, Page::class, Project::class] as $model) {
             $model::saved(fn ($record) => IndexNow::changed($record));
             $model::deleted(fn ($record) => IndexNow::changed($record, deleted: true));

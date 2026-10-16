@@ -83,7 +83,7 @@ class CommentResource extends Resource
             ->modifyQueryUsing(fn (Builder $query) => $query->with(['article:id,title,slug,type', 'parent:id,name', 'user']))
             ->columns([
                 ViewColumn::make('name')->label('Comment')->view('filament.comments.cell')->searchable(['name', 'email', 'body']),
-                TextColumn::make('article.title')->label('On')->limit(40)->wrap()
+                TextColumn::make('article.title')->label('On')->limit(40)->wrap()->grow(false)
                     ->url(fn (Comment $record) => $record->status === Comment::APPROVED ? $record->url() : url($record->article->publicPath() ?? '/'), shouldOpenInNewTab: true),
                 TextColumn::make('status')->badge()->formatStateUsing(fn (string $state) => Comment::STATUSES[$state] ?? $state)
                     ->color(fn (string $state) => match ($state) {
@@ -98,10 +98,10 @@ class CommentResource extends Resource
                     ->options(fn () => Article::whereHas('comments')->orderBy('title')->pluck('title', 'id')->all()),
             ])
             ->recordActions([
-                Action::make('approve')->icon(Heroicon::OutlinedCheck)->color('success')
+                Action::make('approve')->icon(Heroicon::OutlinedCheck)->color('success')->iconButton()->tooltip('Approve')
                     ->visible(fn (Comment $record) => $record->status !== Comment::APPROVED)
                     ->action(fn (Comment $record) => self::approve($record)),
-                Action::make('reply')->label('Reply')->icon(Heroicon::OutlinedArrowUturnLeft)->color('primary')
+                Action::make('reply')->label('Reply')->icon(Heroicon::OutlinedArrowUturnLeft)->color('primary')->iconButton()->tooltip('Reply as the author')
                     ->visible(fn (Comment $record) => in_array($record->status, [Comment::APPROVED, Comment::PENDING], true))
                     ->modalHeading(fn (Comment $record) => 'Reply to '.$record->name)
                     ->modalDescription(fn (Comment $record) => new HtmlString('<div class="prose prose-sm max-w-none dark:prose-invert">'.$record->body_html.'</div>'))

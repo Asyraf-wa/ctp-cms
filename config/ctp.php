@@ -46,4 +46,14 @@ return [
         'indexnow' => (bool) env('CTP_INDEXNOW', env('APP_ENV') === 'production'),
         'indexnow_endpoint' => 'https://api.indexnow.org/indexnow',
     ],
+
+    // OPS-05: extra hosts for scripts pasted in Site settings → Scripts (e.g. "https://www.googletagmanager.com https://*.google-analytics.com").
+    'csp' => [
+        'extra_hosts' => env('CSP_EXTRA_HOSTS', ''),
+    ],
+
+    // OPS-03: empty database that ctp:backup-verify restores into (never the live one).
+    'backup' => [
+        'verify_database' => env('BACKUP_VERIFY_DATABASE'),
+    ],
 ];

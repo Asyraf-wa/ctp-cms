@@ -7,6 +7,7 @@ use App\Filament\Resources\ContactMessages\Pages\ViewContactMessage;
 use App\Mail\ContactReplyMail;
 use App\Models\ContactMessage;
 use App\Models\ContactReply;
+use App\Support\Html;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -72,7 +73,7 @@ class ContactMessageResource extends Resource
                     ->formatStateUsing(fn (string $state) => new HtmlString(nl2br(e($state)))),
                 TextEntry::make('replies')->label('Replies')
                     ->state(fn (ContactMessage $record) => $record->replies->isEmpty() ? null : new HtmlString($record->replies->map(fn (ContactReply $r) => '<div style="margin-bottom:12px;padding:10px 12px;border-left:3px solid #14b8a6;background:rgb(20 184 166 / .08)"><p style="font-size:12px;opacity:.7">'
-                        .e($r->user?->authorName() ?? 'You').' · '.e($r->created_at->timezone(config('ctp.display_timezone'))->format('j M Y, g:i a')).'</p>'.nl2br(e($r->body)).'</div>')->join('')))
+                        .e($r->user?->authorName() ?? 'You').' · '.e($r->created_at->timezone(config('ctp.display_timezone'))->format('j M Y, g:i a')).'</p>'.Html::comment($r->body).'</div>')->join('')))
                     ->visible(fn (ContactMessage $record) => $record->replies->isNotEmpty()),
             ]),
             Section::make()->columnSpan(1)->schema([
@@ -143,6 +144,7 @@ class ContactMessageResource extends Resource
                 $reply = $record->replies()->create(['user_id' => auth()->id(), 'body' => $data['body']]);
                 Mail::to($record->email, $record->name)->queue(new ContactReplyMail($reply));
                 $record->update(['status' => ContactMessage::REPLIED, 'replied_at' => now(), 'read_at' => $record->read_at ?? now()]);
+                $record->load('replies.user'); // show the reply on the page straight away
                 Notification::make()->success()->title('Reply sent to '.$record->email)->send();
             });
     }

@@ -14,7 +14,10 @@
         "laravel/framework": "^13.17",
         "laravel/socialite": "^5.31",
         "laravel/tinker": "^3.0",
+        "league/flysystem-aws-s3-v3": "^3.35",
         "mallardduck/blade-lucide-icons": "^2.0",
+        "spatie/laravel-backup": "^10.3",
+        "spatie/laravel-responsecache": "^8.4",
         "spatie/laravel-settings": "^3.9",
         "symfony/html-sanitizer": "^8.1",
         "tempest/highlight": "^2.28"

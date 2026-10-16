@@ -140,10 +140,10 @@
 - [x] T4.01 Comments: form, Turnstile, honeypot, rate limit, Markdown-lite rendering, one level of threading (CMT-01, 02)
 - [x] T4.02 Moderation resource with an "Author" reply (CMT-03)
 - [x] T4.03 Comment email notifications (CMT-04, 05)
-- [ ] T4.04 Dashboard widgets (ADM-01)
-- [ ] T4.05 Response cache, cleared on any content change (OPS-04)
-- [ ] T4.06 Security headers and CSP (OPS-05)
-- [ ] T4.07 Backups to an off-site disk, plus a **test restore** (OPS-03)
+- [x] T4.04 Dashboard widgets (ADM-01)
+- [x] T4.05 Response cache, cleared on any content change (OPS-04)
+- [x] T4.06 Security headers and CSP (OPS-05)
+- [x] T4.07 Backups to an off-site disk, plus a **test restore** (OPS-03)
 
 - [x] T4.09 **Contact page** (CONTACT-01..03): two-column layout, topic cards, conditional fields, related-article autocomplete, live validation, draft kept, success screen, `?topic=` prefill
 - [x] T4.10 Contact anti-spam: Turnstile, honeypot, min time-to-submit, rate limit, heuristics (CONTACT-04)
@@ -152,6 +152,7 @@
 - [x] T4.13 Hashed IP, PDPA consent, 12-month auto-purge job (CONTACT-07)
 
 **Exit criteria:** a comment goes from submit to moderate to approve to reply, with an email. A contact message goes from submit to the inbox to a reply, and both emails are received in Mailpit. The cache invalidates on publish. A backup restore is verified.
+*Status (2026-10-16): met. Browser runs: a comment submitted, approved and answered as the author (owner and reply emails in Mailpit); a contact message submitted (owner copy and auto-reply in Mailpit) and answered from the inbox (reply in Mailpit). Tests cover cache flushing on publish and no cookies in cached pages. `ctp:backup-verify` restored the newest backup: 37 of 37 tables and 12 of 12 media files.*
 
 ---
 

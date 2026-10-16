@@ -1,12 +1,14 @@
 <?php
 
 use App\Http\Middleware\NormalizeUrl;
+use App\Http\Middleware\SecurityHeaders;
 use App\Models\NotFoundLog;
 use App\Models\Redirect;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Spatie\ResponseCache\Middlewares\CacheResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -18,6 +20,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // SEO-10: one URL per page (lowercase, no trailing slash).
         $middleware->prepend(NormalizeUrl::class); // global: it must run before route matching
+        $middleware->append(SecurityHeaders::class); // OPS-05
+
+        // OPS-04: full-page cache for guests (App\Http\Cache\PublicPagesProfile decides what is cached).
+        $middleware->web(append: [CacheResponse::class]);
 
         // View beacon and kudos (ART-10, ART-12) are posted from response-cached pages.
         $middleware->validateCsrfTokens(except: ['api/articles/*/view', 'api/articles/*/kudos', 'api/articles/*/comments', 'api/contact']);

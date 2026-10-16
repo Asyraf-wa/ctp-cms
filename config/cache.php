@@ -53,6 +53,18 @@ return [
             'lock_path' => storage_path('framework/cache/locks'),
         ],
 
+        // OPS-04: full-page cache in its own store, so clearing it never touches sessions or rate limits.
+        'responses' => [
+            'driver' => 'file',
+            'path' => storage_path('framework/cache/responses'),
+        ],
+
+        // The same separation in tests (two array stores are two separate memories).
+        'responses-array' => [
+            'driver' => 'array',
+            'serialize' => false,
+        ],
+
         'storage' => [
             'driver' => 'storage',
             'disk' => env('CACHE_STORAGE_DISK'),

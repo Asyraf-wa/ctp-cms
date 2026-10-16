@@ -256,6 +256,12 @@ Constraints: PHP 8.4, MySQL 8.0.44, **no Node, no Supervisor, cron only**. Deplo
 | `main` | Source code, release-ready | Merge from `develop` |
 | `production` | **Built release**: source, `vendor/` (no dev) and `public/build/` (Vite output) | **GitHub Actions only**, on every push to `main` |
 
+**Full-page cache (OPS-04).** `spatie/laravel-responsecache` stores guest GET pages, feeds, sitemaps and `.md` files in their own file store (`storage/framework/cache/responses`), so clearing it never touches sessions or rate limits. `App\Http\Cache\PublicPagesProfile` skips the admin, API, previews, search, signed-in users and unknown query strings; `CookielessSerializer` drops `Set-Cookie` before storing (the stock serializer would replay the first visitor's session cookie). Saving any visible model or a settings group clears it, as do the nightly view rollup and the topbar notice switching on or off. It is on by default only in production (`RESPONSE_CACHE_ENABLED`).
+
+**Security headers (OPS-05).** `App\Http\Middleware\SecurityHeaders` sets nosniff, frame options, referrer and permissions policies, HSTS on HTTPS in production, and a CSP on public pages (not the admin). Hosts for analytics scripts pasted in Site settings go in `CSP_EXTRA_HOSTS`.
+
+**Backups (OPS-03).** Nightly `backup:run` (database and `storage/app/public`, generated OG cards excluded) to `BACKUP_DISKS` (`backups` locally, plus `offsite` for any S3-compatible bucket), `backup:clean` keeps 7 daily and 4 weekly, `backup:monitor` mails if the newest is over a day old. `php artisan ctp:backup-verify` restores the newest backup into `BACKUP_VERIFY_DATABASE` (an empty database made in cPanel), compares every table and the media files, then drops what it restored. Keep `APP_KEY` safe outside the backups: encrypted settings need it.
+
 **Compression and caching.** `public/.htaccess` turns on `mod_deflate` and sets `Cache-Control` (a year, `immutable`, for the hashed `/build/` files; 30 days for `/storage/` and `/media/`). The dev nginx config mirrors these rules, so local Lighthouse runs match production. Without compression, the 130 KB stylesheet alone costs about 10 Lighthouse points on mobile.
 
 The server has no Node, so `public/build` must arrive pre-built. Composer *may* exist on the host (`/opt/cpanel/composer/bin/composer`). Shipping `vendor/` in the `production` branch removes that dependency entirely. T0.13 confirms it.
@@ -276,6 +282,7 @@ deployment:
     - cd $APP && /usr/local/bin/php artisan migrate --force
     - cd $APP && /usr/local/bin/php artisan settings:clear-cache   # settings are cached; new settings need this
     - cd $APP && /usr/local/bin/php artisan optimize
+    - cd $APP && /usr/local/bin/php artisan responsecache:clear    # new code, new pages
     - cd $APP && /usr/local/bin/php artisan responsecache:clear
 ```
 
