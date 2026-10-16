@@ -1,21 +1,35 @@
 <?php
 
 use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\Site\ArchiveController;
 use App\Http\Controllers\Site\ArticleController;
+use App\Http\Controllers\Site\AuthorController;
+use App\Http\Controllers\Site\HomeController;
 use App\Http\Controllers\Site\PageController;
+use App\Http\Controllers\Site\ProjectController;
 use App\Http\Controllers\Site\RootSlugController;
+use App\Http\Controllers\Site\TutorialController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('pages.home');
-});
+$slug = '[a-z0-9]+(?:-[a-z0-9]+)*';
+
+Route::get('/', HomeController::class)->name('home');
+Route::get('tutorials', [TutorialController::class, 'index'])->name('tutorials.index');
+Route::get('category/{slug}', [ArchiveController::class, 'category'])->where('slug', $slug)->name('categories.show');
+Route::get('tag/{slug}', [ArchiveController::class, 'tag'])->where('slug', $slug)->name('tags.show');
+Route::get('series', [ArchiveController::class, 'seriesIndex'])->name('series.index');
+Route::get('series/{slug}', [ArchiveController::class, 'series'])->where('slug', $slug)->name('series.show');
+Route::get('blog', [ArticleController::class, 'blogIndex'])->name('blog.index');
+Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');
+Route::get('projects/{slug}', [ProjectController::class, 'show'])->where('slug', $slug)->name('projects.show');
+Route::get('author/{slug}', [AuthorController::class, 'show'])->where('slug', $slug)->name('authors.show');
 
 Route::middleware('throttle:10,1')->prefix('auth/google')->name('auth.google.')->group(function () {
     Route::get('redirect', [GoogleAuthController::class, 'redirect'])->name('redirect');
     Route::get('callback', [GoogleAuthController::class, 'callback'])->name('callback');
 });
 
-Route::get('blog/{slug}', [ArticleController::class, 'blog'])->where('slug', '[a-z0-9]+(?:-[a-z0-9]+)*')->name('blog.show');
+Route::get('blog/{slug}', [ArticleController::class, 'blog'])->where('slug', $slug)->name('blog.show');
 
 // ART-04: signed preview links from the admin; never indexed.
 Route::get('preview/articles/{article}', [ArticleController::class, 'preview'])
@@ -28,5 +42,5 @@ Route::get('preview/pages/{page}', [PageController::class, 'preview'])
 
 // D9: tutorials and pages at domain/{slug}. Must stay the LAST route; every other first segment is reserved.
 Route::get('{slug}', RootSlugController::class)
-    ->where('slug', '[a-z0-9]+(?:-[a-z0-9]+)*')
+    ->where('slug', $slug)
     ->name('root-slug');

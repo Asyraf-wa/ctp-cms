@@ -33,4 +33,31 @@ class Html
 
         return trim((new HtmlSanitizer($config))->sanitize($html));
     }
+
+    // Short rich text such as the author's full bio: paragraphs, lists, emphasis and safe links.
+    public static function basic(?string $html): string
+    {
+        if (blank($html)) {
+            return '';
+        }
+
+        $config = (new HtmlSanitizerConfig)
+            ->allowElement('p')
+            ->allowElement('br')
+            ->allowElement('ul')
+            ->allowElement('ol')
+            ->allowElement('li')
+            ->allowElement('strong')
+            ->allowElement('b')
+            ->allowElement('em')
+            ->allowElement('i')
+            ->allowElement('a', ['href'])
+            ->blockElement('div')
+            ->blockElement('span')
+            ->allowLinkSchemes(['https', 'http', 'mailto'])
+            ->allowRelativeLinks()
+            ->forceAttribute('a', 'rel', 'noopener');
+
+        return trim((new HtmlSanitizer($config))->sanitize($html));
+    }
 }

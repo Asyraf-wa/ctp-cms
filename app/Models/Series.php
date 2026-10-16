@@ -10,8 +10,9 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-// PRD TAX-03: an ordered group of tutorials ("Part 2 of 5"). Articles join in Phase 1D.
+// PRD TAX-03: an ordered group of tutorials ("Part 2 of 5").
 #[Fillable(['title', 'slug', 'description', 'cover_media_id', 'sort'])]
 class Series extends Model implements HasPublicPath
 {
@@ -23,6 +24,12 @@ class Series extends Model implements HasPublicPath
     public function pathForSlug(string $slug): ?string
     {
         return '/series/'.$slug;
+    }
+
+    /** @return HasMany<Article, $this> tutorials in reading order */
+    public function articles(): HasMany
+    {
+        return $this->hasMany(Article::class)->orderBy('series_position');
     }
 
     /** @return BelongsTo<Media, $this> */

@@ -29,7 +29,7 @@ it('renders the site name, slogan and meta tags from settings', function () {
 it('formats page titles with the title format', function () {
     updateSettings(SeoSettings::class, ['title_format' => '{page} | {site}']);
 
-    $this->get('/')->assertSee('<title>Getting Started with Tailwind CSS | Code The Pixel</title>', false);
+    $this->get('/tutorials')->assertSee('<title>All tutorials | Code The Pixel</title>', false);
 });
 
 it('shows the topbar notice only when enabled and inside its window', function () {

@@ -48,6 +48,18 @@ class Category extends Model implements HasPublicPath
         return $this->hasMany(Category::class, 'parent_id')->orderBy('sort');
     }
 
+    /** @return HasMany<Article, $this> */
+    public function articles(): HasMany
+    {
+        return $this->hasMany(Article::class);
+    }
+
+    /** @return list<int> this category and its children: a parent's archive lists both */
+    public function familyIds(): array
+    {
+        return [$this->id, ...$this->children()->pluck('id')->all()];
+    }
+
     /** @param Builder<Category> $query */
     public function scopeRoots(Builder $query): void
     {

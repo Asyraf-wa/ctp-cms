@@ -133,6 +133,12 @@ class Article extends Model implements HasPublicPath, HasRichContent
         return $this->belongsTo(Media::class, 'featured_media_id');
     }
 
+    /** @return BelongsToMany<Project, $this> */
+    public function projects(): BelongsToMany
+    {
+        return $this->belongsToMany(Project::class, 'project_article');
+    }
+
     /** @return HasMany<ArticleRevision, $this> */
     public function revisions(): HasMany
     {
@@ -151,6 +157,17 @@ class Article extends Model implements HasPublicPath, HasRichContent
     public function scopePublished(Builder $query): void
     {
         $query->where('status', ArticleStatus::Published)->where('published_at', '<=', now());
+    }
+
+    // Lists and cards: everything but the heavy body columns, with what a card shows.
+    /** @param Builder<Article> $query */
+    public function scopeForCards(Builder $query): void
+    {
+        $query->select([
+            'id', 'type', 'author_id', 'title', 'slug', 'excerpt', 'featured_media_id', 'category_id', 'series_id', 'series_position',
+            'status', 'published_at', 'content_updated_at', 'difficulty', 'reading_minutes', 'reading_minutes_override',
+            'is_featured', 'is_pinned', 'views', 'kudos',
+        ])->with(['category', 'featuredMedia']);
     }
 
     /** @param Builder<Article> $query */

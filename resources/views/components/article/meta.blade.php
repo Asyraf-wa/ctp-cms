@@ -22,12 +22,5 @@
     @endif
     <span aria-hidden="true">•</span>
     <span>{{ $article->readingMinutes() }} min read</span>
-    @if ($article->difficulty)
-        <span @class([
-            'rounded-xs px-2 py-0.5 text-xs font-semibold',
-            'bg-[#dcfce7] text-beginner dark:bg-[#14532d]/40' => $article->difficulty->value === 'beginner',
-            'bg-[#fef9c3] text-intermediate dark:bg-[#713f12]/40' => $article->difficulty->value === 'intermediate',
-            'bg-[#fee2e2] text-advanced dark:bg-[#7f1d1d]/40' => $article->difficulty->value === 'advanced',
-        ])>{{ $article->difficulty->getLabel() }}</span>
-    @endif
+    <x-site.difficulty :level="$article->difficulty" />
 </div>

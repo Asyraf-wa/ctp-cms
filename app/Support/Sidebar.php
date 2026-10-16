@@ -12,7 +12,7 @@ class Sidebar
     public const PER_CATEGORY = 5;
 
     /** @return list<array{name: string, icon: string, url: string, count: int, open: bool, items: list<array{title: string, url: string, active: bool}>}> */
-    public static function categories(?Article $current = null): array
+    public static function categories(?Article $current = null, ?Category $open = null): array
     {
         $tree = Cache::remember('sidebar.categories', now()->addMinutes(10), function () {
             return Category::query()->roots()->ordered()->with('children')->get()
@@ -37,22 +37,23 @@ class Sidebar
         });
 
         $out = [];
-        foreach ($tree as $index => $category) {
-            $isCurrent = $current && in_array($current->category_id, $category['ids'], true);
-            $items = array_map(fn (array $i) => ['title' => $i['title'], 'url' => $i['url'], 'active' => $current?->id === $i['id']], $category['items']);
+        foreach ($tree as $index => $entry) {
+            $isCurrent = ($current && in_array($current->category_id, $entry['ids'], true))
+                || ($open && in_array($open->id, $entry['ids'], true));
+            $items = array_map(fn (array $i) => ['title' => $i['title'], 'url' => $i['url'], 'active' => $current?->id === $i['id']], $entry['items']);
 
             // Keep the article being read visible even when it is not among the newest.
-            if ($isCurrent && ! collect($items)->contains('active', true)) {
+            if ($current && $isCurrent && ! collect($items)->contains('active', true)) {
                 array_unshift($items, ['title' => $current->title, 'url' => url($current->publicPath() ?? '/'), 'active' => true]);
             }
 
             $out[] = [
-                'name' => $category['name'],
-                'icon' => $category['icon'],
-                'url' => $category['url'],
-                'count' => $category['count'],
+                'name' => $entry['name'],
+                'icon' => $entry['icon'],
+                'url' => $entry['url'],
+                'count' => $entry['count'],
                 // Open the reader's category; with no article, open the first one (as in the template).
-                'open' => $isCurrent || ($current === null && $index === 0),
+                'open' => $isCurrent || ($current === null && $open === null && $index === 0),
                 'items' => $items,
             ];
         }

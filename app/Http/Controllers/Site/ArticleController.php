@@ -27,6 +27,14 @@ class ArticleController extends Controller
         return $article->type === ArticleType::Blog ? view('site.blog-post', $data) : view('site.article', $data);
     }
 
+    // PUB-08: single-column journal list.
+    public function blogIndex(): View
+    {
+        return view('site.blog', [
+            'posts' => Article::published()->blogPosts()->forCards()->latest('published_at')->paginate(10),
+        ]);
+    }
+
     public function blog(string $slug): View
     {
         $article = Article::blogPosts()->where('slug', $slug)->firstOrFail();
