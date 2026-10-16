@@ -40,6 +40,9 @@ Route::middleware('throttle:10,1')->prefix('auth/google')->name('auth.google.')-
 
 Route::get('blog/{slug}', [ArticleController::class, 'blog'])->where('slug', $slug)->name('blog.show');
 
+// Sample: text-only home in the tutorial layout, for review before it replaces / (noindex).
+Route::get('preview/home', [HomeController::class, 'preview'])->name('home.preview');
+
 // ART-04: signed preview links from the admin; never indexed.
 Route::get('preview/articles/{article}', [ArticleController::class, 'preview'])
     ->middleware('signed')

@@ -18,7 +18,11 @@ export default defineConfig({
         origin: 'http://localhost:5183',
         cors: true,
         hmr: { host: 'localhost' },
+        // Docker Desktop on WSL does not always forward file events from the bind mount,
+        // so new Blade files were missed by Tailwind until a restart. Polling is reliable.
         watch: {
+            usePolling: true,
+            interval: 500,
             ignored: ['**/storage/framework/views/**', '**/vendor/**', '**/legacy/**'],
         },
     },

@@ -122,3 +122,19 @@ it('reserves the new section names for root slugs', function () {
         expect(RootSlugs::isReserved($word))->toBeTrue();
     }
 });
+
+it('renders the text-only home sample with category tabs and discovery panels', function () {
+    Article::factory()->published()->create(['title' => 'Login Plugin', 'category_id' => $this->auth->id, 'difficulty' => Difficulty::Advanced]);
+    Article::factory()->published()->create(['title' => 'VS Code Setup', 'category_id' => $this->tools->id, 'views' => 50]);
+    Article::factory()->create(['title' => 'Secret Draft', 'category_id' => $this->cake->id]);
+
+    $this->get('/preview/home')->assertOk()
+        ->assertSee('noindex, follow', false)
+        ->assertSee(['Latest tutorials', 'Login Plugin', 'VS Code Setup', 'Level', 'Advanced', 'Popular this month'])
+        ->assertDontSee('Secret Draft')
+        ->assertDontSee('<img', false);
+
+    // The CakePHP tab includes its child category.
+    $html = $this->get('/preview/home?category=cakephp')->assertOk()->assertSee('Latest CakePHP tutorials')->getContent();
+    expect(substr($html, strpos($html, '<ol>'), 2000))->toContain('Login Plugin')->not->toContain('VS Code Setup');
+});
