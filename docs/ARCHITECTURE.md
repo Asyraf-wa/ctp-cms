@@ -68,7 +68,7 @@ ctp/
 ```
 users            id, name, email (unique), google_id, google_avatar, last_login_at,
                  -- author profile (AUTHOR-02)
-                 display_name, slug (unique), avatar_media_id, job_title, bio_short, bio_long,
+                 display_name, slug (unique), avatar_path, job_title, bio_short, bio_long,
                  website_url, socials (json {github,x,linkedin,youtube,…}), timestamps
 articles         id, type enum(tutorial,blog), author_id → users, title, slug (unique per type), excerpt, tldr (text),
                  body (longtext, sanitised HTML), body_rendered (longtext, cached), toc (json),
@@ -100,7 +100,7 @@ redirects        id, from_path (unique), to_path, status_code (301|302|410), hit
                  source enum(manual,legacy,slug), timestamps          -- slug = auto from SLUG-03
 not_found_logs   id, path (unique), hits, referrer, last_seen_at
 article_views    article_id, date, views                    -- daily rollups for dashboard charts
-settings         group, name, payload (json), locked        -- spatie/laravel-settings
+settings         group, name, payload (json), locked        -- spatie/laravel-settings (cached; turnstile secret encrypted)
                  groups: general, seo, notice (topbar), ribbon (title, link, new_tab, bg_color, text_color auto), social, scripts, integrations, contact
 root_slugs       slug (unique), sluggable_type (article|page), sluggable_id   -- D9 shared root namespace
 contact_messages id, topic enum(general,tutorial_question,collaboration,speaking,bug_report,other), name, email,

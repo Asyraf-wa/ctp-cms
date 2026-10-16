@@ -44,19 +44,19 @@
 ## Phase 1 — CMS Core
 
 ### 1A. Settings, Authors, Menus, Slugs
-- [ ] T1.01 `spatie/laravel-settings`. Settings page with the tabs General, SEO meta, Topbar notification, Ribbon, Social, Scripts, Integrations (SET-01..07)
-- [ ] T1.02 Topbar notification component: styles, schedule window, dismiss by message hash, scheduler cache flush at the start or end time (SET-03)
-- [ ] T1.03 Ribbon component: top-right corner ribbon on desktop, badge on mobile, **background colour picker with presets**, auto text contrast, live preview in the admin (SET-04)
-- [ ] T1.04 Author profile fields on `users` and a Filament "My profile" page (AUTHOR-02)
-- [ ] T1.05 `HasSlug` trait: generate, unique per type, **slug history → automatic 301** (SLUG-01..04)
-- [ ] T1.06 **Root slug namespace (D9):**
+- [x] T1.01 `spatie/laravel-settings`. Settings page with the tabs General, SEO meta, Topbar notification, Ribbon, Social, Scripts, Integrations (SET-01..07)
+- [x] T1.02 Topbar notification component: styles, schedule window (MYT in the admin, UTC stored), dismiss by message hash with no flash (SET-03). *Cache flush at the start/end time moves to T4.06, when the response cache arrives*
+- [x] T1.03 Ribbon component: top-right corner ribbon on desktop, badge on mobile, **background colour picker with presets**, auto text contrast, live preview in the admin (SET-04)
+- [x] T1.04 Author profile fields on `users` and a Filament "My profile" page (AUTHOR-02)
+- [x] T1.05 `HasSlug` trait: generate, unique per type, **slug history → automatic 301** (SLUG-01..04)
+- [x] T1.06 **Root slug namespace (D9):**
   - `root_slugs` table shared by tutorials and pages
   - reserved words collected automatically from the route prefixes
   - catch-all `/{slug}` route registered last
   - `ctp:check-slug-conflicts` command
   - a Pest test that fails on any route/slug collision
-- [ ] T1.07 Menus and menu items: Filament resource with a drag-and-drop tree (2 levels), link types (URL, route, content by ID), icons, badges, enable toggle (MENU-01..05)
-- [ ] T1.08 Seed the default menus (header, footer_1..3, legal)
+- [x] T1.07 Menus and menu items: Filament resource with a drag-and-drop tree (2 levels), link types (URL, route, content by ID), icons, badges, enable toggle (MENU-01..05)
+- [x] T1.08 Seed the default menus (header, footer_1..3, legal)
 
 ### 1B. Taxonomy
 - [ ] T1.09 Migrations and models: categories (tree), tags, series (TAX-01..03)

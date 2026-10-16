@@ -2,6 +2,7 @@
 
 namespace App\Models\Concerns;
 
+use App\Models\Menu;
 use App\Models\Redirect;
 use Illuminate\Support\Str;
 
@@ -15,6 +16,10 @@ trait HasSlug
     {
         static::saving(fn (self $model) => $model->fillSlug());
         static::updated(fn (self $model) => $model->redirectOldSlug());
+
+        // Menus link content by id and resolve its URL/visibility when cached (MENU-04).
+        static::saved(fn () => Menu::flushCache());
+        static::deleted(fn () => Menu::flushCache());
     }
 
     protected function slugSourceColumn(): string
@@ -28,6 +33,11 @@ trait HasSlug
     public function isPubliclyVisible(): bool
     {
         return true;
+    }
+
+    public function publicPath(): ?string
+    {
+        return $this->slug ? $this->pathForSlug($this->slug) : null;
     }
 
     public static function normalizeSlug(?string $value): string

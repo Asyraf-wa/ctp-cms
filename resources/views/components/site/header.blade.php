@@ -1,14 +1,6 @@
 @inject('general', 'App\Settings\GeneralSettings')
 @inject('ribbon', 'App\Settings\RibbonSettings')
-@php
-    // Temporary until menu management (MENU, T1.07) supplies the `header` menu.
-    $nav = [
-        ['label' => 'Home', 'url' => url('/')],
-        ['label' => 'All Tutorials', 'url' => url('/tutorials')],
-        ['label' => 'Blog', 'url' => url('/blog')],
-        ['label' => 'Projects', 'url' => url('/projects')],
-    ];
-@endphp
+@php($nav = \App\Models\Menu::tree('header'))
 
 {{-- Layout follows tutorial_web_template.html: shrinks on scroll (py-6 → py-3, logo 3xl → xl). --}}
 <header x-data="{ scrolled: false, open: false }"
@@ -29,12 +21,30 @@
 
         <nav class="hidden gap-6 whitespace-nowrap md:flex" aria-label="Main">
             @foreach ($nav as $item)
-                <a href="{{ $item['url'] }}"
-                    @class([
-                        'text-sm font-medium transition-colors',
-                        'text-primary' => request()->url() === $item['url'],
-                        'text-muted-foreground hover:text-primary' => request()->url() !== $item['url'],
-                    ])>{{ $item['label'] }}</a>
+                @php($active = \App\Support\Navigation::isActive($item['href']) || collect($item['children'])->contains(fn ($c) => \App\Support\Navigation::isActive($c['href'])))
+                @if ($item['children'])
+                    {{-- Dropdown (MENU-03) --}}
+                    <div class="relative" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false" @keydown.escape="open = false">
+                        <button type="button" @click="open = !open" :aria-expanded="open"
+                            @class(['inline-flex items-center gap-1 text-sm font-medium transition-colors', 'text-primary' => $active, 'text-muted-foreground hover:text-primary' => ! $active])>
+                            {{ $item['label'] }} <x-lucide-chevron-down class="size-3.5 transition-transform" ::class="open && 'rotate-180'" />
+                        </button>
+                        <div x-show="open" x-cloak x-transition.opacity.duration.150ms class="absolute top-full left-1/2 z-50 -translate-x-1/2 pt-3">
+                            <div class="flex min-w-52 flex-col rounded-xl border border-border bg-card p-1.5 shadow-lg">
+                                @if ($item['href'])
+                                    <x-site.nav-link :item="$item" :active="\App\Support\Navigation::isActive($item['href'])" class="w-full rounded-sm px-3 py-2 text-sm font-medium text-foreground hover:bg-accent" />
+                                @endif
+                                @foreach ($item['children'] as $child)
+                                    <x-site.nav-link :item="$child" :active="\App\Support\Navigation::isActive($child['href'])"
+                                        @class(['w-full rounded-sm px-3 py-2 text-sm hover:bg-accent', 'text-primary font-medium' => \App\Support\Navigation::isActive($child['href']), 'text-muted-foreground hover:text-foreground' => ! \App\Support\Navigation::isActive($child['href'])]) />
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                @else
+                    <x-site.nav-link :item="$item" :active="$active"
+                        @class(['text-sm font-medium transition-colors', 'text-primary' => $active, 'text-muted-foreground hover:text-primary' => ! $active]) />
+                @endif
             @endforeach
         </nav>
 
@@ -95,7 +105,25 @@
             </form>
             <nav class="flex flex-col gap-1 p-3" aria-label="Mobile">
                 @foreach ($nav as $item)
-                    <a href="{{ $item['url'] }}" class="rounded-md px-3 py-2.5 font-medium text-foreground hover:bg-accent">{{ $item['label'] }}</a>
+                    @if ($item['children'])
+                        <div x-data="{ sub: false }">
+                            <button type="button" @click="sub = !sub" :aria-expanded="sub"
+                                class="flex w-full items-center justify-between rounded-md px-3 py-2.5 font-medium text-foreground hover:bg-accent">
+                                {{ $item['label'] }} <x-lucide-chevron-down class="size-4 text-muted-foreground transition-transform" ::class="sub && 'rotate-180'" />
+                            </button>
+                            <div x-show="sub" x-collapse x-cloak class="ml-3 flex flex-col border-l border-border pl-2">
+                                @if ($item['href'])
+                                    <x-site.nav-link :item="$item" class="w-full rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent" />
+                                @endif
+                                @foreach ($item['children'] as $child)
+                                    <x-site.nav-link :item="$child" class="w-full rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent" />
+                                @endforeach
+                            </div>
+                        </div>
+                    @else
+                        <x-site.nav-link :item="$item" :active="\App\Support\Navigation::isActive($item['href'])"
+                            class="rounded-md px-3 py-2.5 font-medium text-foreground hover:bg-accent" />
+                    @endif
                 @endforeach
                 <a href="{{ url('/feed') }}" class="mt-2 rounded-full bg-primary px-4 py-2 text-center text-sm font-medium text-primary-foreground">Subscribe</a>
             </nav>

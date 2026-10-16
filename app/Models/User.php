@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasSlug;
+use App\Models\Contracts\HasPublicPath;
 use App\Support\AdminAccess;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
@@ -21,7 +22,7 @@ use Illuminate\Support\Facades\Storage;
     'display_name', 'slug', 'avatar_path', 'job_title', 'bio_short', 'bio_long', 'website_url', 'socials',
 ])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable implements FilamentUser, HasAvatar
+class User extends Authenticatable implements FilamentUser, HasAvatar, HasPublicPath
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasSlug, Notifiable;
