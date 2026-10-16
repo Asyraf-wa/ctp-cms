@@ -16,7 +16,11 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            // Admins sign in with Google only (PRD AUTH-01); the password stays null.
+            $table->string('password')->nullable();
+            $table->string('google_id')->nullable()->unique();
+            $table->string('google_avatar', 1024)->nullable();
+            $table->timestamp('last_login_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

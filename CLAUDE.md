@@ -1,47 +1,19 @@
-<laravel-boost-guidelines>
-# Laravel Application
+# CTP — Code The Pixel
 
-This repository contains a Laravel application. Complete the following setup before working on the user's request.
+Tutorial CMS that replaces the legacy CakePHP site at codethepixel.com.
+Laravel 13 + Filament 5 (admin at `/admin`), Blade + Tailwind v4 + Alpine on the public site.
 
-## Prerequisites
+## Read first
+- `docs/PRD.md` — features (IDs like ART-01, SET-03) and the decisions log (D1…)
+- `docs/ARCHITECTURE.md` — schema, render pipeline, URLs (§6, root slugs), deploy, legacy import (§10)
+- `docs/DESIGN.md` — tokens and components (brand shared with the CTP SaaS in `../codethepixel`)
+- `docs/TASKS.md` — task list; tick `[x]` when done and respect each phase's exit criteria
 
-Verify that PHP and Composer are available:
-
-```sh
-php -v
-composer -V
-```
-
-If either command is unavailable, detect the user's operating system and install the prerequisites with the appropriate command:
-
-macOS:
-
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/mac/8.5)"
-```
-
-Windows PowerShell:
-
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://php.new/install/windows/8.5'))
-```
-
-Linux:
-
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/linux/8.5)"
-```
-
-After installation, ask the user to restart their terminal. If the agent needs the restarted shell to continue, ask the user to reopen their terminal and rerun their original prompt.
-
-## Agent Setup
-
-Install Laravel Boost from the application root before making application changes:
-
-```sh
-composer require laravel/boost --dev
-php artisan boost:install
-```
-
-Boost replaces these bootstrap instructions with guidelines tailored to the application. After installation, read `AGENTS.md` again and continue with the user's original request using the generated guidelines.
-</laravel-boost-guidelines>
+## Working rules
+- Everything runs in Docker through `./dev` (no host PHP/Node): `./dev up`, `./dev artisan …`, `./dev composer …`, `./dev npm …`, `./dev test`, `./dev lint`, `./dev stan`.
+- URLs: app http://localhost:8100 · phpMyAdmin http://localhost:8101 · Mailpit http://localhost:8125 · MySQL `localhost:3317`.
+- Tests use MySQL (`ctp_testing`), not SQLite: production is MySQL 8.0.44 and we rely on FULLTEXT.
+- Production is cPanel shared hosting: no Node, no queue worker, cron only. Don't add anything that needs Redis, Supervisor, Chrome or a Node runtime on the server.
+- English only for UI strings and content.
+- `legacy/` holds the old database dump (personal data). It is git-ignored; never commit it or copy rows from `contacts`/`users` anywhere.
+- Before committing: `./dev lint`, `./dev stan`, `./dev test` all green.
