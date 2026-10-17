@@ -306,14 +306,15 @@ class ManageSettings extends Page
     private function socialTab(): Tab
     {
         return Tab::make('Social')->icon(Heroicon::OutlinedShare)->schema([
-            Group::make()->statePath('social')->schema([
-                Section::make()->columns(2)->schema(
-                    collect(SocialSettings::NETWORKS)
-                        ->map(fn (string $label, string $key) => TextInput::make($key)->label($label)->url()->prefixIcon(Heroicon::OutlinedLink))
-                        ->values()
-                        ->all(),
-                ),
-            ]),
+            Group::make()->statePath('social')->schema(
+                collect(SocialSettings::NETWORKS)
+                    ->map(fn (string $label, string $key) => TextInput::make($key)->label($label)->url()->maxLength(255)->prefixIcon(Heroicon::OutlinedLink))
+                    ->partition(fn (TextInput $input, string $key) => ! in_array($key, SocialSettings::PROFILES, true))
+                    ->map(fn ($inputs, int $i) => Section::make($i === 0 ? 'Social networks' : 'Developer and research profiles')
+                        ->description('Filled links show as icons in the footer, in this order, and tell search engines these profiles belong to the site.')
+                        ->columns(2)->schema($inputs->values()->all()))
+                    ->all(),
+            ),
         ]);
     }
 

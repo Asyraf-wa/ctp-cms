@@ -46,9 +46,9 @@
                     </nav>
                 @endif
             </div>
-            <div class="flex gap-4">
+            <div class="flex flex-wrap justify-center gap-x-4 gap-y-3 sm:justify-end">
                 @foreach ($social->links() as $network => $url)
-                    <a href="{{ $url }}" rel="me noopener" target="_blank" class="text-muted-foreground transition-colors hover:text-foreground">
+                    <a href="{{ $url }}" rel="me noopener" target="_blank" title="{{ \App\Settings\SocialSettings::NETWORKS[$network] }}" class="text-muted-foreground transition-colors hover:text-foreground">
                         <span class="sr-only">{{ \App\Settings\SocialSettings::NETWORKS[$network] }}</span>
                         <x-site.social-icon :network="$network" class="size-5" />
                     </a>

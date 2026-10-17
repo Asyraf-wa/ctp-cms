@@ -4,18 +4,28 @@ namespace App\Settings;
 
 use Spatie\LaravelSettings\Settings;
 
-// PRD SET-05. Used in the footer, the author box fallback and Organization.sameAs.
+// PRD SET-05. Used in the footer, the author box fallback and Organization.sameAs (footer order = this order).
 class SocialSettings extends Settings
 {
     public const NETWORKS = [
         'github' => 'GitHub',
-        'x' => 'X (Twitter)',
-        'linkedin' => 'LinkedIn',
         'youtube' => 'YouTube',
+        'linkedin' => 'LinkedIn',
+        'x' => 'X (Twitter)',
         'facebook' => 'Facebook',
         'instagram' => 'Instagram',
         'tiktok' => 'TikTok',
+        'codepen' => 'CodePen',
+        'freecodecamp' => 'freeCodeCamp',
+        'packagist' => 'Packagist',
+        'google_developers' => 'Google Developer Profile',
+        'google_scholar' => 'Google Scholar',
+        'orcid' => 'ORCID',
+        'scopus' => 'Scopus',
     ];
+
+    // Admin grouping: the first are social networks, the rest developer and research profiles.
+    public const PROFILES = ['codepen', 'freecodecamp', 'packagist', 'google_developers', 'google_scholar', 'orcid', 'scopus'];
 
     public ?string $github;
 
@@ -30,6 +40,20 @@ class SocialSettings extends Settings
     public ?string $instagram;
 
     public ?string $tiktok;
+
+    public ?string $codepen;
+
+    public ?string $freecodecamp;
+
+    public ?string $packagist;
+
+    public ?string $google_developers;
+
+    public ?string $google_scholar;
+
+    public ?string $orcid;
+
+    public ?string $scopus;
 
     public static function group(): string
     {
