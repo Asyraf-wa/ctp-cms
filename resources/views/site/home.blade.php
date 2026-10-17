@@ -9,8 +9,6 @@
         <x-site.category-sidebar :categories="$sidebar" />
     </x-slot:left>
 
-    <x-article.mobile-bar :categories="$sidebar" />
-
     {{-- Slim intro: one h1 and the search, for first-time visitors and search engines. --}}
     <section class="mb-6 rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
         <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">

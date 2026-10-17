@@ -13,7 +13,7 @@
         </x-slot:left>
     @endif
 
-    <x-article.mobile-bar :categories="$categories" :toc="$article->toc ?? []" />
+    <x-article.mobile-bar :toc="$article->toc ?? []" />
 
     <article class="rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 sm:p-8" data-article @unless ($preview) data-view-beacon="{{ route('api.articles.view', $article) }}" @endunless>
         <header>

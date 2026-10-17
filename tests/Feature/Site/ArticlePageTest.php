@@ -78,7 +78,8 @@ it('lists as many sidebar tutorials per category as the Layout setting says, plu
     updateSettings(DisplaySettings::class, ['sidebar_items_per_category' => 3]);
 
     $html = $this->get('/'.$articles->last()->slug)->assertOk()->getContent();
-    $sidebar = substr($html, strpos($html, 'aria-label="Categories"'), 6000);
+    $start = strpos($html, 'aria-label="Categories"');
+    $sidebar = substr($html, $start, strpos($html, '</aside>', $start) - $start);
 
     // Newest three, then the oldest because it is the article being read.
     expect(substr_count($sidebar, 'Cake Tutorial '))->toBe(4)

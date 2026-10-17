@@ -16,6 +16,10 @@
     </div>
     <div class="mx-auto flex max-w-[1440px] flex-col gap-8 px-4 pt-8 pb-12 sm:px-6 lg:flex-row lg:px-8" x-data x-init="$store.focus.available = true">
         @isset($left)
+            {{-- Below lg the same sidebar sits in the header's menu drawer. --}}
+            @push('mobile-sidebar')
+                {{ $left }}
+            @endpush
             <aside class="hidden w-full shrink-0 lg:block lg:w-64" aria-label="Categories" data-sidebar>
                 <div class="no-scrollbar sticky top-28 h-[calc(100vh-8rem)] overflow-y-auto pr-4 pb-8">
                     {{ $left }}

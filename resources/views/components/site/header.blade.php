@@ -1,6 +1,9 @@
 @inject('general', 'App\Settings\GeneralSettings')
 @inject('ribbon', 'App\Settings\RibbonSettings')
 @php($nav = \App\Models\Menu::tree('header'))
+@php($sidebar = trim($__env->yieldPushContent('mobile-sidebar')))
+{{-- With a page sidebar (categories) the menu button stays until lg, where the sidebar shows. --}}
+@php($drawerHidden = $sidebar !== '' ? 'lg:hidden' : 'md:hidden')
 
 {{-- Layout follows tutorial_web_template.html: shrinks on scroll (py-6 → py-3, logo 3xl → xl). --}}
 <header x-data="{ scrolled: false, open: false }"
@@ -79,19 +82,19 @@
                 class="hidden rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-hover sm:inline-flex">Subscribe</a>
 
             <button type="button" @click="open = true" aria-label="Open menu" :aria-expanded="open"
-                class="inline-flex rounded-lg p-2 text-muted-foreground hover:bg-accent md:hidden">
+                @class(['inline-flex rounded-lg p-2 text-muted-foreground hover:bg-accent', $drawerHidden])>
                 <x-lucide-menu class="size-5" />
             </button>
         </div>
     </div>
 
-    {{-- Mobile drawer (the template has no mobile nav; this adds one). --}}
-    <div x-show="open" x-cloak class="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true" aria-label="Menu">
+    {{-- Mobile drawer from the left: search, main menu, then the page's sidebar (categories) when it has one. --}}
+    <div x-show="open" x-cloak @class(['fixed inset-0 z-50', $drawerHidden]) role="dialog" aria-modal="true" aria-label="Menu">
         <div x-show="open" x-transition.opacity class="absolute inset-0 bg-slate-950/50" @click="open = false"></div>
         <div x-show="open" x-trap.noscroll="open"
-            x-transition:enter="transition duration-200 ease-out" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
-            x-transition:leave="transition duration-150 ease-in" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full"
-            class="absolute inset-y-0 right-0 flex w-80 max-w-[85vw] flex-col overflow-y-auto border-l border-border bg-card shadow-lg">
+            x-transition:enter="transition duration-200 ease-out" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0"
+            x-transition:leave="transition duration-150 ease-in" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full"
+            class="absolute inset-y-0 left-0 flex w-80 max-w-[85vw] flex-col overflow-y-auto border-r border-border bg-card shadow-lg">
             <div class="flex items-center justify-between border-b border-border px-4 py-4">
                 <span class="font-semibold">Menu</span>
                 <button type="button" @click="open = false" aria-label="Close menu" class="rounded-lg p-2 text-muted-foreground hover:bg-accent">
@@ -127,6 +130,9 @@
                 @endforeach
                 <a href="{{ url('/feed') }}" class="mt-2 rounded-full bg-primary px-4 py-2 text-center text-sm font-medium text-primary-foreground">Subscribe</a>
             </nav>
+            @if ($sidebar !== '')
+                <div class="border-t border-border p-5">{!! $sidebar !!}</div>
+            @endif
         </div>
     </div>
 </header>
