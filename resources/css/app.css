@@ -1,9 +1,5 @@
 @import 'tailwindcss';
-/* Poppins, self-hosted (latin subset): no request to Google, so the CSP stays 'self'. */
-@import '@fontsource/poppins/latin-400.css';
-@import '@fontsource/poppins/latin-500.css';
-@import '@fontsource/poppins/latin-600.css';
-@import '@fontsource/poppins/latin-700.css';
+@import '@fontsource-variable/inter';
 @import '@fontsource-variable/jetbrains-mono';
 /* Brand mark only: the </> in Victor Mono (latin, bold; one small file). */
 @import '@fontsource/victor-mono/latin-700.css';
@@ -17,7 +13,7 @@
 
 @theme inline {
     --font-sans:
-        'Poppins', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif, 'Apple Color Emoji',
+        'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif, 'Apple Color Emoji',
         'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
@@ -146,13 +142,15 @@
 
     body {
         @apply bg-background text-foreground antialiased;
+        letter-spacing: -0.005em;
+        font-feature-settings: 'cv11', 'ss01';
     }
 
     h1,
     h2,
     h3,
     h4 {
-        letter-spacing: 0;
+        letter-spacing: -0.02em;
     }
 
     ::selection {
