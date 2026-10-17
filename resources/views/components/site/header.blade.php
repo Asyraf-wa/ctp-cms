@@ -7,8 +7,10 @@
 
 {{-- Layout follows tutorial_web_template.html: shrinks on scroll (py-6 → py-3, logo 3xl → xl). The full-size state is in the static classes so nothing moves when Alpine boots. --}}
 <header x-data="{ scrolled: false, open: false }"
+    {{-- No throttle: Alpine's throttle drops the last event, so a quick flick to the top left the header small.
+        Shrink past 50px, grow back under 10px, so it cannot flicker around one threshold. --}}
     x-init="scrolled = window.scrollY > 50"
-    @scroll.window.throttle.50ms="scrolled = window.scrollY > 50"
+    @scroll.window.passive="scrolled = scrolled ? window.scrollY > 10 : window.scrollY > 50"
     @keydown.escape.window="open = false"
     class="sticky top-0 z-40 w-full border-b border-border bg-card py-6 transition-all duration-300"
     :class="scrolled && 'py-3! bg-card/95! shadow-sm backdrop-blur'">
