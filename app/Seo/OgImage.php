@@ -90,10 +90,9 @@ class OgImage
 
         $left = 80;
 
-        // Brand: teal mark with </> and the site name.
-        $this->roundedRect($img, $left, 64, $left + 64, 128, 14, $this->color($img, '#0f766e'));
-        $this->text($img, '</>', 21, $font('ExtraBold'), $left + 32, 108, '#ffffff', center: true);
-        $this->text($img, $general->site_name, 28, $font('SemiBold'), $left + 84, 108, '#e2e8f0');
+        // Brand: the </> glyph (Victor Mono's ligature, pre-rendered: GD cannot shape ligatures) and the site name.
+        $this->mark($img, $left, 76, 78);
+        $this->text($img, $general->site_name, 28, $font('SemiBold'), $left + 102, 108, '#e2e8f0');
 
         // Eyebrow and title (auto-sized to at most three lines).
         $this->text($img, Str::upper(Str::limit($content['eyebrow'], 40, '…')), 22, $font('SemiBold'), $left, 236, '#5eead4', tracking: 2);
@@ -117,6 +116,17 @@ class OgImage
         imagepng($img, null, 6);
 
         return (string) ob_get_clean();
+    }
+
+    private function mark(GdImage $img, int $x, int $y, int $width): void
+    {
+        $mark = imagecreatefrompng(resource_path('brand/mark-og.png'));
+        if ($mark === false) {
+            return;
+        }
+
+        $height = (int) round($width * imagesy($mark) / imagesx($mark));
+        imagecopyresampled($img, $mark, $x, $y, 0, 0, $width, $height, imagesx($mark), imagesy($mark));
     }
 
     /**
@@ -191,15 +201,6 @@ class OgImage
         for ($r = $radius; $r > 0; $r -= 12) {
             $alpha = $strength * (1 - $r / $radius) / 6;
             imagefilledellipse($img, $cx, $cy, $r * 2, $r * 2, $this->color($img, $hex, $alpha));
-        }
-    }
-
-    private function roundedRect(GdImage $img, int $x1, int $y1, int $x2, int $y2, int $r, int $color): void
-    {
-        imagefilledrectangle($img, $x1 + $r, $y1, $x2 - $r, $y2, $color);
-        imagefilledrectangle($img, $x1, $y1 + $r, $x2, $y2 - $r, $color);
-        foreach ([[$x1 + $r, $y1 + $r], [$x2 - $r, $y1 + $r], [$x1 + $r, $y2 - $r], [$x2 - $r, $y2 - $r]] as [$cx, $cy]) {
-            imagefilledellipse($img, $cx, $cy, $r * 2, $r * 2, $color);
         }
     }
 
