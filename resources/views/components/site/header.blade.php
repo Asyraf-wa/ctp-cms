@@ -78,8 +78,18 @@
                 <x-lucide-minimize-2 class="size-5" x-show="$store.focus.on" x-cloak />
             </button>
 
-            <a href="{{ url('/feed') }}"
-                class="hidden rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-hover sm:inline-flex">Subscribe</a>
+            {{-- Fullscreen: hidden where the Fullscreen API is missing (iPhone Safari). --}}
+            <button type="button" x-data="{ full: false, supported: document.fullscreenEnabled }" x-show="supported" x-cloak
+                @fullscreenchange.document="full = !!document.fullscreenElement"
+                @click="full ? document.exitFullscreen() : document.documentElement.requestFullscreen()"
+                :aria-pressed="full ? 'true' : 'false'"
+                :title="full ? 'Exit fullscreen' : 'Fullscreen'"
+                :aria-label="full ? 'Exit fullscreen' : 'Fullscreen'"
+                class="hidden rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent focus:ring-4 focus:ring-line-strong focus:outline-none lg:inline-flex"
+                :class="full && 'bg-brand-soft text-primary'">
+                <x-lucide-maximize class="size-5" x-show="!full" />
+                <x-lucide-minimize class="size-5" x-show="full" x-cloak />
+            </button>
 
             <button type="button" @click="open = true" aria-label="Open menu" :aria-expanded="open"
                 @class(['inline-flex rounded-lg p-2 text-muted-foreground hover:bg-accent', $drawerHidden])>
@@ -128,7 +138,6 @@
                             class="rounded-md px-3 py-2.5 font-medium text-foreground hover:bg-accent" />
                     @endif
                 @endforeach
-                <a href="{{ url('/feed') }}" class="mt-2 rounded-full bg-primary px-4 py-2 text-center text-sm font-medium text-primary-foreground">Subscribe</a>
             </nav>
             @if ($sidebar !== '')
                 <div class="border-t border-border p-5">{!! $sidebar !!}</div>
