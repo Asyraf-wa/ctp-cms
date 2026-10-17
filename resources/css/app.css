@@ -8,6 +8,15 @@
     src: url('@fontsource-variable/inter/files/inter-latin-wght-normal.woff2') format('woff2-variations');
 }
 
+/* Site name next to the logo only (bold, Latin): its square, technical shapes match the </> mark. */
+@font-face {
+    font-family: 'Titillium Web';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 700;
+    src: url('@fontsource/titillium-web/files/titillium-web-latin-700-normal.woff2') format('woff2');
+}
+
 @font-face {
     font-family: 'JetBrains Mono Variable';
     font-style: normal;
@@ -27,6 +36,7 @@
     --font-sans:
         'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif, 'Apple Color Emoji',
         'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-brand: 'Titillium Web', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
     --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
     --color-background: var(--background);

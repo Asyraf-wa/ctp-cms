@@ -33,9 +33,11 @@
     <meta name="theme-color" content="#f1f5f9" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0a1120" media="(prefers-color-scheme: dark)">
 
-    {{-- Inter, which every page needs: fetched alongside the CSS instead of after it, so the swap happens before first paint (no layout shift). --}}
+    {{-- Inter and the site-name font, which every page needs: fetched alongside the CSS instead of after it, so the swap happens before first paint (no layout shift). --}}
     @unless (\Illuminate\Support\Facades\Vite::isRunningHot())
-        <link rel="preload" href="{{ \Illuminate\Support\Facades\Vite::asset('node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2') }}" as="font" type="font/woff2" crossorigin>
+        @foreach (['node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2', 'node_modules/@fontsource/titillium-web/files/titillium-web-latin-700-normal.woff2'] as $font)
+            <link rel="preload" href="{{ \Illuminate\Support\Facades\Vite::asset($font) }}" as="font" type="font/woff2" crossorigin>
+        @endforeach
     @endunless
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     {{ $head ?? '' }}

@@ -17,8 +17,8 @@
     <div @class(['mx-auto flex h-full max-w-[1440px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8', 'sm:pr-24 lg:pr-24' => $ribbon->isVisible()])>
 
         <a href="{{ url('/') }}" class="flex shrink-0 items-center gap-2 whitespace-nowrap" aria-label="{{ $general->site_name }} home">
-            <x-brand.mark />
-            <span class="text-xl font-bold tracking-tight text-foreground transition-all duration-300 lg:text-3xl"
+            <x-brand.mark class="w-10 transition-all duration-300" ::class="scrolled && 'w-7!'" />
+            <span class="font-brand text-xl font-bold text-foreground transition-all duration-300 lg:text-3xl"
                 :class="scrolled && 'lg:text-xl!'">{{ $general->site_name }}</span>
         </a>
 

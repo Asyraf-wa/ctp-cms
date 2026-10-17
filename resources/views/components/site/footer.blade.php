@@ -15,7 +15,7 @@
             <div class="col-span-1 md:col-span-2">
                 <div class="mb-4 flex items-center gap-2">
                     <x-brand.mark />
-                    <span class="text-2xl font-bold tracking-tight text-foreground">{{ $general->site_name }}</span>
+                    <span class="font-brand text-2xl font-bold text-foreground">{{ $general->site_name }}</span>
                 </div>
                 @if ($general->slogan)
                     <p class="mb-2 text-sm font-medium text-foreground">{{ $general->slogan }}</p>
