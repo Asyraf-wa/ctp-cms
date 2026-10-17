@@ -43,7 +43,7 @@
                         @endif
                         {{ $tab?->name ?? 'All' }}
                         @if ($tab)
-                            <span class="ml-1 text-xs tabular-nums opacity-70">{{ $tab->tutorial_count }}</span>
+                            <span class="ml-1 text-xs font-normal tabular-nums">{{ $tab->tutorial_count }}</span>
                         @endif
                     </a>
                 @endforeach

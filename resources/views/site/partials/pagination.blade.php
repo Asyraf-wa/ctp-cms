@@ -2,7 +2,7 @@
 @if ($paginator->hasPages())
     <nav role="navigation" aria-label="Pagination" class="mt-10 flex items-center justify-between gap-4">
         @if ($paginator->onFirstPage())
-            <span class="inline-flex items-center gap-1 rounded-md border border-border px-3 py-2 text-sm text-muted-foreground opacity-50"><x-lucide-chevron-left class="size-4" /> Previous</span>
+            <span aria-disabled="true" class="inline-flex cursor-not-allowed items-center gap-1 rounded-md border border-dashed border-border px-3 py-2 text-sm text-muted-foreground"><x-lucide-chevron-left class="size-4" /> Previous</span>
         @else
             <a href="{{ $paginator->previousPageUrl() }}" rel="prev" class="inline-flex items-center gap-1 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium hover:border-primary hover:text-primary"><x-lucide-chevron-left class="size-4" /> Previous</a>
         @endif
@@ -30,7 +30,7 @@
         @if ($paginator->hasMorePages())
             <a href="{{ $paginator->nextPageUrl() }}" rel="next" class="inline-flex items-center gap-1 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium hover:border-primary hover:text-primary">Next <x-lucide-chevron-right class="size-4" /></a>
         @else
-            <span class="inline-flex items-center gap-1 rounded-md border border-border px-3 py-2 text-sm text-muted-foreground opacity-50">Next <x-lucide-chevron-right class="size-4" /></span>
+            <span aria-disabled="true" class="inline-flex cursor-not-allowed items-center gap-1 rounded-md border border-dashed border-border px-3 py-2 text-sm text-muted-foreground">Next <x-lucide-chevron-right class="size-4" /></span>
         @endif
     </nav>
 @endif
