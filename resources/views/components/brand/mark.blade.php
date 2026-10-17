@@ -1,9 +1,7 @@
-{{-- CTP brand mark: teal </> glyph in Victor Mono. --}}
-@props(['class' => 'size-8'])
-<span {{ $attributes->class([$class, 'flex aspect-square shrink-0 items-center justify-center text-primary [container-type:size]']) }} aria-hidden="true">
-    {{--
-        Victor Mono's ligature joins </> into one glyph. Ligatures switch off with any letter-spacing or with
-        the body's Inter feature settings (cv11, ss01), so both are reset here. cqw scales it with the tile.
-    --}}
-    <span class="leading-none select-none" style="font-family: 'Victor Mono', monospace; font-weight: 700; font-size: 70cqw; letter-spacing: 0; font-feature-settings: normal; font-variant-ligatures: common-ligatures contextual;">&lt;/&gt;</span>
-</span>
+{{-- CTP brand mark: the </> glyph as one stroked line (the outline of Victor Mono's ligature), no font needed.
+    stroke-width is the weight: 190 at w-10 (40px) matches Inter Bold stems next to the site name.
+    The viewBox is cut at the glyph's top and bottom, which gives the flat tips; x has room for the mitred corners. --}}
+@props(['class' => 'w-10'])
+<svg {{ $attributes->class([$class, 'h-auto shrink-0 text-primary']) }} viewBox="-72 0 1850 1054" fill="none" stroke="currentColor" stroke-width="190" stroke-linejoin="miter" stroke-linecap="butt" aria-hidden="true" focusable="false">
+    <polyline points="469.5,177 72.5,524 664,1041 1052,16 1633.5,524 1236.5,871" />
+</svg>

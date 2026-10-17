@@ -15,8 +15,6 @@
     font-weight: 100 800;
     src: url('@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2') format('woff2-variations');
 }
-/* Brand mark only: the </> in Victor Mono (latin, bold; one small file). */
-@import '@fontsource/victor-mono/latin-700.css';
 
 @plugin '@tailwindcss/typography';
 

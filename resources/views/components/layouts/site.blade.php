@@ -33,11 +33,9 @@
     <meta name="theme-color" content="#f1f5f9" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0a1120" media="(prefers-color-scheme: dark)">
 
-    {{-- Fonts every page needs (Inter body, Victor Mono logo): fetched alongside the CSS instead of after it, so the swap happens before first paint (no layout shift). --}}
+    {{-- Inter, which every page needs: fetched alongside the CSS instead of after it, so the swap happens before first paint (no layout shift). --}}
     @unless (\Illuminate\Support\Facades\Vite::isRunningHot())
-        @foreach (['node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2', 'node_modules/@fontsource/victor-mono/files/victor-mono-latin-700-normal.woff2'] as $font)
-            <link rel="preload" href="{{ \Illuminate\Support\Facades\Vite::asset($font) }}" as="font" type="font/woff2" crossorigin>
-        @endforeach
+        <link rel="preload" href="{{ \Illuminate\Support\Facades\Vite::asset('node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2') }}" as="font" type="font/woff2" crossorigin>
     @endunless
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     {{ $head ?? '' }}

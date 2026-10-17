@@ -91,8 +91,8 @@ class OgImage
         $left = 80;
 
         // Brand: the </> glyph (Victor Mono's ligature, pre-rendered: GD cannot shape ligatures) and the site name.
-        $this->mark($img, $left, 76, 78);
-        $this->text($img, $general->site_name, 28, $font('SemiBold'), $left + 102, 108, '#e2e8f0');
+        $this->mark($img, $left, 76, 84);
+        $this->text($img, $general->site_name, 28, $font('SemiBold'), $left + 108, 108, '#e2e8f0');
 
         // Eyebrow and title (auto-sized to at most three lines).
         $this->text($img, Str::upper(Str::limit($content['eyebrow'], 40, '…')), 22, $font('SemiBold'), $left, 236, '#5eead4', tracking: 2);
