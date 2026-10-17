@@ -14,6 +14,7 @@ class ContentEditor
                 ['bold', 'italic', 'strike', 'code', 'link'],
                 ['h2', 'h3', 'h4'],
                 ['bulletList', 'orderedList', 'blockquote', 'horizontalRule'],
+                ['alignStart', 'alignCenter', 'alignEnd', 'alignJustify'],
                 ['codeBlock', 'table', 'attachFiles', 'customBlocks', 'details'],
                 ['undo', 'redo'],
             ])
