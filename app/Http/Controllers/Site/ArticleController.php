@@ -37,7 +37,7 @@ class ArticleController extends Controller
     // PUB-08: single-column journal list.
     public function blogIndex(): View
     {
-        $posts = Article::published()->blogPosts()->forCards()->latest('published_at')->paginate(10);
+        $posts = Article::published()->blogPosts()->forCards()->latest('published_at')->paginate(ArchiveController::PER_PAGE);
 
         return view('site.blog', [
             'posts' => $posts,
