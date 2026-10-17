@@ -5,19 +5,19 @@
 {{-- With a page sidebar (categories) the menu button stays until lg, where the sidebar shows. --}}
 @php($drawerHidden = $sidebar !== '' ? 'lg:hidden' : 'md:hidden')
 
-{{-- Layout follows tutorial_web_template.html: shrinks on scroll (py-6 → py-3, logo 3xl → xl). --}}
+{{-- Layout follows tutorial_web_template.html: shrinks on scroll (py-6 → py-3, logo 3xl → xl). The full-size state is in the static classes so nothing moves when Alpine boots. --}}
 <header x-data="{ scrolled: false, open: false }"
     x-init="scrolled = window.scrollY > 50"
     @scroll.window.throttle.50ms="scrolled = window.scrollY > 50"
     @keydown.escape.window="open = false"
-    class="sticky top-0 z-40 w-full border-b border-border transition-all duration-300"
-    :class="scrolled ? 'py-3 shadow-sm bg-card/95 backdrop-blur' : 'py-6 bg-card'">
+    class="sticky top-0 z-40 w-full border-b border-border bg-card py-6 transition-all duration-300"
+    :class="scrolled && 'py-3! bg-card/95! shadow-sm backdrop-blur'">
     <div @class(['mx-auto flex h-full max-w-[1440px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8', 'sm:pr-24 lg:pr-24' => $ribbon->isVisible()])>
 
         <a href="{{ url('/') }}" class="flex shrink-0 items-center gap-2 whitespace-nowrap" aria-label="{{ $general->site_name }} home">
             <x-brand.mark class="size-8" />
-            <span class="font-bold tracking-tight text-foreground transition-all duration-300"
-                :class="scrolled ? 'text-xl' : 'text-xl lg:text-3xl'">{{ $general->site_name }}</span>
+            <span class="text-xl font-bold tracking-tight text-foreground transition-all duration-300 lg:text-3xl"
+                :class="scrolled && 'lg:text-xl!'">{{ $general->site_name }}</span>
         </a>
 
         <nav class="hidden gap-6 whitespace-nowrap md:flex" aria-label="Main">
