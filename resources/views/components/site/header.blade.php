@@ -100,50 +100,54 @@
         </div>
     </div>
 
-    {{-- Mobile drawer from the left: search, main menu, then the page's sidebar (categories) when it has one. --}}
-    <div x-show="open" x-cloak @class(['fixed inset-0 z-50', $drawerHidden]) role="dialog" aria-modal="true" aria-label="Menu">
-        <div x-show="open" x-transition.opacity class="absolute inset-0 bg-slate-950/50" @click="open = false"></div>
-        <div x-show="open" x-trap.noscroll="open"
-            x-transition:enter="transition duration-200 ease-out" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0"
-            x-transition:leave="transition duration-150 ease-in" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full"
-            class="absolute inset-y-0 left-0 flex w-80 max-w-[85vw] flex-col overflow-y-auto border-r border-border bg-card shadow-lg">
-            <div class="flex items-center justify-between border-b border-border px-4 py-4">
-                <span class="font-semibold">Menu</span>
-                <button type="button" @click="open = false" aria-label="Close menu" class="rounded-lg p-2 text-muted-foreground hover:bg-accent">
-                    <x-lucide-x class="size-5" />
-                </button>
-            </div>
-            <form action="{{ url('/search') }}" method="get" role="search" aria-label="Mobile search" class="border-b border-border p-4">
-                <label for="mobile-search" class="sr-only">Search tutorials</label>
-                <input id="mobile-search" name="q" type="search" placeholder="Search..."
-                    class="w-full rounded-full bg-muted px-4 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
-            </form>
-            <nav class="flex flex-col gap-1 p-3" aria-label="Mobile">
-                @foreach ($nav as $item)
-                    @if ($item['children'])
-                        <div x-data="{ sub: false }">
-                            <button type="button" @click="sub = !sub" :aria-expanded="sub"
-                                class="flex w-full items-center justify-between rounded-md px-3 py-2.5 font-medium text-foreground hover:bg-accent">
-                                {{ $item['label'] }} <x-lucide-chevron-down class="size-4 text-muted-foreground transition-transform" ::class="sub && 'rotate-180'" />
-                            </button>
-                            <div x-show="sub" x-collapse x-cloak class="ml-3 flex flex-col border-l border-border pl-2">
-                                @if ($item['href'])
-                                    <x-site.nav-link :item="$item" class="w-full rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent" />
-                                @endif
-                                @foreach ($item['children'] as $child)
-                                    <x-site.nav-link :item="$child" class="w-full rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent" />
-                                @endforeach
+    {{-- Mobile drawer from the left: search, main menu, then the page's sidebar (categories) when it has one.
+        Teleported to <body>: once scrolled, the header's backdrop-blur makes it the containing block for fixed
+        children, which squeezed the drawer into the header's height. --}}
+    <template x-teleport="body">
+        <div x-show="open" x-cloak @class(['fixed inset-0 z-50', $drawerHidden]) role="dialog" aria-modal="true" aria-label="Menu">
+            <div x-show="open" x-transition.opacity class="absolute inset-0 bg-slate-950/50" @click="open = false"></div>
+            <div x-show="open" x-trap.noscroll="open"
+                x-transition:enter="transition duration-200 ease-out" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0"
+                x-transition:leave="transition duration-150 ease-in" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full"
+                class="absolute inset-y-0 left-0 flex w-80 max-w-[85vw] flex-col overflow-y-auto border-r border-border bg-card shadow-lg">
+                <div class="flex items-center justify-between border-b border-border px-4 py-4">
+                    <span class="font-semibold">Menu</span>
+                    <button type="button" @click="open = false" aria-label="Close menu" class="rounded-lg p-2 text-muted-foreground hover:bg-accent">
+                        <x-lucide-x class="size-5" />
+                    </button>
+                </div>
+                <form action="{{ url('/search') }}" method="get" role="search" aria-label="Mobile search" class="border-b border-border p-4">
+                    <label for="mobile-search" class="sr-only">Search tutorials</label>
+                    <input id="mobile-search" name="q" type="search" placeholder="Search..."
+                        class="w-full rounded-full bg-muted px-4 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
+                </form>
+                <nav class="flex flex-col gap-1 p-3" aria-label="Mobile">
+                    @foreach ($nav as $item)
+                        @if ($item['children'])
+                            <div x-data="{ sub: false }">
+                                <button type="button" @click="sub = !sub" :aria-expanded="sub"
+                                    class="flex w-full items-center justify-between rounded-md px-3 py-2.5 font-medium text-foreground hover:bg-accent">
+                                    {{ $item['label'] }} <x-lucide-chevron-down class="size-4 text-muted-foreground transition-transform" ::class="sub && 'rotate-180'" />
+                                </button>
+                                <div x-show="sub" x-collapse x-cloak class="ml-3 flex flex-col border-l border-border pl-2">
+                                    @if ($item['href'])
+                                        <x-site.nav-link :item="$item" class="w-full rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent" />
+                                    @endif
+                                    @foreach ($item['children'] as $child)
+                                        <x-site.nav-link :item="$child" class="w-full rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent" />
+                                    @endforeach
+                                </div>
                             </div>
-                        </div>
-                    @else
-                        <x-site.nav-link :item="$item" :active="\App\Support\Navigation::isActive($item['href'])"
-                            class="rounded-md px-3 py-2.5 font-medium text-foreground hover:bg-accent" />
-                    @endif
-                @endforeach
-            </nav>
-            @if ($sidebar !== '')
-                <div class="border-t border-border p-5">{!! $sidebar !!}</div>
-            @endif
+                        @else
+                            <x-site.nav-link :item="$item" :active="\App\Support\Navigation::isActive($item['href'])"
+                                class="rounded-md px-3 py-2.5 font-medium text-foreground hover:bg-accent" />
+                        @endif
+                    @endforeach
+                </nav>
+                @if ($sidebar !== '')
+                    <div class="border-t border-border p-5">{!! $sidebar !!}</div>
+                @endif
+            </div>
         </div>
-    </div>
+    </template>
 </header>
