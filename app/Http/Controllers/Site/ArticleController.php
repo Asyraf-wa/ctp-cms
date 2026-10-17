@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Site;
 
-use App\Enums\ArticleType;
 use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Seo\Seo;
@@ -23,7 +22,7 @@ class ArticleController extends Controller
             'article' => $article,
             'preview' => $preview,
             'meta' => app(Seo::class)->article($article, $preview),
-            'categories' => $article->type === ArticleType::Tutorial ? Sidebar::categories($article) : [],
+            'categories' => Sidebar::categories($article),
             'seriesParts' => $article->series
                 ? $article->series->articles()->published()->get(['id', 'type', 'title', 'slug', 'series_position'])
                 : collect(),
@@ -32,7 +31,7 @@ class ArticleController extends Controller
             ...$this->neighbours($article),
         ];
 
-        return $article->type === ArticleType::Blog ? view('site.blog-post', $data) : view('site.article', $data);
+        return view('site.article', $data);
     }
 
     // PUB-08: single-column journal list.
@@ -42,6 +41,7 @@ class ArticleController extends Controller
 
         return view('site.blog', [
             'posts' => $posts,
+            'sidebar' => Sidebar::categories(open: 'blog'),
             'meta' => app(Seo::class)->listing('Blog', 'Notes, opinions and updates from Code The Pixel.', [['Blog', null]], $posts),
         ]);
     }

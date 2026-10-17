@@ -91,7 +91,10 @@ it('lists only blog posts on the blog index', function () {
     Article::factory()->published()->blog()->create(['title' => 'Journal Entry']);
     Article::factory()->published()->create(['title' => 'A Tutorial', 'category_id' => $this->tools->id]);
 
-    $this->get('/blog')->assertOk()->assertSee('Journal Entry')->assertDontSee('A Tutorial');
+    $html = $this->get('/blog')->assertOk()->assertSee('Journal Entry')->getContent();
+
+    // The sidebar lists tutorials by category; the post list itself must not.
+    expect(substr($html, strpos($html, 'data-focus-main')))->not->toContain('A Tutorial');
 });
 
 it('filters projects by tech and shows the detail page with gallery and related tutorials', function () {

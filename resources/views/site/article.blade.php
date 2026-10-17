@@ -1,4 +1,4 @@
-{{-- Tutorial page (PUB-03): tutorial_web_template.html layout. --}}
+{{-- Tutorial page (PUB-03) and blog post (PUB-08): tutorial_web_template.html layout. --}}
 @php
     $tz = config('ctp.display_timezone');
 @endphp
@@ -7,11 +7,9 @@
         <x-slot:banner><x-article.preview-banner :article="$article" /></x-slot:banner>
     @endif
 
-    @if ($categories)
-        <x-slot:left>
-            <x-site.category-sidebar :categories="$categories" />
-        </x-slot:left>
-    @endif
+    <x-slot:left>
+        <x-site.category-sidebar :categories="$categories" />
+    </x-slot:left>
 
     <x-article.mobile-bar :toc="$article->toc ?? []" />
 
@@ -19,7 +17,9 @@
         <header>
             {{-- Long titles make the breadcrumb noisy on phones; the category link covers it there. --}}
             <x-site.breadcrumbs :items="$meta->breadcrumbs" class="mb-5 hidden sm:block [&_li:last-child]:max-w-[24ch] [&_li:last-child_span]:truncate" />
-            @if ($article->category)
+            @if ($article->type === \App\Enums\ArticleType::Blog)
+                <a href="{{ url('/blog') }}" class="text-sm font-semibold tracking-wide text-primary uppercase hover:underline">Blog</a>
+            @elseif ($article->category)
                 <a href="{{ url($article->category->publicPath()) }}" class="text-sm font-semibold tracking-wide text-primary uppercase hover:underline">{{ $article->category->name }}</a>
             @endif
             <h1 class="mt-2 mb-4 text-3xl font-bold tracking-tight text-balance text-foreground sm:text-4xl">{{ $article->title }}</h1>
@@ -57,7 +57,7 @@
         @endunless
     </article>
 
-    <x-article.related :articles="$related" />
+    <x-article.related :articles="$related" :title="$article->type === \App\Enums\ArticleType::Blog ? 'More from the blog' : 'Related tutorials'" />
 
     @if ($article->toc || $article->technologies->isNotEmpty())
         <x-slot:right>

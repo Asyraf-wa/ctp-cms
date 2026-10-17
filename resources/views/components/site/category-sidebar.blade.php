@@ -1,6 +1,6 @@
 {{--
     Category accordion (left sidebar of the template).
-    $categories: [['name', 'icon' (lucide), 'technology' (?Technology, preferred), 'url', 'count', 'open' => bool, 'items' => [['title', 'url', 'active' => bool]]]]
+    $categories: [['name', 'icon' (lucide), 'noun' (?string, default tutorials), 'technology' (?Technology, preferred), 'url', 'count', 'open' => bool, 'items' => [['title', 'url', 'active' => bool]]]]
 --}}
 @props(['categories' => []])
 <h3 class="mb-4 text-xs font-semibold tracking-wider text-muted-foreground uppercase">Categories</h3>
@@ -34,7 +34,7 @@
                     @endforeach
                     <li class="mt-2 border-t border-border pt-2">
                         <a href="{{ $category['url'] }}" class="flex items-center gap-1 text-[11px] font-bold tracking-wider text-foreground uppercase transition-colors hover:text-primary">
-                            View all {{ $category['count'] }} tutorials <x-lucide-chevron-right class="size-3" />
+                            View all {{ $category['count'] }} {{ $category['noun'] ?? 'tutorials' }} <x-lucide-chevron-right class="size-3" />
                         </a>
                     </li>
                 </ul>

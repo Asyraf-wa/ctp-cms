@@ -61,14 +61,14 @@ it('picks related articles by shared tags first, then category, never itself or 
         ->and(strpos($related, 'Shares A Tag'))->toBeLessThan(strpos($related, 'Same Category'));
 });
 
-it('renders blog posts in a single column with more posts', function () {
+it('renders blog posts in the tutorial layout with the Blog section open in the sidebar', function () {
     $post = Article::factory()->published()->blog()->create(['title' => 'Why I Moved To Laravel']);
     Article::factory()->published()->blog()->create(['title' => 'Another Journal Entry']);
 
     $this->get('/blog/'.$post->slug)->assertOk()
         ->assertSee('Why I Moved To Laravel')
         ->assertSee('More from the blog')->assertSee('Another Journal Entry')
-        ->assertDontSee('aria-label="Categories"', false);
+        ->assertSee('aria-label="Categories"', false)->assertSee('View all 2 posts');
 });
 
 it('lists as many sidebar tutorials per category as the Layout setting says, plus the one being read', function () {
