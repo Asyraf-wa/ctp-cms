@@ -20,7 +20,7 @@ use Illuminate\Support\Str;
 class OgImage
 {
     // Bump to regenerate every card after a design change.
-    public const VERSION = 1;
+    public const VERSION = 2;
 
     public const WIDTH = 1200;
 
@@ -92,7 +92,8 @@ class OgImage
 
         // Brand: the </> glyph (Victor Mono's ligature, pre-rendered: GD cannot shape ligatures) and the site name.
         $this->mark($img, $left, 76, 84);
-        $this->text($img, $general->site_name, 28, $font('SemiBold'), $left + 108, 108, '#e2e8f0');
+        // Same face as the navbar (Titillium Web Bold, converted from the Latin WOFF: GD needs TTF).
+        $this->text($img, $general->site_name, 32, resource_path('fonts/TitilliumWeb-Bold.ttf'), $left + 108, 110, '#e2e8f0');
 
         // Eyebrow and title (auto-sized to at most three lines).
         $this->text($img, Str::upper(Str::limit($content['eyebrow'], 40, '…')), 22, $font('SemiBold'), $left, 236, '#5eead4', tracking: 2);
