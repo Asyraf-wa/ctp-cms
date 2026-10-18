@@ -102,6 +102,7 @@ jobs:
           # One fresh commit per release (no history), so the clone on the shared host stays small.
           git checkout --orphan release
           git add -A
-          git add -f vendor public/build
+          # public/css, js and fonts are Filament's admin assets, published by `filament:upgrade` during composer install.
+          git add -f vendor public/build public/css public/js public/fonts
           git commit -q -m "Release ${GITHUB_SHA::7} from main"
           git push -f origin HEAD:production
