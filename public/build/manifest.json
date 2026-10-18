@@ -1,0 +1,43 @@
+{
+  "node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2": {
+    "file": "assets/inter-latin-wght-normal-Dx4kXJAl.woff2",
+    "src": "node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2"
+  },
+  "node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2": {
+    "file": "assets/jetbrains-mono-latin-wght-normal-B9CIFXIH.woff2",
+    "src": "node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2"
+  },
+  "node_modules/@fontsource/titillium-web/files/titillium-web-latin-700-normal.woff2": {
+    "file": "assets/titillium-web-latin-700-normal-YDdGQjzo.woff2",
+    "src": "node_modules/@fontsource/titillium-web/files/titillium-web-latin-700-normal.woff2"
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-Cf6-Hjfi.css",
+    "name": "app",
+    "names": [
+      "app.css"
+    ],
+    "src": "resources/css/app.css",
+    "isEntry": true,
+    "assets": [
+      "assets/inter-latin-wght-normal-Dx4kXJAl.woff2",
+      "assets/titillium-web-latin-700-normal-YDdGQjzo.woff2",
+      "assets/jetbrains-mono-latin-wght-normal-B9CIFXIH.woff2"
+    ]
+  },
+  "resources/css/filament/admin/theme.css": {
+    "file": "assets/theme-Cdow4orE.css",
+    "name": "theme",
+    "names": [
+      "theme.css"
+    ],
+    "src": "resources/css/filament/admin/theme.css",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-DU4uWTYX.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  }
+}

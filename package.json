@@ -1,0 +1,30 @@
+{
+    "$schema": "https://www.schemastore.org/package.json",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite",
+        "icons:data": "node scripts/simple-icons-data.mjs"
+    },
+    "devDependencies": {
+        "@alpinejs/collapse": "^3.17.4",
+        "@alpinejs/focus": "^3.17.4",
+        "@fontsource-variable/inter": "^5.3.0",
+        "@fontsource-variable/jetbrains-mono": "^5.3.0",
+        "@tailwindcss/typography": "^0.5.20",
+        "@tailwindcss/vite": "^4.3.3",
+        "alpinejs": "^3.17.4",
+        "concurrently": "^10.0.3",
+        "laravel-vite-plugin": "^3.1",
+        "simple-icons": "^16.35.0",
+        "tailwindcss": "^4.3.3",
+        "vite": "^8.0.0"
+    },
+    "optionalDependencies": {
+        "@laravel/multiplex": "^0.4.1"
+    },
+    "dependencies": {
+        "@fontsource/titillium-web": "^5.3.0"
+    }
+}

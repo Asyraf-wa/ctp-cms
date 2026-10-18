@@ -1,0 +1,75 @@
+{
+    "name": "spatie/laravel-responsecache",
+    "description": "Speed up a Laravel application by caching the entire response",
+    "keywords": [
+        "spatie",
+        "laravel-responsecache",
+        "laravel",
+        "cache",
+        "response",
+        "performance"
+    ],
+    "homepage": "https://github.com/spatie/laravel-responsecache",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Freek Van der Herten",
+            "email": "freek@spatie.be",
+            "homepage": "https://spatie.be",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.4",
+        "illuminate/cache": "^12.0|^13.0",
+        "illuminate/console": "^12.0|^13.0",
+        "illuminate/container": "^12.0|^13.0",
+        "illuminate/http": "^12.0|^13.0",
+        "illuminate/support": "^12.0|^13.0",
+        "nesbot/carbon": "^3.0",
+        "spatie/laravel-package-tools": "^1.9",
+        "spatie/php-attribute-reader": "^1.0"
+    },
+    "require-dev": {
+        "larastan/larastan": "^3.9",
+        "laravel/framework": "^12.0|^13.0",
+        "laravel/pint": "^1.13.7",
+        "mockery/mockery": "^1.6",
+        "orchestra/testbench": "^10.0|^11.0",
+        "pestphp/pest": "^4.0",
+        "jasonmccreary/double": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Spatie\\ResponseCache\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Spatie\\ResponseCache\\Test\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/pest",
+        "format": "vendor/bin/pint",
+        "analyse": "vendor/bin/phpstan analyse"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Spatie\\ResponseCache\\ResponseCacheServiceProvider"
+            ],
+            "aliases": {
+                "ResponseCache": "Spatie\\ResponseCache\\Facades\\ResponseCache"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

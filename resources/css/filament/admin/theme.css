@@ -1,0 +1,10 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+/* Grid tables (media library): let the card content shrink beside the selection checkbox. */
+.fi-ta-record-content-ctn {
+    min-width: 0;
+    flex: 1 1 0%;
+}

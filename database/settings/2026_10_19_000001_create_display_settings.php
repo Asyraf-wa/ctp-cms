@@ -1,0 +1,11 @@
+<?php
+
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
+
+return new class extends SettingsMigration
+{
+    public function up(): void
+    {
+        $this->migrator->add('display.sidebar_items_per_category', 5);
+    }
+};
