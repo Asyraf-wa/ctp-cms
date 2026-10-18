@@ -175,7 +175,7 @@
 ## Phase 6 — Launch Prep (the owner runs the live deploy, D15)
 - [ ] T6.01 GitHub Actions: tests, then `composer install --no-dev`, then `npm run build`, then a force-push to the `production` branch
 - [ ] T6.02 `.cpanel.yml` (rsync to the app dir, migrate, optimize, cache clear)
-- [ ] T6.03 **`docs/DEPLOY.md`**, a step-by-step guide:
+- [x] T6.03 **`docs/DEPLOY.md`**, a step-by-step guide:
   - cPanel Git clone with a deploy key
   - document root or symlink
   - `.env` template
@@ -183,7 +183,7 @@
   - cron
   - SMTP
   - first-time `ctp:import-legacy` on production
-- [ ] T6.04 `docs/LAUNCH-CHECKLIST.md`:
+- [x] T6.04 `docs/LAUNCH-CHECKLIST.md`:
   - smoke tests (login, publish, comment, contact, OG image, sitemap)
   - DNS and HTTPS
   - Search Console and Bing
