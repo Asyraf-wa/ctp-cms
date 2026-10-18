@@ -94,15 +94,23 @@ jobs:
           npm ci
           npm run build
 
+      # cPanel's clone of this branch IS the live app (docs/DEPLOY.md), so the history must be linear:
+      # each release is a normal commit on top of the last one and the host can simply pull.
       - name: Push to the production branch
         run: |
           rm -rf node_modules public/hot
+          # The host runs PHP 8.4 through this cPanel handler. It is committed here (not edited on the
+          # server) so that pulling never meets a locally modified public/.htaccess.
+          printf '\n# php -- BEGIN cPanel-generated handler, do not edit\n<IfModule mime_module>\n  AddHandler application/x-httpd-ea-php84 .php .php8 .phtml\n</IfModule>\n# php -- END cPanel-generated handler, do not edit\n' >> public/.htaccess
+
+          git clone -q --branch production --single-branch "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" /tmp/prod
+          rsync -a --delete --exclude='/.git' --exclude='/node_modules' ./ /tmp/prod/
+          cd /tmp/prod
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # One fresh commit per release (no history), so the clone on the shared host stays small.
-          git checkout --orphan release
           git add -A
           # public/css, js and fonts are Filament's admin assets, published by `filament:upgrade` during composer install.
           git add -f vendor public/build public/css public/js public/fonts
+          if git diff --cached --quiet; then echo "Nothing changed since the last release."; exit 0; fi
           git commit -q -m "Release ${GITHUB_SHA::7} from main"
-          git push -f origin HEAD:production
+          git push origin production
