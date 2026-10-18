@@ -163,7 +163,7 @@ return [
              * The disk names on which the backups will be stored.
              */
             // BACKUP_DISKS=backups,offsite: a local copy plus the off-site S3-compatible disk (config/filesystems.php).
-            'disks' => array_filter(explode(',', (string) env('BACKUP_DISKS', 'backups'))),
+            'disks' => array_filter(explode(',', (string) (env('BACKUP_DISKS') ?: 'backups'))),
 
             /*
              * Determines whether to allow backups to continue when some targets fail instead of failing completely.
@@ -180,7 +180,7 @@ return [
          * The password to be used for archive encryption.
          * Set to `null` or leave it empty to disable encryption.
          */
-        'password' => env('BACKUP_ARCHIVE_PASSWORD'),
+        'password' => env('BACKUP_ARCHIVE_PASSWORD') ?: null,
 
         /*
          * The encryption algorithm to be used for archive encryption.
@@ -235,7 +235,8 @@ return [
         'notifiable' => Notifiable::class,
 
         'mail' => [
-            'to' => env('BACKUP_NOTIFY_EMAIL', env('MAIL_FROM_ADDRESS', 'hello@example.com')),
+            // ?: not a default argument: a blank BACKUP_NOTIFY_EMAIL= in .env is '' (invalid), not null.
+            'to' => env('BACKUP_NOTIFY_EMAIL') ?: env('MAIL_FROM_ADDRESS', 'hello@example.com'),
 
             'from' => [
                 'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
@@ -296,7 +297,7 @@ return [
     'monitor_backups' => [
         [
             'name' => env('BACKUP_NAME', 'ctp'),
-            'disks' => array_filter(explode(',', (string) env('BACKUP_DISKS', 'backups'))),
+            'disks' => array_filter(explode(',', (string) (env('BACKUP_DISKS') ?: 'backups'))),
             'health_checks' => [
                 MaximumAgeInDays::class => 1,
                 MaximumStorageInMegabytes::class => 5000,
