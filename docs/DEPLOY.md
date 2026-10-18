@@ -137,14 +137,14 @@ MAIL_FROM_ADDRESS="noreply@codethepixel.com"
 MAIL_FROM_NAME="${APP_NAME}"
 
 # Admin sign-in (Google). Only these accounts can open /admin.
-ADMIN_EMAILS=asyraf.wahianuar@gmail.com
+ADMIN_EMAILS=you@gmail.com
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 GOOGLE_REDIRECT_URI="${APP_URL}/auth/google/callback"
 
 # Backups (OPS-03): local disk, plus "offsite" once an S3-compatible bucket exists
 BACKUP_DISKS=backups
-BACKUP_NOTIFY_EMAIL=asyraf.wahianuar@gmail.com
+BACKUP_NOTIFY_EMAIL=you@example.com
 BACKUP_ARCHIVE_PASSWORD=
 BACKUP_VERIFY_DATABASE=USER_ctp_restore
 # BACKUP_DISKS=backups,offsite
