@@ -320,3 +320,4 @@ extract it over `~/ctp-app` without touching `.env` and `storage/`, then run the
 | Scheduled post not published, mails not sent | The cron entry, and its PHP path. |
 | Google sign-in "redirect_uri_mismatch" | Step 10, and `APP_URL` must be `https://`. |
 | Admin shows a quick-login button | `APP_ENV` is not `production`. |
+| Site runs on the wrong PHP version after a deploy | MultiPHP Manager → set PHP 8.4 for the domain again. `.cpanel.yml` keeps its handler block in `public/.htaccess` from then on. |

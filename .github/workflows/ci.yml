@@ -60,3 +60,48 @@ jobs:
 
       - name: Tests (Pest)
         run: php artisan test
+
+  # T6.01 / ARCH §9: the host has no Node and may have no Composer, so the production branch carries
+  # everything it needs: the source, vendor/ without dev packages, and the built public/build/.
+  # Runs only after the tests pass, and only for pushes to main. cPanel pulls this branch (.cpanel.yml).
+  release:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: release
+      cancel-in-progress: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: pdo_mysql, intl, zip, bcmath, gd, exif
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Build the release
+        run: |
+          composer install --no-dev --no-interaction --prefer-dist --no-progress --optimize-autoloader
+          npm ci
+          npm run build
+
+      - name: Push to the production branch
+        run: |
+          rm -rf node_modules public/hot
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # One fresh commit per release (no history), so the clone on the shared host stays small.
+          git checkout --orphan release
+          git add -A
+          git add -f vendor public/build
+          git commit -q -m "Release ${GITHUB_SHA::7} from main"
+          git push -f origin HEAD:production

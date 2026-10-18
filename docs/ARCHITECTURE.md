@@ -271,20 +271,13 @@ The server has no Node, so `public/build` must arrive pre-built. Composer *may* 
 1. Push to `main`. GitHub Actions runs the tests, then `composer install --no-dev -o` and `npm ci && npm run build`, and force-pushes the result to the `production` branch.
 2. In cPanel, open Git Version Control, select the repo, and choose **Pull or Deploy → Update from Remote**, then **Deploy HEAD Commit**.
    - The repo is cloned once via SSH URL with a read-only **deploy key**, because it's a private repo.
-3. `.cpanel.yml` runs the deployment tasks:
+3. `.cpanel.yml` (in the repo root) runs the deployment tasks:
+   - rsync the clone into `~/ctp-app` with `--delete`, keeping `.env`, `storage/`, `public/storage`, `public/media`, `public/.well-known` and host files (`error_log`, `.user.ini`);
+   - keep the PHP version handler that MultiPHP Manager writes into `public/.htaccess` (copied out before the rsync, appended after);
+   - create the `storage/` skeleton on the first deploy (`rsync --ignore-existing`);
+   - `migrate --force`, `settings:clear-cache` (new settings need it), `optimize`, `responsecache:clear`.
 
-```yaml
----
-deployment:
-  tasks:
-    - export APP=/home/USER/ctp-app            # live app dir (outside public_html)
-    - /bin/rsync -a --delete --exclude='.env' --exclude='storage/' --exclude='.git' ./ $APP/
-    - cd $APP && /usr/local/bin/php artisan migrate --force
-    - cd $APP && /usr/local/bin/php artisan settings:clear-cache   # settings are cached; new settings need this
-    - cd $APP && /usr/local/bin/php artisan optimize
-    - cd $APP && /usr/local/bin/php artisan responsecache:clear    # new code, new pages
-    - cd $APP && /usr/local/bin/php artisan responsecache:clear
-```
+   The PHP 8.4 CLI path is set at the top of the file (`/opt/cpanel/ea-php84/root/usr/bin/php` by default). The full procedure is in `docs/DEPLOY.md`.
 
 **Server layout**
 

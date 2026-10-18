@@ -173,8 +173,8 @@
 ---
 
 ## Phase 6 — Launch Prep (the owner runs the live deploy, D15)
-- [ ] T6.01 GitHub Actions: tests, then `composer install --no-dev`, then `npm run build`, then a force-push to the `production` branch
-- [ ] T6.02 `.cpanel.yml` (rsync to the app dir, migrate, optimize, cache clear)
+- [x] T6.01 GitHub Actions: tests, then `composer install --no-dev`, then `npm run build`, then a force-push to the `production` branch
+- [x] T6.02 `.cpanel.yml` (rsync to the app dir, migrate, optimize, cache clear)
 - [x] T6.03 **`docs/DEPLOY.md`**, a step-by-step guide:
   - cPanel Git clone with a deploy key
   - document root or symlink
