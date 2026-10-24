@@ -12,7 +12,7 @@
     "src": "node_modules/@fontsource/titillium-web/files/titillium-web-latin-700-normal.woff2"
   },
   "resources/css/app.css": {
-    "file": "assets/app-Cf6-Hjfi.css",
+    "file": "assets/app-DomTu0ME.css",
     "name": "app",
     "names": [
       "app.css"
@@ -35,7 +35,7 @@
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-DU4uWTYX.js",
+    "file": "assets/app-BRfoqQM4.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true

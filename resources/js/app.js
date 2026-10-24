@@ -43,6 +43,61 @@ document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && Alpine.store('focus').on && !document.querySelector('dialog[open]')) Alpine.store('focus').toggle(false);
 });
 
+// Cookie notice (Settings → Scripts): the head/body snippets arrive as JSON and are injected only after Accept.
+// Choice is kept in this browser (localStorage); "Cookie settings" in the footer reopens it.
+Alpine.data('consent', () => ({
+    open: false,
+    key: 'ctp.consent',
+
+    init() {
+        const saved = this.saved();
+        if (saved === 'granted') this.load();
+        else if (saved === null) this.open = true;
+    },
+
+    saved() {
+        try { return localStorage.getItem(this.key); } catch { return null; }
+    },
+
+    store(value) {
+        try { localStorage.setItem(this.key, value); } catch { /* private mode: asked again next visit */ }
+    },
+
+    show() { this.open = true; },
+
+    accept() {
+        this.store('granted');
+        this.open = false;
+        this.load();
+    },
+
+    decline() {
+        const wasGranted = this.saved() === 'granted';
+        this.store('denied');
+        this.open = false;
+        if (wasGranted) {
+            // Withdraw: drop the analytics cookies (Google's start with _ga) and reload without the snippets.
+            for (const name of document.cookie.split(';').map((c) => c.split('=')[0].trim()).filter((n) => n.startsWith('_ga') || n.startsWith('_gid'))) {
+                for (const domain of [location.hostname, '.' + location.hostname.replace(/^www\./, '')]) {
+                    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=${domain}`;
+                }
+                document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+            }
+            location.reload();
+        }
+    },
+
+    load() {
+        if (window.__ctpConsentLoaded) return;
+        window.__ctpConsentLoaded = true;
+        let data = {};
+        try { data = JSON.parse(document.getElementById('ctp-consent-scripts')?.textContent || '{}'); } catch { return; }
+        // createContextualFragment keeps <script> elements executable once they are inserted.
+        if (data.head) document.head.append(document.createRange().createContextualFragment(data.head));
+        if (data.body) document.body.append(document.createRange().createContextualFragment(data.body));
+    },
+}));
+
 // Scroll-spy for the "On this page" TOC: highlights the heading nearest the top of the viewport.
 Alpine.data('toc', () => ({
     active: null,

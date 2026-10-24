@@ -4,15 +4,17 @@ Step-by-step guide for a clean cPanel account (T6.03). The design behind it is i
 `USER` below is your cPanel username; `codethepixel.com` is the live domain.
 
 **How releases work.** You push to `main`. GitHub Actions runs lint, Larastan and the tests, then builds
-`vendor/` (no dev packages) and `public/build/` and force-pushes the result to the `production` branch.
-cPanel pulls `production`, and `.cpanel.yml` copies it into the live app folder and runs the artisan steps.
-The server needs no Node and no Composer.
+`vendor/` (no dev packages) and `public/build/` and adds a commit to the `production` branch (a normal,
+linear history, so the host can simply pull). The cPanel clone of that branch **is** the live app: nothing is
+copied. To update, you press **Update from Remote** and then **Deploy HEAD Commit**; `.cpanel.yml` runs the
+migrations and cache steps for you, so **no Terminal is needed** (it takes seconds). The server needs no Node
+and no Composer.
 
 ```
 /home/USER/
-├─ repositories/ctp/   cPanel Git clone of the production branch (never edit here)
-├─ ctp-app/            live app: .env and storage/ live here permanently
-└─ public_html/        not used by CTP (the domain points at ctp-app/public)
+├─ repositories/ctp/   cPanel Git clone of the production branch = the live app
+│                      (.env, storage/ and public/storage live here; git never touches them)
+└─ public_html/        shared with other sites; codethepixel → symlink to repositories/ctp/public
 ```
 
 ---
@@ -52,48 +54,38 @@ cPanel → **MySQL® Databases**:
 
 ---
 
-## 3. Clone the repository with a deploy key
+## 3. Clone the repository
 
-The repository is private, so cPanel reads it with a read-only key.
+The repository is public, so cPanel needs no deploy key.
 
-1. cPanel → **SSH Access** → Manage SSH Keys → **Generate a New Key**. Name it `ctp_deploy`, no passphrase, RSA 4096.
-   Then **Manage** → **Authorize** it.
-2. View the **public** key and copy it.
-3. GitHub → repository → Settings → **Deploy keys** → Add deploy key. Paste it, title `cPanel`, leave
-   "Allow write access" **off**.
-4. Tell SSH to use that key for GitHub. In cPanel Terminal:
+cPanel → **Git™ Version Control** → Create:
 
-```bash
-mkdir -p ~/.ssh && chmod 700 ~/.ssh
-printf 'Host github.com\n  IdentityFile ~/.ssh/ctp_deploy\n  IdentitiesOnly yes\n' >> ~/.ssh/config
-chmod 600 ~/.ssh/config
-ssh -T git@github.com
-```
+- Clone URL: `https://github.com/Asyraf-wa/ctp-cms.git`
+- Repository path: `repositories/ctp`
+- Name: `ctp`
 
-Answer `yes` to the host key prompt. The last line should greet you by repository name.
+Then open the repository → **Basic Information** → **Checked-out branch: `production`** (not `main`: `main` has
+no `vendor/` or built assets).
 
-5. cPanel → **Git™ Version Control** → Create:
-   - Clone URL: `git@github.com:OWNER/REPO.git` (the SSH URL, not HTTPS)
-   - Repository path: `repositories/ctp`
-   - Name: `ctp`
-
-6. Open the repository → **Basic Information** → Checked-out branch: **production**.
+If the clone is still on `main`, switch the branch there and press **Update from Remote**.
 
 ---
 
 ## 4. First deploy
 
-In Git Version Control → `ctp` → **Pull or Deploy**: **Update from Remote**, then **Deploy HEAD Commit**.
+Do this after steps 5 to 8 have created `.env` and the symlink. Git Version Control → `ctp` → **Update from
+Remote**, then **Deploy HEAD Commit**. `.cpanel.yml` creates the `storage/` folders, runs `storage:link`,
+`migrate --force`, `settings:clear-cache`, `optimize` and `responsecache:clear`. The deploy fails until `.env`
+exists, which is expected.
 
-This creates `~/ctp-app` with the code, `vendor/` and `public/build/`, and an empty `storage/` skeleton.
-The artisan steps in the first run fail until `.env` exists, which is expected. Finish steps 5 to 8, then
-deploy once more.
+If the deploy button is greyed out, the clone has local changes: leave the repository untouched on the server
+(never edit files in it) and `.env`, `storage/` and `public/storage` are ignored by git, so they never count.
 
 ---
 
 ## 5. The `.env` file
 
-Create `~/ctp-app/.env` (cPanel File Manager, or `nano ~/ctp-app/.env` in Terminal) and fill in the blanks.
+Create `~/repositories/ctp/.env` (cPanel File Manager, or `nano ~/repositories/ctp/.env` in Terminal) and fill in the blanks.
 It is never overwritten by a deploy.
 
 ```dotenv
@@ -161,8 +153,16 @@ CSP_EXTRA_HOSTS=
 Then generate the key:
 
 ```bash
-cd ~/ctp-app && /opt/cpanel/ea-php84/root/usr/bin/php artisan key:generate
+cd ~/repositories/ctp && /opt/cpanel/ea-php84/root/usr/bin/php artisan key:generate
 ```
+
+No Terminal? Make the key yourself: `APP_KEY=base64:` followed by 32 random bytes in Base64. On Windows PowerShell:
+
+```powershell
+"base64:" + [Convert]::ToBase64String((1..32 | ForEach-Object { Get-Random -Maximum 256 }))
+```
+
+Paste the result after `APP_KEY=` once and never change it afterwards (it encrypts settings and sessions).
 
 Notes:
 
@@ -175,34 +175,31 @@ Notes:
 
 ---
 
-## 6. Point the domain at `ctp-app/public`
+## 6. Point the domain at `public/`
 
-cPanel → **Domains** → `codethepixel.com` → Manage → **Document Root**: `ctp-app/public`.
+Only the `public/` folder may be reachable from the web: the rest holds `.env`, `vendor/` and the database
+settings. Never put the app itself inside `public_html`.
 
-If the host does not let you change the main domain's root, replace `public_html` with a symlink instead
-(only when `public_html` holds nothing you need):
+**Domain with its own document root:** cPanel → **Domains** → the domain → **Document Root** →
+`repositories/ctp/public`.
 
-```bash
-mv ~/public_html ~/public_html.old && ln -s ~/ctp-app/public ~/public_html
+**Several sites share `public_html`** (for example a root `.htaccess` that maps `codethepixel.com` to a
+`codethepixel` folder): make that folder a symlink to the app's `public/`, using File Manager → **Symlink**
+(or `ln -s` if you do have a Terminal): link path `public_html/codethepixel`, pointing to
+`/home/USER/repositories/ctp/public`. The root `.htaccess` stays as it is:
+
+```apache
+RewriteCond %{HTTP_HOST} ^(www\.)?codethepixel\.com$ [NC]
+RewriteCond %{REQUEST_URI} !^/codethepixel/
+RewriteRule ^(.*)$ /codethepixel/$1 [L]
 ```
 
-Then create the storage link and check the permissions:
+Check that secret files are not reachable (browser, each should be 403 or 404, never file contents):
+`https://codethepixel.com/.env`, `https://codethepixel.com/codethepixel/.env`, `https://codethepixel.com/composer.json`.
 
-```bash
-cd ~/ctp-app
-/opt/cpanel/ea-php84/root/usr/bin/php artisan storage:link
-chmod -R u+rwX,go+rX storage bootstrap/cache
-```
-
-If `storage:link` is not allowed (symlinks disabled), keep media in the public folder instead. Add to
-`.env`, then move any existing files there:
-
-```dotenv
-MEDIA_ROOT=/home/USER/ctp-app/public/media
-MEDIA_URL=https://codethepixel.com/media
-```
-
-`.cpanel.yml` keeps `public/storage` and `public/media` out of its `--delete`, so neither is wiped by a deploy.
+The release carries the PHP 8.4 handler in `public/.htaccess` and the http → https redirect, so there is
+nothing to add by hand. If the host does not allow symlinks, set `MEDIA_ROOT` and `MEDIA_URL` in `.env`
+(see ARCHITECTURE §9) so media lives under `public/`.
 
 ---
 
@@ -233,8 +230,8 @@ On the server:
 
 1. phpMyAdmin → `USER_ctp` → **Import** → `ctp.sql`. If the file is too big for the upload limit, upload
    it with File Manager and run `mysql -u USER_ctp -p USER_ctp < ctp.sql` in Terminal.
-2. Upload `media.tgz` to `~/ctp-app/storage/app/public/`, then run
-   `tar -xzf media.tgz -C ~/ctp-app/storage/app/public && rm media.tgz`.
+2. Upload `media.tgz` to `~/repositories/ctp/storage/app/public/` with File Manager, select it and press **Extract**
+   (or `tar -xzf media.tgz -C ~/repositories/ctp/storage/app/public` in a Terminal), then delete `media.tgz`.
 3. Delete `ctp.sql` and `media.tgz` from the server once imported.
 
 ### B. Start fresh and import the legacy site
@@ -244,10 +241,11 @@ from the server when done.
 
 1. Create a third database `USER_ctp_legacy`, import the legacy CakePHP dump into it, and set
    `LEGACY_DB_DATABASE=USER_ctp_legacy` in `.env`.
-2. Run, while the **old site is still live** (posters and images are downloaded from it):
+2. Run these while the **old site is still live** (posters and images are downloaded from it). Without a Terminal,
+   run each one as a one-off cron job (see *Updating the live site*):
 
 ```bash
-cd ~/ctp-app
+cd ~/repositories/ctp
 /opt/cpanel/ea-php84/root/usr/bin/php artisan migrate --force
 /opt/cpanel/ea-php84/root/usr/bin/php artisan ctp:import-legacy --dry-run
 /opt/cpanel/ea-php84/root/usr/bin/php artisan ctp:import-legacy
@@ -266,7 +264,7 @@ Add `--with-posters` to the import if the legacy posters should become featured 
 cPanel → **Cron Jobs** → Add New Cron Job, "Once Per Minute" (`* * * * *`):
 
 ```bash
-cd /home/USER/ctp-app && /opt/cpanel/ea-php84/root/usr/bin/php artisan schedule:run >> /dev/null 2>&1
+cd /home/USER/repositories/ctp && /opt/cpanel/ea-php84/root/usr/bin/php artisan schedule:run >> /dev/null 2>&1
 ```
 
 This one entry runs everything: scheduled publishing, the mail and image queue, view rollups, backups,
@@ -274,12 +272,10 @@ the topbar notice window and the 12-month contact purge. Set the cron email to b
 
 ---
 
-## 9. Deploy again and check
+## 9. Check
 
-Git Version Control → `ctp` → **Update from Remote** → **Deploy HEAD Commit**. This time the artisan
-steps succeed: migrations, settings cache clear, `optimize`, response cache clear.
-
-Then open `https://codethepixel.com` and work through **docs/LAUNCH-CHECKLIST.md**.
+Open `https://codethepixel.com`, then work through **docs/LAUNCH-CHECKLIST.md**. `http://codethepixel.com`
+must redirect to https with a 301.
 
 ---
 
@@ -294,17 +290,23 @@ Keep `http://localhost:8100/...` there as well if you still sign in locally. Cha
 
 ---
 
-## Updating the live site
+## Updating the live site (no Terminal)
 
-1. Push to `main` (merge `develop` first if you work there).
-2. Wait for the CI run to go green. It updates `production`.
-3. cPanel → Git Version Control → `ctp` → **Update from Remote** → **Deploy HEAD Commit**.
+1. Push to `main`.
+2. Wait for the GitHub Actions run to go green: it adds the new release commit to `production`.
+3. cPanel → Git Version Control → `ctp` → **Update from Remote**, then **Deploy HEAD Commit**.
 
-If CI fails, `production` is not touched and the live site keeps the last good release.
+That is all: the deploy runs the migrations and clears the caches. If CI fails, `production` is not touched
+and the live site keeps the last good release.
 
-**Without Git** (fallback): on GitHub, switch to the `production` branch → Code → Download ZIP. Upload and
-extract it over `~/ctp-app` without touching `.env` and `storage/`, then run the artisan steps from
-`.cpanel.yml` by hand in Terminal.
+Some releases need a one-off command; they are stated in the commit message or the release notes:
+
+- **Re-render article bodies** (after a change to how content is rendered): `php artisan ctp:rerender`.
+- **Seed the launch pages once** (About, Privacy, Terms): `php artisan db:seed --class=LaunchPagesSeeder --force`.
+
+**Without a Terminal**, run such a command from **cPanel → Cron Jobs**: add a job for the next minute, for example
+`/opt/cpanel/ea-php84/root/usr/bin/php /home/USER/repositories/ctp/artisan ctp:rerender >> /home/USER/cron.log 2>&1`,
+wait for it to run, read `cron.log`, then delete the job.
 
 ---
 
@@ -312,8 +314,8 @@ extract it over `~/ctp-app` without touching `.env` and `storage/`, then run the
 
 | Symptom | Check |
 |---|---|
-| 500 error, blank page | `~/ctp-app/storage/logs/laravel-*.log`. Usually `.env`, permissions on `storage/` and `bootstrap/cache/`, or a missing PHP extension. |
-| Styles missing, page unstyled | `public/build/manifest.json` must exist. The domain must point at `ctp-app/public`. No file `public/hot` may exist on the server. |
+| 500 error, blank page | `~/repositories/ctp/storage/logs/laravel-*.log`. Usually `.env`, permissions on `storage/` and `bootstrap/cache/`, or a missing PHP extension. |
+| Styles missing, page unstyled | `public/build/manifest.json` must exist. The domain must point at `repositories/ctp/public`. No file `public/hot` may exist on the server. |
 | Images 404 | `public/storage` link (`storage:link`) or the `MEDIA_ROOT` fallback. |
 | Old page still shown after a change | `php artisan responsecache:clear`. Saving content in the admin does this automatically. |
 | New setting not saved or "must not be accessed before initialization" | `php artisan settings:clear-cache` (the deploy runs it). |

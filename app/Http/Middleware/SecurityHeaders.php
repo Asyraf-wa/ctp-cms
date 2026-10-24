@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Settings\ScriptSettings;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Vite;
@@ -45,6 +46,9 @@ class SecurityHeaders
     private function policy(): string
     {
         $extra = preg_split('/\s+/', trim((string) config('ctp.csp.extra_hosts'))) ?: [];
+        if (app(ScriptSettings::class)->cookie_notice) {
+            $extra = [...$extra, ...ScriptSettings::ANALYTICS_HOSTS];
+        }
         $dev = [];
         if (Vite::isRunningHot()) {
             // The Vite dev server and its hot-reload websocket.
