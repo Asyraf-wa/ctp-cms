@@ -36,3 +36,15 @@ yarn-error.log
 Thumbs.db
 .idea/
 .vscode/
+
+# Files the cPanel host creates inside the clone (the clone is the live app). Untracked files make
+# Git Version Control grey out "Deploy HEAD Commit", so they must be ignored.
+error_log
+php_errorlog
+.user.ini
+/public/.well-known
+/public/cgi-bin
+/cgi-bin
+/.well-known
+/public/storage
+/public/media
