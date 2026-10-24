@@ -13,6 +13,14 @@ class ScriptSettings extends Settings
 
     public bool $cookie_notice;
 
+    // Hosts the Google Analytics / Tag Manager snippets talk to; added to the CSP while the cookie notice is on.
+    public const ANALYTICS_HOSTS = [
+        'https://www.googletagmanager.com',
+        'https://*.googletagmanager.com',
+        'https://*.google-analytics.com',
+        'https://*.analytics.google.com',
+    ];
+
     public static function group(): string
     {
         return 'scripts';

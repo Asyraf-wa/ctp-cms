@@ -1,5 +1,6 @@
 @inject('general', 'App\Settings\GeneralSettings')
 @inject('social', 'App\Settings\SocialSettings')
+@inject('scripts', 'App\Settings\ScriptSettings')
 @php
     // Footer columns come from the footer_1..3 menus (MENU-01); empty menus are skipped.
     $columns = collect(['footer_1', 'footer_2', 'footer_3'])
@@ -38,11 +39,14 @@
         <div class="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 md:flex-row">
             <div class="flex flex-col items-center gap-2 md:flex-row md:gap-6">
                 <p class="text-sm text-muted-foreground">&copy; {{ now()->year }} {{ $general->copyright ?: $general->site_name }}. All rights reserved.</p>
-                @if ($legal)
-                    <nav aria-label="Legal" class="flex gap-4">
+                @if ($legal || $scripts->cookie_notice)
+                    <nav aria-label="Legal" class="flex flex-wrap justify-center gap-x-4 gap-y-1">
                         @foreach ($legal as $item)
                             <x-site.nav-link :item="$item" class="text-sm text-muted-foreground transition-colors hover:text-primary" />
                         @endforeach
+                        @if ($scripts->cookie_notice)
+                            <button type="button" x-data @click="$dispatch('open-consent')" class="py-1 text-sm text-muted-foreground transition-colors hover:text-primary">Cookie settings</button>
+                        @endif
                     </nav>
                 @endif
             </div>

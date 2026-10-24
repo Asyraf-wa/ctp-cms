@@ -41,7 +41,9 @@
     @endunless
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     {{ $head ?? '' }}
-    {!! $scripts->head_scripts !!}
+    @unless ($scripts->cookie_notice)
+        {!! $scripts->head_scripts !!}
+    @endunless
 </head>
 <body class="flex min-h-screen flex-col">
     <a href="#main" class="sr-only z-50 rounded-md bg-primary px-4 py-2 text-primary-foreground focus:not-sr-only focus:fixed focus:top-3 focus:left-3">Skip to content</a>
@@ -65,6 +67,12 @@
         aria-label="Back to top">
         <x-lucide-arrow-up class="size-5" />
     </button>
-    {!! $scripts->body_scripts !!}
+    @if ($scripts->cookie_notice)
+        {{-- Consent first: the head and body snippets (analytics) are inert data until the visitor accepts. --}}
+        <script type="application/json" id="ctp-consent-scripts">{!! json_encode(['head' => (string) $scripts->head_scripts, 'body' => (string) $scripts->body_scripts], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES) !!}</script>
+        <x-site.consent-banner />
+    @else
+        {!! $scripts->body_scripts !!}
+    @endif
 </body>
 </html>

@@ -325,8 +325,8 @@ class ManageSettings extends Page
                 Section::make()->description('Output exactly as entered, on every public page. Use for analytics (e.g. the CTP SaaS snippet).')->schema([
                     CodeEditor::make('head_scripts')->label('Before </head>')->language(Language::Html),
                     CodeEditor::make('body_scripts')->label('Before </body>')->language(Language::Html),
-                    Toggle::make('cookie_notice')->label('Show a cookie notice')
-                        ->helperText('Only needed for tracking cookies such as Google Analytics.'),
+                    Toggle::make('cookie_notice')->label('Ask for consent before loading these scripts')
+                        ->helperText('Shows a cookie notice. The two boxes above are loaded only after the visitor clicks Accept. Turn this on for Google Analytics or any tracking cookies; the CSP then allows the Google Analytics hosts automatically.'),
                 ]),
             ]),
         ]);

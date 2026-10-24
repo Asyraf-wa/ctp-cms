@@ -1,20 +1,21 @@
 ---
-# T6.02 / ARCH §9: run by cPanel Git Version Control on "Deploy HEAD Commit", from the clone of the
-# production branch (built by CI: source, vendor/ and public/build/). See docs/DEPLOY.md.
+# T6.02 / ARCH §9: run by cPanel Git Version Control on "Deploy HEAD Commit". See docs/DEPLOY.md.
+#
+# The cPanel clone of the production branch IS the live app (it holds vendor/ and public/build/, built by CI), so
+# there is nothing to copy: this file only prepares folders and runs the artisan steps. That is why it takes
+# seconds, and it means no Terminal is needed: Update from Remote, then Deploy HEAD Commit.
+#
 # Edit PHP below if the host's PHP 8.4 CLI lives elsewhere (`ls /opt/cpanel/ea-php84/root/usr/bin/php`).
 deployment:
   tasks:
-    - export APP=$HOME/ctp-app
     - export PHP=/opt/cpanel/ea-php84/root/usr/bin/php
-    - /bin/mkdir -p $APP
-    # MultiPHP Manager writes the PHP version handler into public/.htaccess; keep it across deploys.
-    - /bin/sed -n '/# php -- BEGIN cPanel-generated handler/,/# php -- END cPanel-generated handler/p' $APP/public/.htaccess > $HOME/.ctp-php-handler 2>/dev/null || true
-    # Code, vendor and built assets. .env, storage, the media link/folder and host files stay as they are.
-    - /bin/rsync -a --delete --exclude='.git' --exclude='/.env' --exclude='/storage/' --exclude='/public/storage' --exclude='/public/media' --exclude='/public/.well-known' --exclude='error_log' --exclude='.user.ini' ./ $APP/
-    - /bin/cat $HOME/.ctp-php-handler >> $APP/public/.htaccess
-    # First deploy: create the storage skeleton. Never overwrites existing files.
-    - /bin/rsync -a --ignore-existing ./storage/ $APP/storage/
-    - cd $APP && $PHP artisan migrate --force
-    - cd $APP && $PHP artisan settings:clear-cache
-    - cd $APP && $PHP artisan optimize
-    - cd $APP && $PHP artisan responsecache:clear
+    # Tasks start in the repository folder; fall back to the usual clone path if not.
+    - '[ -f artisan ] || cd $HOME/repositories/ctp'
+    # Folders Laravel writes to (a no-op once they exist; their contents are never touched).
+    - /bin/mkdir -p storage/app/public storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
+    - '[ -e public/storage ] || $PHP artisan storage:link || true'
+    - $PHP artisan migrate --force
+    # Settings are cached, so new settings need this; then rebuild the caches and drop cached pages.
+    - $PHP artisan settings:clear-cache
+    - $PHP artisan optimize
+    - $PHP artisan responsecache:clear
