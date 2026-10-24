@@ -5,6 +5,7 @@ use App\Filament\Widgets\PopularArticles;
 use App\Filament\Widgets\RecentActivity;
 use App\Filament\Widgets\SiteOverview;
 use App\Http\Cache\CookielessSerializer;
+use App\Http\Cache\PublicPagesProfile;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\Comment;
@@ -13,6 +14,7 @@ use App\Models\User;
 use App\Providers\AppServiceProvider;
 use App\Settings\NoticeSettings;
 use App\Support\SiteCache;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 
@@ -106,4 +108,13 @@ it('generates https URLs in production, whatever scheme the request came in on',
         ->and(asset('favicon.svg'))->toStartWith('https://');
 
     URL::forceScheme('http'); // do not leak the forced scheme into other tests
+});
+
+it('keys cached pages by release and scheme, so a deploy or an http copy never serves stale HTML', function () {
+    $profile = new PublicPagesProfile;
+
+    $http = $profile->useCacheNameSuffix(Request::create('http://example.test/'));
+    $https = $profile->useCacheNameSuffix(Request::create('https://example.test/'));
+
+    expect($http)->toEndWith('|http')->and($https)->toEndWith('|https')->and($http)->not->toBe($https);
 });
