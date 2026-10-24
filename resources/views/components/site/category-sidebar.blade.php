@@ -3,7 +3,7 @@
     $categories: [['name', 'icon' (lucide), 'noun' (?string, default tutorials), 'technology' (?Technology, preferred), 'url', 'count', 'open' => bool, 'items' => [['title', 'url', 'active' => bool]]]]
 --}}
 @props(['categories' => []])
-<h3 class="mb-4 text-xs font-semibold tracking-wider text-muted-foreground uppercase">Browse</h3>
+<p class="mb-4 text-xs font-semibold tracking-wider text-muted-foreground uppercase">Browse</p>
 
 <div class="space-y-2">
     @foreach ($categories as $category)

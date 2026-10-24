@@ -5,6 +5,15 @@
 
     RewriteEngine On
 
+    # One scheme: send http to https (a proxy that terminates TLS must set X-Forwarded-Proto; localhost is left alone).
+    # The path comes from THE_REQUEST, the line the browser sent: REQUEST_URI may already be rewritten when this
+    # runs behind another .htaccess that maps the domain into a sub-folder.
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
+    RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1)(:[0-9]+)?$ [NC]
+    RewriteCond %{THE_REQUEST} ^[A-Z]+\s(\S+)\s
+    RewriteRule ^ https://%{HTTP_HOST}%1 [L,R=301]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
@@ -39,6 +48,8 @@
     </If>
     # Same values as App\Http\Middleware\SecurityHeaders; "set" (not "always set") replaces the app's header
     # instead of adding a second copy, and still covers static files.
+    # Do not announce the PHP version.
+    Header unset X-Powered-By
     Header set X-Content-Type-Options "nosniff"
     Header set X-Frame-Options "SAMEORIGIN"
     Header set Referrer-Policy "strict-origin-when-cross-origin"

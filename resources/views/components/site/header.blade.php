@@ -29,7 +29,7 @@
                     {{-- Dropdown (MENU-03) --}}
                     <div class="relative" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false" @keydown.escape="open = false">
                         <button type="button" @click="open = !open" :aria-expanded="open"
-                            @class(['inline-flex items-center gap-1 text-sm font-medium transition-colors', 'text-primary' => $active, 'text-muted-foreground hover:text-primary' => ! $active])>
+                            @class(['inline-flex items-center gap-1 py-1 text-sm font-medium transition-colors', 'text-primary' => $active, 'text-muted-foreground hover:text-primary' => ! $active])>
                             {{ $item['label'] }} <x-lucide-chevron-down class="size-3.5 transition-transform" ::class="open && 'rotate-180'" />
                         </button>
                         <div x-show="open" x-cloak x-transition.opacity.duration.150ms class="absolute top-full left-1/2 z-50 -translate-x-1/2 pt-3">
@@ -46,7 +46,7 @@
                     </div>
                 @else
                     <x-site.nav-link :item="$item" :active="$active"
-                        @class(['text-sm font-medium transition-colors', 'text-primary' => $active, 'text-muted-foreground hover:text-primary' => ! $active]) />
+                        @class(['py-1 text-sm font-medium transition-colors', 'text-primary' => $active, 'text-muted-foreground hover:text-primary' => ! $active]) />
                 @endif
             @endforeach
         </nav>
@@ -71,6 +71,7 @@
 
             {{-- Focus mode (PUB-05) replaces the template's fullscreen button; only on pages with sidebars. --}}
             <button type="button" x-show="$store.focus.available" x-cloak @click="$store.focus.toggle()"
+                aria-label="Focus mode"
                 :aria-pressed="$store.focus.on ? 'true' : 'false'"
                 :title="$store.focus.on ? 'Exit focus mode (Esc)' : 'Focus mode: hide the sidebars'"
                 :aria-label="$store.focus.on ? 'Exit focus mode' : 'Focus mode'"
@@ -84,6 +85,7 @@
             <button type="button" x-data="{ full: false, supported: document.fullscreenEnabled }" x-show="supported" x-cloak
                 @fullscreenchange.document="full = !!document.fullscreenElement"
                 @click="full ? document.exitFullscreen() : document.documentElement.requestFullscreen()"
+                aria-label="Fullscreen"
                 :aria-pressed="full ? 'true' : 'false'"
                 :title="full ? 'Exit fullscreen' : 'Fullscreen'"
                 :aria-label="full ? 'Exit fullscreen' : 'Fullscreen'"

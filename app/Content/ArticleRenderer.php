@@ -23,6 +23,7 @@ class ArticleRenderer
         $body = $doc->body;
 
         $this->promoteH1($doc);
+        $this->closeHeadingGaps($doc);
         $toc = $this->headings($doc);
         $codeBlocks = $this->highlightCode($doc);
         $media = $this->images($doc);
@@ -48,6 +49,20 @@ class ArticleRenderer
     {
         foreach ($doc->body->querySelectorAll('h1') as $h1) {
             $this->rename($doc, $h1, 'h2');
+        }
+    }
+
+    // H2 → H4 becomes H2 → H3: a heading may go at most one level deeper than the one before it (the title is the H1).
+    private function closeHeadingGaps(HTMLDocument $doc): void
+    {
+        $previous = 1;
+        foreach ($doc->body->querySelectorAll('h2, h3, h4, h5, h6') as $heading) {
+            $level = (int) substr($heading->tagName, 1);
+            if ($level > $previous + 1) {
+                $level = $previous + 1;
+                $this->rename($doc, $heading, 'h'.$level);
+            }
+            $previous = $level;
         }
     }
 
