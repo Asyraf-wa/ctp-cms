@@ -2,6 +2,7 @@
 <button type="button"
     x-data
     @click="$store.theme.cycle()"
+    aria-label="Change colour theme"
     :aria-label="'Theme: ' + $store.theme.mode + '. Click to change.'"
     :title="'Theme: ' + $store.theme.mode"
     {{ $attributes->class('rounded-lg p-2 text-sm text-muted-foreground transition-colors hover:bg-accent focus:ring-4 focus:ring-line-strong focus:outline-none') }}>

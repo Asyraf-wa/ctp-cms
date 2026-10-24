@@ -1,6 +1,6 @@
 {{-- Search results (PUB-06). Never indexed. --}}
 @use('App\Search\Search')
-<x-layouts.site :title="$query !== '' ? 'Search: '.$query : 'Search'" robots="noindex, follow">
+<x-layouts.site :title="$query !== '' ? 'Search: '.$query : 'Search'" description="Search tutorials, tags and categories." robots="noindex, follow">
     <div class="mx-auto max-w-4xl px-4 pt-8 pb-12 sm:px-6 lg:px-8">
         <x-site.page-header title="Search" :breadcrumbs="[['Search', null]]" />
         <x-site.search-trigger :value="$query" :palette="false" placeholder="Search tutorials, tags and categories" class="mb-8" />

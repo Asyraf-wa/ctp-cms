@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Intervention\Image\Drivers\Gd\Driver as GdDriver;
 use Intervention\Image\ImageManager;
@@ -46,6 +47,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Every generated URL is https in production. The response cache shares one entry between http and
+        // https requests, so a page first built over http would otherwise leak http:// links to everyone.
+        if ($this->app->isProduction() && str_starts_with((string) config('app.url'), 'https://')) {
+            URL::forceScheme('https');
+        }
+
         // CMT-02: per-IP limit for comments (the contact form counts successful sends itself).
         RateLimiter::for('comments', fn (Request $request) => Limit::perMinutes(10, 10)->by('comments|'.$request->ip()));
 

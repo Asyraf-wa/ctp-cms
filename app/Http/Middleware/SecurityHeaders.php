@@ -21,6 +21,9 @@ class SecurityHeaders
     {
         $response = $next($request);
 
+        // PHP adds this itself; it only tells attackers which version to look up.
+        header_remove('X-Powered-By');
+
         $headers = $response->headers;
         $headers->set('X-Content-Type-Options', 'nosniff');
         $headers->set('X-Frame-Options', 'SAMEORIGIN');

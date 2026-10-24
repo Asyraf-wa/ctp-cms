@@ -10,6 +10,7 @@ use App\Models\Category;
 use App\Models\Comment;
 use App\Models\ContactMessage;
 use App\Models\User;
+use App\Providers\AppServiceProvider;
 use App\Settings\NoticeSettings;
 use App\Support\SiteCache;
 use Illuminate\Support\Facades\DB;
@@ -94,4 +95,15 @@ it('shows what needs attention on the dashboard', function () {
     Livewire::test(NeedsReview::class)->assertOk()->assertSee('Old CakePHP 3 Guide');
     Livewire::test(RecentActivity::class)->assertOk()->assertSee('Aina');
     Livewire::test(PopularArticles::class)->assertOk()->assertSee('Views (7 days)');
+});
+
+it('generates https URLs in production, whatever scheme the request came in on', function () {
+    config(['app.url' => 'https://codethepixel.com']);
+    app()->detectEnvironment(fn () => 'production');
+    (new AppServiceProvider(app()))->boot();
+
+    expect(url('/tutorials'))->toStartWith('https://')
+        ->and(asset('favicon.svg'))->toStartWith('https://');
+
+    URL::forceScheme('http'); // do not leak the forced scheme into other tests
 });
