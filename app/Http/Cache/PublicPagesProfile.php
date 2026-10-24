@@ -38,8 +38,14 @@ class PublicPagesProfile extends CacheAllSuccessfulGetRequests
         return $response->getStatusCode() === 200 && in_array($type, self::TYPES, true);
     }
 
+    // Part of every cache key: a new release (the Vite manifest changes) and the scheme each get their own entries.
+    // Without it, cached HTML points at asset files the new release deleted (unstyled pages after a deploy), and a
+    // page built over http is served to https visitors. Old entries simply expire.
     public function useCacheNameSuffix(Request $request): string
     {
-        return '';
+        static $release = null;
+        $release ??= (string) @filemtime(public_path('build/manifest.json'));
+
+        return $release.'|'.$request->getScheme();
     }
 }
