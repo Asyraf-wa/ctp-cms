@@ -212,4 +212,6 @@ Work done on top of the original plan, from the live site's health report and th
 - [x] Google Analytics behind a consent notice, Privacy Policy updated (D26)
 - [x] Settings → Social: developer and research profiles; Blog as a sidebar section with a category-style index; mobile menu drawer; smooth scrolling
 - [x] "Generate with AI" key takeaways with DeepSeek (D27)
+- [x] Admin "Background jobs" tile (cron heartbeat and mail queue) and `ctp:mail-test`, for a host without a Terminal
+- [x] HTML sitemap at `/sitemap` for people (every tutorial by category, blog, series, projects, pages); the footer link points to it, the XML sitemap stays for crawlers
 - [ ] Owner: move the app out of `public_html` (plan in docs/DEPLOY.md §6), the permanent `schedule:run` cron, SMTP check, backups off-site, Search Console and Bing, DMARC and DKIM records

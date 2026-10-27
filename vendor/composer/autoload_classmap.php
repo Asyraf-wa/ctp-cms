@@ -140,6 +140,7 @@ return array(
     'App\\Http\\Controllers\\Site\\ProjectController' => $baseDir . '/app/Http/Controllers/Site/ProjectController.php',
     'App\\Http\\Controllers\\Site\\RootSlugController' => $baseDir . '/app/Http/Controllers/Site/RootSlugController.php',
     'App\\Http\\Controllers\\Site\\SearchController' => $baseDir . '/app/Http/Controllers/Site/SearchController.php',
+    'App\\Http\\Controllers\\Site\\SitemapPageController' => $baseDir . '/app/Http/Controllers/Site/SitemapPageController.php',
     'App\\Http\\Controllers\\Site\\TutorialController' => $baseDir . '/app/Http/Controllers/Site/TutorialController.php',
     'App\\Http\\Middleware\\NormalizeUrl' => $baseDir . '/app/Http/Middleware/NormalizeUrl.php',
     'App\\Http\\Middleware\\SecurityHeaders' => $baseDir . '/app/Http/Middleware/SecurityHeaders.php',

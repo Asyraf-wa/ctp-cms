@@ -954,6 +954,7 @@ class ComposerStaticInitfe605ef52ccb56d70c11648187fcd8d0
         'App\\Http\\Controllers\\Site\\ProjectController' => __DIR__ . '/../..' . '/app/Http/Controllers/Site/ProjectController.php',
         'App\\Http\\Controllers\\Site\\RootSlugController' => __DIR__ . '/../..' . '/app/Http/Controllers/Site/RootSlugController.php',
         'App\\Http\\Controllers\\Site\\SearchController' => __DIR__ . '/../..' . '/app/Http/Controllers/Site/SearchController.php',
+        'App\\Http\\Controllers\\Site\\SitemapPageController' => __DIR__ . '/../..' . '/app/Http/Controllers/Site/SitemapPageController.php',
         'App\\Http\\Controllers\\Site\\TutorialController' => __DIR__ . '/../..' . '/app/Http/Controllers/Site/TutorialController.php',
         'App\\Http\\Middleware\\NormalizeUrl' => __DIR__ . '/../..' . '/app/Http/Middleware/NormalizeUrl.php',
         'App\\Http\\Middleware\\SecurityHeaders' => __DIR__ . '/../..' . '/app/Http/Middleware/SecurityHeaders.php',
