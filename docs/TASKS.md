@@ -8,7 +8,7 @@
 ## Phase 0 — Setup & Foundations
 
 ### 0A. Repo & Docker
-- [x] T0.01 `git init`, `main` and `develop` branches, `.gitignore` (incl. `legacy/`). *GitHub remote `Asyraf-wa/ctp` (private) still to be created and pushed by the owner (no `gh` CLI here)*
+- [x] T0.01 `git init`, `main` and `develop` branches, `.gitignore` (incl. `legacy/`). *Remote: `Asyraf-wa/ctp-cms` (public, MIT; D22). Only `main` and `production` are used.*
 - [x] T0.02 `docker-compose.yml`: app (php 8.4-fpm), nginx :8080, **mysql:8.0.44**, **phpMyAdmin :8081**, node (Vite), mailpit :8025, scheduler (OPS-01)
 - [x] T0.03 `./dev` helper script (`up`, `down`, `artisan`, `composer`, `npm`, `test`, `fresh`, `legacy-import`)
 - [x] T0.04 Install Laravel 13 (13.36) at the repo root. MySQL, `ctp_testing` and the `ctp_legacy` DB (loaded with `./dev legacy-import`)
@@ -26,7 +26,7 @@
 
 ### 0D. Spikes
 - [x] T0.12 **Editor spike:** Filament RichEditor with a custom code block (language and filename), a callout block and a media-picker action. Test it with a sample of legacy HTML. Decide between RichEditor and TinyMCE (EDIT-01). → **RichEditor (D16)**, results in ARCH §5.1
-- [ ] T0.13 **Hosting check (cPanel):**
+- [x] T0.13 **Hosting check (cPanel):** results in ARCH §9 ("Hosting check results"); the SMTP, symlink and `.cpanel.yml` items are marked not verified there and are covered by docs/LAUNCH-CHECKLIST.md
   - cPanel Git can clone a private repo with a deploy key
   - `.cpanel.yml` tasks run `php artisan`
   - Composer is available, or not
@@ -198,3 +198,18 @@
 - Downloadable cheat-sheet or PDF per series
 - PWA offline reading for saved tutorials
 - Multi-language (if ever)
+
+---
+
+## After launch (2026-10)
+
+Work done on top of the original plan, from the live site's health report and the owner's requests. Decisions D22–D27 in the PRD.
+
+- [x] Open source: MIT, README, SECURITY.md, clean history in `ctp-cms` (D22)
+- [x] Release flow: CI release job to `production`, `.cpanel.yml`, DEPLOY.md, LAUNCH-CHECKLIST.md, no-Terminal updates (D23)
+- [x] Brand: inline SVG `</>` mark, Titillium Web site name, matching favicon, app icons, OG card and mail header (D24)
+- [x] Health report fixes: https everywhere, release-keyed response cache, accessible names without JS, heading outline, SEO details (D25)
+- [x] Google Analytics behind a consent notice, Privacy Policy updated (D26)
+- [x] Settings → Social: developer and research profiles; Blog as a sidebar section with a category-style index; mobile menu drawer; smooth scrolling
+- [x] "Generate with AI" key takeaways with DeepSeek (D27)
+- [ ] Owner: move the app out of `public_html` (plan in docs/DEPLOY.md §6), the permanent `schedule:run` cron, SMTP check, backups off-site, Search Console and Bing, DMARC and DKIM records

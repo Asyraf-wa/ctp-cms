@@ -252,9 +252,10 @@ Constraints: PHP 8.4, MySQL 8.0.44, **no Node, no Supervisor, cron only**. Deplo
 
 | Branch | Contents | Who writes it |
 |---|---|---|
-| `develop` | Daily work | You |
-| `main` | Source code, release-ready | Merge from `develop` |
-| `production` | **Built release**: source, `vendor/` (no dev) and `public/build/` (Vite output) | **GitHub Actions only**, on every push to `main` |
+| `main` | Source code, release-ready; where work is pushed | You |
+| `production` | **Built release**: source, `vendor/` (no dev), `public/build/` (Vite output), Filament's admin assets and the PHP 8.4 handler. A linear history: one commit per release | **GitHub Actions only**, after the tests pass on `main` |
+
+(A `develop` branch was planned and is not used: this is a one-person project, so `main` is the working branch.)
 
 **Full-page cache (OPS-04).** `spatie/laravel-responsecache` stores guest GET pages, feeds, sitemaps and `.md` files in their own file store (`storage/framework/cache/responses`), so clearing it never touches sessions or rate limits. `App\Http\Cache\PublicPagesProfile` skips the admin, API, previews, search, signed-in users and unknown query strings; `CookielessSerializer` drops `Set-Cookie` before storing (the stock serializer would replay the first visitor's session cookie). Saving any visible model or a settings group clears it, as do the nightly view rollup and the topbar notice switching on or off. It is on by default only in production (`RESPONSE_CACHE_ENABLED`).
 
@@ -296,6 +297,23 @@ If symlinks are not allowed: set the domain's **document root** to `ctp-app/publ
 - **Cron (cPanel → Cron Jobs):** `* * * * * /usr/local/bin/php /home/USER/ctp-app/artisan schedule:run >> /dev/null 2>&1`. The scheduler runs `queue:work --stop-when-empty --max-time=50` every minute with `withoutOverlapping()`.
 - **Drivers:** `QUEUE_CONNECTION=database`, `CACHE_STORE=file`, `SESSION_DRIVER=database`. Mail goes through the hosting SMTP (`noreply@codethepixel.com`).
 - **Storage:** run `php artisan storage:link` once. If that is blocked, use a `public_media` disk that writes straight into `public/media`.
+
+### Hosting check results (T0.13, 2026-10-24)
+
+Found while deploying to the live cPanel account (shared hosting, LiteSpeed, PHP 8.4). "Not verified" means it was not tested, not that it fails.
+
+| Question | Result |
+|---|---|
+| Can cPanel Git clone the repository? | **Yes.** The repository is public, so no deploy key is needed (an SSH deploy key works for a private one). Pull with **Update from Remote**. |
+| Do `.cpanel.yml` tasks run `php artisan`? | **Not verified.** "Deploy HEAD Commit" stayed greyed out after a pull, most likely because the clone held files git did not know (`error_log`, `.well-known`, `cgi-bin`), which `.gitignore` now covers. Until it works, the same commands run from a one-off cron job. |
+| Is Composer available? | Not needed: `vendor/` ships in the `production` branch. |
+| Symlinks or a document-root change? | **Not verified.** The live site currently runs from `public_html/codethepixel` behind a root `.htaccess` that maps the domain to that folder, which works but leaves the app inside the web folder. The target layout (app in `~/repositories/ctp`, document root or symlink to its `public/`) is in docs/DEPLOY.md §6. |
+| GD with WebP or AVIF? | WebP variants are used; AVIF stays off by default (`MEDIA_AVIF`). Confirm with a test upload on the live admin. |
+| Does cron work? | **Yes.** One-off cron jobs ran the artisan commands. The permanent `schedule:run` entry (every minute) must also be in place: it drives scheduled posts, the mail and image queue, view roll-ups and backups. |
+| Is SMTP available? | **Not verified.** Send a contact message and a comment on the live site and check that the emails arrive (docs/LAUNCH-CHECKLIST.md). |
+| Other findings | The host sends `X-Powered-By` (removed in the app); LiteSpeed answered plain `http://` with 200 until the redirect was added; MultiPHP's version handler must stay in `public/.htaccess` (the release carries it). |
+
+---
 
 ## 10. Legacy Import
 
