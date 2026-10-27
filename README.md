@@ -11,12 +11,14 @@ It runs on ordinary cPanel shared hosting: no Node, no Redis, no queue worker on
 - Tutorials, blog posts, series, projects and static pages; drafts, previews, scheduling, revisions
 - Media library with WebP variants, usage tracking and a picker
 - Technologies (Simple Icons logos), categories, tags and difficulty levels
+- Key takeaways you write yourself, or draft with one click from DeepSeek (optional, your own API key)
 
 **Reading**
 - Three-column tutorial layout with a category sidebar, "On this page" and focus mode
 - Search palette (Ctrl/⌘ K) on MySQL FULLTEXT
 - Comments with moderation and reply emails; contact form with an inbox
 - Light and dark themes; Lighthouse 98–100 on every category
+- Analytics scripts load only after a cookie-notice consent (Settings → Scripts)
 
 **SEO and AI**
 - Meta, canonical, JSON-LD, sitemaps, RSS, generated Open Graph cards

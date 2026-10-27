@@ -188,7 +188,7 @@ Full schema: [ARCHITECTURE.md §4](ARCHITECTURE.md).
 ### GEO — Generative Engine Optimisation (AI search)
 - **GEO-01** `/llms.txt`: a site summary with curated links to key tutorials and series. `/llms-full.txt` holds the full Markdown of every published article.
 - **GEO-02** A **Markdown version** of every article at `/{slug}.md` (tutorials and pages) or `/blog/{slug}.md`, linked with `<link rel="alternate" type="text/markdown">`.
-- **GEO-03** TL;DR / Key takeaways block (ART-06) in a clearly marked `<section>` near the top.
+- **GEO-03** TL;DR / Key takeaways block (ART-06) in a clearly marked `<section>` near the top. The admin writes the points, or presses **Generate with AI** to have DeepSeek draft them from the article (D27) and edits them before saving.
 - **GEO-04** Explicit facts on the page: "Tested with" versions, published or updated dates, a strong author page with credentials and links.
 - **GEO-05** An **AI crawler policy** in settings: allow or block GPTBot, ClaudeBot, PerplexityBot, Google-Extended and CCBot individually. This writes `robots.txt`.
 - **GEO-06** Optional FAQ block (question and answer pairs), rendered as `FAQPage` JSON-LD.
@@ -244,7 +244,7 @@ A single Filament settings page with tabs. Values are stored in the `settings` t
 - **SET-05 Social links:** GitHub, X, LinkedIn, YouTube, Facebook, Instagram, TikTok and others. They are used in the footer, the author box fallback and `Organization.sameAs`.
 - **SET-06 Analytics & scripts:**
   - head and body script fields (CTP SaaS snippet, Plausible or GA4)
-  - cookie notice toggle (needed only if GA4 is used)
+  - **consent toggle** (D26): with it on, a cookie notice appears and these scripts load only after the visitor clicks Accept
 - **SET-07 Integrations:**
   - comments (global on/off, auto-close after N days)
   - Turnstile keys
@@ -378,7 +378,7 @@ The full mapping is in [ARCH §10](ARCHITECTURE.md). The legacy dump has 64 arti
 | Security | Only allow-listed Google accounts can log in. All user HTML is sanitised. CSRF on all forms. |
 | Compatibility | Last 2 versions of evergreen browsers. Works without JS for reading; JS adds enhancements. |
 | Hosting | Runs on shared hosting: PHP 8.4, MySQL, cron only. |
-| Privacy | PDPA (Malaysia) compliant privacy page. No tracking cookies unless analytics is enabled. |
+| Privacy | PDPA (Malaysia) compliant privacy page. No advertising cookies. Analytics cookies (Google Analytics) are set only after consent (D26). |
 
 ## 7. Phases & Exit Criteria
 
@@ -434,6 +434,12 @@ The full mapping is in [ARCH §10](ARCHITECTURE.md). The legacy dump has 64 arti
 | D20 | Home page | **Text-only home in the tutorial layout** instead of an image-card magazine page: it matches the template, legacy articles have no covers, and it is lighter (148 KiB, Lighthouse mobile 99/100/100/100). Blog and projects are reached from the menu and footer. |
 | D21 | Social images | **The generated brand card is the default social image** (override per item with "Social sharing image"). Featured images are not used by default: their 1200×630 variant is WebP, which LinkedIn and some chat apps ignore, and the card always shows the title. |
 | D15 | Staging and live deploy | **No staging.** Development is local in Docker. The owner does the live deploy; we supply `.cpanel.yml`, the CI workflow and a deploy guide. |
+| D22 | Open source | The CMS is **MIT-licensed** in its own public repository, `Asyraf-wa/ctp-cms`, started with a clean history. The "Code The Pixel" name, logo and the site's content are not covered. The older private `CTP` repository (CakePHP, with credentials in its history) stays private. |
+| D23 | Release flow | Push to `main` runs lint, Larastan and the tests; the CI `release` job then adds a commit to **`production`** with `vendor/` (no dev), `public/build/`, Filament's admin assets and the PHP 8.4 handler. The cPanel clone of `production` **is** the live app (no copying); `.cpanel.yml` only prepares folders, migrates and clears caches. No Terminal is needed on the host. |
+| D24 | Brand mark | The `</>` logo is one inline stroked SVG line (the outline of Victor Mono's ligature, no font), heavier to match the site name in Titillium Web. Body text stays Inter. |
+| D25 | One scheme, one cache entry per release | Production forces https URLs and `.htaccess` redirects http to https. The response cache key includes the release (Vite manifest) and the scheme, so a deploy never serves HTML that points at deleted assets, and an http copy is never served to https visitors. |
+| D26 | Analytics and consent | **Google Analytics behind a cookie notice.** With the consent toggle on (Settings → Scripts), the head and body snippets are inert data until the visitor clicks Accept; "Cookie settings" in the footer changes the choice and withdrawing removes the `_ga` cookies. The CSP allows the Google hosts only while it is on. The Privacy Policy says so. A cookieless tool (Umami, Plausible) remains a way to drop the banner. |
+| D27 | AI writing help | **DeepSeek drafts key takeaways on request.** A button in the TL;DR section sends the title and prose of that article (and nothing else) to the DeepSeek API; the answer only fills the field. Key (encrypted) and model are in Settings → Integrations. Nothing is sent unless the button is pressed. |
 
 ## 11. Open Questions
 _None at the moment._ New questions are added here as they come up during the build.
