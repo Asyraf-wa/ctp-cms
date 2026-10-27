@@ -2,6 +2,7 @@
 
 use App\Models\ContactMessage;
 use App\Models\NotFoundLog;
+use App\Support\SchedulerHealth;
 use App\Support\SiteCache;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -10,6 +11,9 @@ use Illuminate\Support\Facades\Schedule;
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+// Heartbeat for the admin dashboard: proves the cron entry that runs the scheduler is alive.
+Schedule::call(fn () => SchedulerHealth::beat())->name('scheduler-heartbeat')->everyMinute();
 
 // ART-02. On shared hosting the scheduler itself runs from cron every minute (ARCH §9).
 Schedule::command('ctp:publish-scheduled')->everyMinute()->withoutOverlapping();
