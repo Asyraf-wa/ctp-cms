@@ -347,6 +347,13 @@ class ManageSettings extends Page
                     TextInput::make('turnstile_site_key')->label('Site key'),
                     TextInput::make('turnstile_secret_key')->label('Secret key')->password()->revealable(),
                 ]),
+                Section::make('DeepSeek (AI writing help)')
+                    ->description('Powers the "Generate with AI" button for key takeaways in the article editor. When you press it, the article text is sent to DeepSeek (api.deepseek.com); nothing is sent otherwise, and no visitor data is involved. Create a key at platform.deepseek.com.')
+                    ->columns(2)->schema([
+                        TextInput::make('deepseek_api_key')->label('API key')->password()->revealable()->autocomplete(false),
+                        TextInput::make('deepseek_model')->label('Model')->placeholder('deepseek-chat')->maxLength(60)
+                            ->helperText('Leave empty for deepseek-chat.'),
+                    ]),
                 Section::make('Search & AI')->columns(2)->schema([
                     TextInput::make('indexnow_key')->label('IndexNow key')
                         ->hintAction(Action::make('generate')->label('Generate')

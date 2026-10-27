@@ -29,6 +29,10 @@ class IntegrationSettings extends Settings
 
     public ?string $indexnow_key;
 
+    public ?string $deepseek_api_key;
+
+    public ?string $deepseek_model;
+
     /** @var array<string, bool> */
     public array $ai_crawlers;
 
@@ -40,6 +44,6 @@ class IntegrationSettings extends Settings
     /** @return list<string> */
     public static function encrypted(): array
     {
-        return ['turnstile_secret_key'];
+        return ['turnstile_secret_key', 'deepseek_api_key'];
     }
 }

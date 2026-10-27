@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\Articles\Schemas;
 
+use App\Ai\AiException;
+use App\Ai\ArticleText;
+use App\Ai\DeepSeek;
 use App\Enums\ArticleStatus;
 use App\Enums\ArticleType;
 use App\Enums\Difficulty;
@@ -17,6 +20,7 @@ use App\Seo\LinkSuggestions;
 use App\Settings\GeneralSettings;
 use App\Support\Slugs\RootSlugs;
 use Closure;
+use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Repeater\TableColumn;
@@ -25,6 +29,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Html as HtmlBlock;
@@ -33,6 +38,7 @@ use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -103,14 +109,39 @@ class ArticleForm
 
     private static function tldrSection(): Section
     {
-        return Section::make('Key takeaways (TL;DR)')
-            ->description('Shown at the top of the article. Short, factual points: AI search engines quote these.')
+        return Section::make('Key takeaways (TL;DR)')->key('tldr-section')
+            ->description('Shown at the top of the article. Short, factual points: AI search engines quote these. Write them yourself, or let DeepSeek draft them from the article and then edit.')
             ->collapsible()
+            ->headerActions([self::generateTldrAction()])
             ->schema([
                 Repeater::make('tldr')->hiddenLabel()
                     ->simple(TextInput::make('point')->required()->maxLength(200))
                     ->reorderable()->defaultItems(0)->addActionLabel('Add takeaway')->maxItems(6),
             ]);
+    }
+
+    // The article text (title and prose) goes to DeepSeek; the answer only fills the field, the admin edits and saves.
+    private static function generateTldrAction(): Action
+    {
+        return Action::make('generateTldr')
+            ->label('Generate with AI')
+            ->icon(Heroicon::OutlinedSparkles)
+            ->color('gray')
+            ->requiresConfirmation(fn (Get $get): bool => filled($get('tldr')))
+            ->modalHeading('Replace the current takeaways?')
+            ->modalDescription('The takeaways below will be replaced by new ones from DeepSeek. You can still edit them before saving.')
+            ->action(function (Get $get, Set $set): void {
+                try {
+                    $points = app(DeepSeek::class)->keyTakeaways((string) $get('title'), ArticleText::from($get('body')));
+                } catch (AiException $e) {
+                    Notification::make()->danger()->title('Could not generate takeaways')->body($e->getMessage())->send();
+
+                    return;
+                }
+
+                $set('tldr', $points);
+                Notification::make()->success()->title('Takeaways generated')->body('Read them, edit what is off, then save the article.')->send();
+            });
     }
 
     private static function tutorialSection(): Section
