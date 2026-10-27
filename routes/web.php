@@ -18,6 +18,7 @@ use App\Http\Controllers\Site\PageController;
 use App\Http\Controllers\Site\ProjectController;
 use App\Http\Controllers\Site\RootSlugController;
 use App\Http\Controllers\Site\SearchController;
+use App\Http\Controllers\Site\SitemapPageController;
 use App\Http\Controllers\Site\TutorialController;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +34,8 @@ Route::get('blog', [ArticleController::class, 'blogIndex'])->name('blog.index');
 Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');
 Route::get('projects/{slug}', [ProjectController::class, 'show'])->where('slug', $slug)->name('projects.show');
 // SEO-05..08: sitemaps, robots.txt, feeds and the IndexNow key file.
+// For people: every page on one screen. The XML sitemap below is for crawlers.
+Route::get('sitemap', SitemapPageController::class)->name('sitemap.page');
 Route::get('sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('sitemaps/{section}.xml', [SitemapController::class, 'section'])->where('section', '[a-z]+')->name('sitemap.section');
 Route::get('robots.txt', RobotsController::class)->name('robots');
