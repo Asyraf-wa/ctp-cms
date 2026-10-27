@@ -259,16 +259,40 @@ Add `--with-posters` to the import if the legacy posters should become featured 
 
 ---
 
-## 8. Cron
+## 8. Cron and a test email
 
-cPanel → **Cron Jobs** → Add New Cron Job, "Once Per Minute" (`* * * * *`):
+**The permanent cron entry.** cPanel → **Cron Jobs** → Add New Cron Job, "Once Per Minute" (`* * * * *`).
+Use `$HOME/` plus the folder that really holds `artisan` (File Manager shows it: `repositories/ctp`, or
+`public_html/codethepixel` until the app is moved out of `public_html`):
 
 ```bash
-cd /home/USER/repositories/ctp && /opt/cpanel/ea-php84/root/usr/bin/php artisan schedule:run >> /dev/null 2>&1
+cd $HOME/repositories/ctp && /opt/cpanel/ea-php84/root/usr/bin/php artisan schedule:run >> /dev/null 2>&1
 ```
 
-This one entry runs everything: scheduled publishing, the mail and image queue, view rollups, backups,
-the topbar notice window and the 12-month contact purge. Set the cron email to blank, or every minute mails you.
+This one entry runs everything: scheduled publishing, **the mail queue** (every email is queued, so nothing is
+sent without it), image variants, view rollups, backups, the topbar notice window and the 12-month contact purge.
+It stays; unlike the one-off jobs it is never deleted. Set the cron email to blank, or every minute mails you.
+If the app folder moves, edit this entry too.
+
+**Check that it runs, without a Terminal:** open `/admin`. The **Background jobs** tile says *Running* with
+"Last run … seconds ago" and "mail queue: 0 waiting, 0 failed". *Not running* after two minutes means the entry
+is missing or its path or PHP binary is wrong.
+
+**Where owner emails go.** New comments and contact messages are mailed to the **notification email** in
+Settings → General (it falls back to the contact email). Both start as `noreply@…`, which nobody reads: put a
+real inbox there. The **contact email** is also the reply-to address visitors see.
+
+**Test the mail setup.** A one-off cron job (next minute, then delete it) sends a test email at once, without the
+queue, and prints the mailer, the sender, the scheduler state and any SMTP error to `cron.log`:
+
+```bash
+cd $HOME/repositories/ctp && /opt/cpanel/ea-php84/root/usr/bin/php artisan ctp:mail-test you@gmail.com >> $HOME/cron.log 2>&1
+```
+
+Read `~/cron.log` in File Manager. `Sent.` plus an email in the inbox (check spam) means SMTP works. `NOT SENT:`
+shows the reason: wrong `MAIL_HOST`, port or scheme, or a wrong username or password (the account in
+`MAIL_USERNAME` must exist in cPanel → Email Accounts). Then do the real flow from the LAUNCH-CHECKLIST: send a
+contact message and a comment, and wait a minute or two for the queued emails.
 
 ---
 

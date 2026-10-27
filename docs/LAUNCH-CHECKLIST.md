@@ -9,7 +9,9 @@ Test on the new host with a temporary URL, or by pointing your own computer at i
 (`<server IP>  codethepixel.com`).
 
 - [ ] `.env`: `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://codethepixel.com`, `APP_KEY` set and copied somewhere safe
-- [ ] Cron entry saved, and `storage/logs` shows no scheduler errors after a few minutes
+- [ ] Cron entry saved; the **Background jobs** tile in `/admin` says *Running* and the mail queue is empty (docs/DEPLOY.md §8)
+- [ ] Settings → General: the **notification email** is a real inbox, not `noreply@…`
+- [ ] `ctp:mail-test` printed `Sent.` and the test email arrived (docs/DEPLOY.md §8)
 - [ ] Media present: open three older tutorials and check their images load
 - [ ] The legacy site is still reachable if posters or images still need downloading (option B only)
 - [ ] An empty `BACKUP_VERIFY_DATABASE` exists

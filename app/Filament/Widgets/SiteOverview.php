@@ -11,6 +11,7 @@ use App\Models\Article;
 use App\Models\Comment;
 use App\Models\ContactMessage;
 use App\Models\NotFoundLog;
+use App\Support\SchedulerHealth;
 use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -34,6 +35,10 @@ class SiteOverview extends StatsOverviewWidget
         $views = (int) DB::table('article_view_stats')->where('date', '>=', now()->subDays(7)->toDateString())->sum('views')
             + DB::table('article_views')->where('viewed_on', now()->toDateString())->count();
 
+        $running = SchedulerHealth::isRunning();
+        $last = SchedulerHealth::lastRun();
+        $queue = SchedulerHealth::queue();
+
         return [
             Stat::make('Published', number_format($published))
                 ->description(number_format($views).' views in the last 7 days')->icon(Heroicon::OutlinedDocumentText)
@@ -50,6 +55,11 @@ class SiteOverview extends StatsOverviewWidget
             Stat::make('Missing pages', $missing)->icon(Heroicon::OutlinedExclamationTriangle)
                 ->color($missing ? 'danger' : 'gray')->description('404s visited by people, 7 days')
                 ->url(NotFoundLogResource::getUrl()),
+            // The cron entry on the host runs scheduled posts, the mail queue, image variants and backups.
+            Stat::make('Background jobs', $running ? 'Running' : 'Not running')->icon(Heroicon::OutlinedClock)
+                ->color($running ? 'success' : 'danger')
+                ->description(($last ? 'Last run '.$last->diffForHumans() : 'Never ran: add the cron entry (docs/DEPLOY.md)')
+                    .' · mail queue: '.$queue['waiting'].' waiting, '.$queue['failed'].' failed'),
         ];
     }
 }
