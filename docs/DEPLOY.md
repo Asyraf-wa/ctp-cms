@@ -323,6 +323,15 @@ Keep `http://localhost:8100/...` there as well if you still sign in locally. Cha
 That is all: the deploy runs the migrations and clears the caches. If CI fails, `production` is not touched
 and the live site keeps the last good release.
 
+**Migrations and caches run by themselves.** Once the permanent cron entry (§8) is in place, the scheduler runs
+`ctp:release-sync` every minute. When the checked-out commit changed (after *Update from Remote*), it runs
+`migrate --force`, `settings:clear-cache`, `optimize` and `responsecache:clear` once and notes the commit in
+`storage/app/private/release.txt`. So the "Deploy HEAD Commit" button is not needed: Update from Remote, wait a
+minute, done. A failed step is retried the next minute.
+
+**Images without WebP variants** (uploaded while the cron was not running): run `php artisan ctp:media-variants` once
+as a one-off cron job. It queues only the incomplete images; `--force` redoes all of them.
+
 Some releases need a one-off command; they are stated in the commit message or the release notes:
 
 - **Re-render article bodies** (after a change to how content is rendered): `php artisan ctp:rerender`.

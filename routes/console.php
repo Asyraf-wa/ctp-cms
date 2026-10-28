@@ -15,6 +15,9 @@ Artisan::command('inspire', function () {
 // Heartbeat for the admin dashboard: proves the cron entry that runs the scheduler is alive.
 Schedule::call(fn () => SchedulerHealth::beat())->name('scheduler-heartbeat')->everyMinute();
 
+// DEPLOY §10: after "Update from Remote" run migrations and rebuild caches once per new release (no Terminal needed).
+Schedule::command('ctp:release-sync')->everyMinute()->withoutOverlapping()->environments(['production']);
+
 // ART-02. On shared hosting the scheduler itself runs from cron every minute (ARCH §9).
 Schedule::command('ctp:publish-scheduled')->everyMinute()->withoutOverlapping();
 
