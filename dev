@@ -23,7 +23,8 @@ case "$cmd" in
   npm)       $DC run --rm --no-deps --user "$USR" -e HOME=/tmp app npm "$@" ;;
   migrate)   $DC exec --user "$USR" app php artisan migrate "$@" ;;
   fresh)     $DC exec --user "$USR" app php artisan migrate:fresh --seed ;;
-  test)      $DC exec --user "$USR" app php artisan test "$@" ;;
+  # flock: two runs share one ctp_testing database, so a run that outlives its client (a closed pipe, a timeout) must make the next one wait.
+  test)      $DC exec --user "$USR" app flock /tmp/ctp-test.lock php artisan test "$@" ;;
   lint)      $DC exec --user "$USR" app vendor/bin/pint --parallel ;;
   stan)      $DC exec --user "$USR" app vendor/bin/phpstan analyse --memory-limit=1G "$@" ;;
   mysql)     $DC exec mysql mysql -uroot -proot "$@" ;;
