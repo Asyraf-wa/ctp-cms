@@ -4,6 +4,7 @@ use App\Filament\Widgets\SiteOverview;
 use App\Models\User;
 use App\Settings\GeneralSettings;
 use App\Support\SchedulerHealth;
+use Illuminate\Console\Scheduling\CallbackEvent;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
@@ -56,4 +57,19 @@ it('reports a mail failure instead of crashing', function () {
     $this->artisan('ctp:mail-test', ['to' => 'you@example.com'])
         ->expectsOutputToContain('NOT SENT: Connection refused')
         ->assertFailed();
+});
+
+it('runs every scheduled task inside the scheduler process, because shared hosting disables proc_open', function () {
+    $this->artisan('schedule:list')->assertSuccessful();
+
+    $events = collect(app(Schedule::class)->events());
+    $spawning = $events->reject(fn ($event) => $event instanceof CallbackEvent)->map(fn ($event) => $event->command)->all();
+
+    expect($events)->not->toBeEmpty()
+        ->and($spawning)->toBe([]);
+
+    // And they really do run: the publish task is a closure around its artisan command.
+    $publish = $events->first(fn ($event) => $event->description === 'ctp:publish-scheduled');
+    expect($publish)->not->toBeNull();
+    $publish->run(app());
 });
