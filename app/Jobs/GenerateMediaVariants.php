@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Media\VariantGenerator;
 use App\Models\Media;
+use App\Support\SiteCache;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
@@ -22,6 +23,9 @@ class GenerateMediaVariants implements ShouldQueue
     {
         if ($media = Media::find($this->mediaId)) {
             $variants->generate($media);
+
+            // The variants are saved without model events; pages cached before they existed still show the original.
+            SiteCache::flush();
         }
     }
 }

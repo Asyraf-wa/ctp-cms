@@ -1,12 +1,15 @@
 <?php
 
+use App\Jobs\GenerateMediaVariants;
 use App\Media\MediaUploader;
+use App\Media\VariantGenerator;
 use App\Models\Media;
 use App\Models\MediaUsage;
 use App\Models\Series;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Spatie\ResponseCache\Facades\ResponseCache;
 
 beforeEach(function () {
     Storage::fake('media');
@@ -148,4 +151,13 @@ it('writes the file back when the same image is uploaded again after its file we
     Storage::disk('media')->put($first->path, 'marker');
     $this->uploader->store(jpegWithExif());
     expect(Storage::disk('media')->get($first->path))->toBe('marker');
+});
+
+it('empties the page cache once the variants exist, so cached pages switch to the WebP files', function () {
+    $media = $this->uploader->store(jpegWithExif(1600, 900));
+
+    ResponseCache::shouldReceive('clear')->once();
+    (new GenerateMediaVariants($media->id))->handle(app(VariantGenerator::class));
+
+    expect($media->fresh()->variants)->toHaveKeys(['320', '768', '1280', 'og']);
 });
