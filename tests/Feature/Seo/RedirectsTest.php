@@ -98,3 +98,15 @@ it('suggests related articles to link to and marks the ones already linked', fun
         ->and($suggestions->first()['linked'])->toBeTrue()
         ->and($suggestions->last()['linked'])->toBeFalse();
 });
+
+it('sends the host\'s app folder URLs to the real ones with a 301, keeping the query', function () {
+    config(['app.url' => 'https://codethepixel.com']);
+
+    $this->get('/codethepixel/public/blog')->assertStatus(301)->assertRedirect('https://codethepixel.com/blog');
+    $this->get('/codethepixel/public')->assertStatus(301)->assertRedirect('https://codethepixel.com/');
+    $this->get('/codethepixel/public/tutorials?page=2')->assertStatus(301)->assertRedirect('https://codethepixel.com/tutorials?page=2');
+
+    // Only that exact folder: other paths that start with the word are untouched (the legacy site lived in /codethepixel/).
+    $this->get('/codethepixel/public-notes')->assertStatus(404);
+    $this->get('/codethepixelx/public')->assertStatus(404);
+});

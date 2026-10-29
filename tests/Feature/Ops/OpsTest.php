@@ -110,6 +110,22 @@ it('generates https URLs in production, whatever scheme the request came in on',
     URL::forceScheme('http'); // do not leak the forced scheme into other tests
 });
 
+it('builds links from APP_URL in production, not from the folder the host serves the app from', function () {
+    config(['app.url' => 'https://codethepixel.com']);
+    app()->detectEnvironment(fn () => 'production');
+    (new AppServiceProvider(app()))->boot();
+
+    // As on the live host: the request root carries the subfolder.
+    $request = Request::create('https://codethepixel.com/codethepixel/public/blog', 'GET', server: ['SCRIPT_NAME' => '/codethepixel/public/index.php', 'SCRIPT_FILENAME' => '/home/u/public_html/codethepixel/public/index.php']);
+    app()->instance('request', $request);
+
+    expect(url('/blog'))->toBe('https://codethepixel.com/blog')
+        ->and(route('blog.index'))->toBe('https://codethepixel.com/blog');
+
+    URL::forceScheme('http');
+    URL::forceRootUrl(null);
+});
+
 it('keys cached pages by release and scheme, so a deploy or an http copy never serves stale HTML', function () {
     $profile = new PublicPagesProfile;
 

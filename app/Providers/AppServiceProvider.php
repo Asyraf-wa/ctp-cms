@@ -53,6 +53,12 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
+        // The host maps the domain into a subfolder (public_html/codethepixel/public) with a root .htaccess, so the
+        // request root carries that folder and menu links came out as /codethepixel/public/blog. Use APP_URL instead.
+        if ($this->app->isProduction() && filled(config('app.url'))) {
+            URL::forceRootUrl(rtrim((string) config('app.url'), '/'));
+        }
+
         // CMT-02: per-IP limit for comments (the contact form counts successful sends itself).
         RateLimiter::for('comments', fn (Request $request) => Limit::perMinutes(10, 10)->by('comments|'.$request->ip()));
 
