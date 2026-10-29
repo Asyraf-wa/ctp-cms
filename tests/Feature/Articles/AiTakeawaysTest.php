@@ -153,3 +153,42 @@ it('fills the excerpt field from the button in the article editor and saves it',
 
     expect($article->fresh()->excerpt)->toBe('Move slow work out of the request with Laravel queues.');
 });
+
+it('writes an SEO title, description and keywords within the field limits', function () {
+    Http::fake(['api.deepseek.com/*' => Http::sequence()->push(['choices' => [['message' => ['content' => json_encode([
+        'title' => str_repeat('Laravel queues ', 8),
+        'description' => "Learn to move <i>slow</i> work\n out of the request.",
+        'keywords' => ['laravel queues', 'Laravel Queues', ' shared hosting ', '<b>cron</b>', 5, '', 'a', 'b', 'c', 'd', 'e'],
+    ])]]]])->push(['choices' => [['message' => ['content' => json_encode(['title' => 'Only a title'])]]]])]);
+
+    $seo = app(DeepSeek::class)->seo('Laravel queues', AI_PROSE);
+
+    expect(mb_strlen($seo['title']))->toBeLessThanOrEqual(DeepSeek::MAX_SEO_TITLE_LENGTH)
+        ->and($seo['description'])->toBe('Learn to move slow work out of the request.')
+        ->and($seo['keywords'])->toBe('laravel queues, shared hosting, cron, a, b, c, d, e');
+
+    expect(fn () => app(DeepSeek::class)->seo('Laravel queues', AI_PROSE))->toThrow(AiException::class, 'title and description');
+});
+
+it('fills the SEO fields from the button in the article editor and saves them', function () {
+    Http::fake(['api.deepseek.com/*' => Http::response(['choices' => [['message' => ['content' => json_encode([
+        'title' => 'Laravel Queues on Shared Hosting',
+        'description' => 'Move slow work out of the request with Laravel queues, and drain them from the scheduler when you have no worker.',
+        'keywords' => ['laravel queues', 'shared hosting'],
+    ])]]]])]);
+    $article = Article::factory()->create(['category_id' => Category::factory(), 'author_id' => $this->user->id, 'body' => [
+        'type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => AI_PROSE]]]],
+    ]]);
+
+    Livewire::test(EditArticle::class, ['record' => $article->getRouteKey()])
+        ->callAction(TestAction::make('generateSeo')->schemaComponent('seo-section'))
+        ->assertHasNoActionErrors()
+        ->assertSet('data.seo.title', 'Laravel Queues on Shared Hosting')
+        ->assertSet('data.seo.keywords', 'laravel queues, shared hosting')
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($article->fresh()->seo)->title->toBe('Laravel Queues on Shared Hosting')
+        ->description->toStartWith('Move slow work')
+        ->keywords->toBe('laravel queues, shared hosting');
+});

@@ -7,6 +7,7 @@ use App\Seo\SeoChecklist;
 use App\Settings\GeneralSettings;
 use App\Settings\SeoSettings;
 use Closure;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -23,6 +24,7 @@ class SeoSection
      * @param  string  $descriptionField  form field used when the SEO description is empty
      * @param  string|Closure  $pathPrefix  public path before the slug, e.g. "/" or "/projects/"
      * @param  string|null  $bodyField  TipTap body for the content checks (null: skip them)
+     * @param  Action|null  $generate  header button that fills the fields (AI)
      */
     public static function make(
         string $fallbacks = 'the title and excerpt',
@@ -31,10 +33,12 @@ class SeoSection
         string $descriptionField = 'excerpt',
         string|Closure $pathPrefix = '/',
         ?string $bodyField = 'body',
+        ?Action $generate = null,
     ): Section {
-        return Section::make('Search engines & social')
+        return Section::make('Search engines & social')->key('seo-section')
             ->description("Leave empty to use {$fallbacks}.")
             ->collapsed()
+            ->headerActions($generate ? [$generate] : [])
             ->schema([
                 // SEO-02: live previews and checks from the unsaved form.
                 HtmlBlock::make(fn (Get $get) => view('filament.seo.preview', [
