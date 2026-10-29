@@ -107,8 +107,22 @@ it('fills the takeaways field from the button in the article editor', function (
     Livewire::test(EditArticle::class, ['record' => $article->getRouteKey()])
         ->callAction(TestAction::make('generateTldr')->schemaComponent('tldr-section'))
         ->assertHasNoActionErrors()
-        ->assertSet('data.tldr', fn (array $tldr) => array_values($tldr) === ['Queues keep requests fast.', 'Drain the queue from the scheduler on shared hosting.']);
+        ->assertSet('data.tldr', fn (array $tldr) => array_column(array_values($tldr), 'point') === ['Queues keep requests fast.', 'Drain the queue from the scheduler on shared hosting.']);
 
     // Nothing is saved until the admin saves the form.
     expect($article->fresh()->tldr)->toBeNull();
+});
+
+it('keeps generated takeaways as a plain list once the article is saved', function () {
+    Http::fake(['api.deepseek.com/*' => Http::response(aiAnswer(['Queues keep requests fast.', 'Drain the queue from the scheduler on shared hosting.']))]);
+    $article = Article::factory()->create(['category_id' => Category::factory(), 'author_id' => $this->user->id, 'tldr' => null, 'body' => [
+        'type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => AI_PROSE]]]],
+    ]]);
+
+    Livewire::test(EditArticle::class, ['record' => $article->getRouteKey()])
+        ->callAction(TestAction::make('generateTldr')->schemaComponent('tldr-section'))
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($article->fresh()->tldr)->toBe(['Queues keep requests fast.', 'Drain the queue from the scheduler on shared hosting.']);
 });
