@@ -139,7 +139,8 @@ class ArticleForm
                     return;
                 }
 
-                $set('tldr', $points);
+                // A simple repeater holds each item as ['point' => text] in the form; it stores the plain list on save.
+                $set('tldr', array_map(fn (string $point): array => ['point' => $point], $points));
                 Notification::make()->success()->title('Takeaways generated')->body('Read them, edit what is off, then save the article.')->send();
             });
     }
