@@ -7,6 +7,9 @@ x-app: &app
       UID: ${UID:-1000}
       GID: ${GID:-1000}
   image: ctp/app:dev
+  environment:
+    # The scheduler would otherwise run ctp:release-sync here whenever the commit changes (APP_ENV may be production).
+    CTP_RELEASE_SYNC: "false"
   volumes:
     - ./:/var/www/html
   depends_on:

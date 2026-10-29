@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 use JsonException;
 
 /**
- * Key takeaways (TL;DR) and the excerpt of an article, written by DeepSeek's chat API. The admin presses a button in the editor;
+ * Key takeaways (TL;DR), the excerpt and the search snippet of an article, written by DeepSeek's chat API. The admin presses a button in the editor;
  * the title and the prose of the article are sent, nothing else. The result is only a suggestion to edit.
  */
 class DeepSeek
@@ -27,6 +27,12 @@ class DeepSeek
     public const MAX_POINT_LENGTH = 200; // the TL;DR field's own limit
 
     public const MAX_EXCERPT_LENGTH = 500; // the excerpt column's own limit
+
+    public const MAX_SEO_TITLE_LENGTH = 70; // the SEO title field's own limit
+
+    public const MAX_SEO_DESCRIPTION_LENGTH = 320; // the meta description field's own limit
+
+    public const MAX_KEYWORDS = 8;
 
     public function __construct(private IntegrationSettings $settings) {}
 
@@ -60,6 +66,46 @@ class DeepSeek
         }
 
         return Str::limit($excerpt, self::MAX_EXCERPT_LENGTH, '');
+    }
+
+    /**
+     * @return array{title: string, description: string, keywords: string}
+     *
+     * @throws AiException
+     */
+    public function seo(string $title, string $text): array
+    {
+        $data = $this->decode($this->ask($this->seoSystem(), $title, $text, 400));
+        $clean = fn (mixed $v): string => is_string($v) ? trim(preg_replace('/\s+/u', ' ', strip_tags($v)) ?? '') : '';
+
+        $seoTitle = Str::limit($clean($data['title'] ?? null), self::MAX_SEO_TITLE_LENGTH, '');
+        $description = Str::limit($clean($data['description'] ?? null), self::MAX_SEO_DESCRIPTION_LENGTH, '');
+
+        if ($seoTitle === '' || $description === '') {
+            throw new AiException('DeepSeek did not return a title and description. Try again.');
+        }
+
+        $keywords = collect(is_array($data['keywords'] ?? null) ? $data['keywords'] : [])
+            ->map($clean)
+            ->filter()
+            ->unique(fn (string $k) => mb_strtolower($k))
+            ->take(self::MAX_KEYWORDS)
+            ->implode(', ');
+
+        return ['title' => $seoTitle, 'description' => $description, 'keywords' => $keywords];
+    }
+
+    private function seoSystem(): string
+    {
+        return <<<'PROMPT'
+            You write the search-engine snippet of a programming tutorial. Answer in English, whatever the article's language.
+            Return JSON only, in exactly this shape: {"title": "...", "description": "...", "keywords": ["...", "..."]}
+            Rules:
+            - title: at most 60 characters, the main topic first, no site name, no quotes around it.
+            - description: 120 to 160 characters, says what the reader will learn or build and invites the click. Only what the article states.
+            - keywords: 5 to 8 short phrases a reader would search for, lower case, no duplicates.
+            - No marketing words, no markdown, no emoji. Keep code, file names and commands exactly as written.
+            PROMPT;
     }
 
     /** @throws AiException */

@@ -56,7 +56,7 @@ class ArticleForm
                     self::tldrSection(),
                     self::tutorialSection(),
                     self::faqSection(),
-                    SeoSection::make(pathPrefix: fn (Get $get) => in_array($get('type'), [ArticleType::Blog, ArticleType::Blog->value], true) ? '/blog/' : '/'),
+                    SeoSection::make(pathPrefix: fn (Get $get) => in_array($get('type'), [ArticleType::Blog, ArticleType::Blog->value], true) ? '/blog/' : '/', generate: self::generateSeoAction()),
                 ])->columnSpan(['lg' => 2]),
 
                 Group::make([
@@ -162,6 +162,29 @@ class ArticleForm
 
                 $set('excerpt', $excerpt);
                 Notification::make()->success()->title('Excerpt generated')->body('Read it, edit what is off, then save the article.')->send();
+            });
+    }
+
+    private static function generateSeoAction(): Action
+    {
+        return Action::make('generateSeo')
+            ->label('Generate with AI')
+            ->icon(Heroicon::OutlinedSparkles)
+            ->color('gray')
+            ->requiresConfirmation(fn (Get $get): bool => filled($get('seo.title')) || filled($get('seo.description')) || filled($get('seo.keywords')))
+            ->modalHeading('Replace the current SEO fields?')
+            ->modalDescription('The SEO title, meta description and meta keywords will be replaced by new ones from DeepSeek. You can still edit them before saving.')
+            ->action(function (Get $get, Set $set): void {
+                $seo = self::askDeepSeek(fn (DeepSeek $ai) => $ai->seo((string) $get('title'), ArticleText::from($get('body'))), 'SEO fields');
+
+                if ($seo === null) {
+                    return;
+                }
+
+                $set('seo.title', $seo['title']);
+                $set('seo.description', $seo['description']);
+                $set('seo.keywords', $seo['keywords']);
+                Notification::make()->success()->title('SEO fields generated')->body('Check the preview, edit what is off, then save the article.')->send();
             });
     }
 

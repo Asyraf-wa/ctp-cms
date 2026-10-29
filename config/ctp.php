@@ -11,6 +11,12 @@ return [
     ))),
 
     /*
+    | ctp:release-sync (DEPLOY §10) migrates and caches after a new release is pulled. Production only: the dev
+    | containers set CTP_RELEASE_SYNC=false, because a cached config in bootstrap/cache would also be read by tests.
+    */
+    'release_sync' => (bool) env('CTP_RELEASE_SYNC', true),
+
+    /*
     | Times are stored in UTC (config app.timezone); the admin shows and accepts them in this zone.
     */
     /*

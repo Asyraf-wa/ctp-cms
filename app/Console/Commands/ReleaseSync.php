@@ -18,6 +18,10 @@ class ReleaseSync extends Command
 
     public function handle(): int
     {
+        if (! config('ctp.release_sync')) {
+            return self::SUCCESS;
+        }
+
         $release = Release::id();
         $disk = Storage::disk('local');
 
