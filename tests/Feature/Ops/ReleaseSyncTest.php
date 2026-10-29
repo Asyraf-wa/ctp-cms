@@ -32,12 +32,14 @@ it('does nothing when the release is unchanged and records it after the steps ru
     Storage::disk('local')->put('release.txt', $current);
     $this->artisan('ctp:release-sync')->doesntExpectOutputToContain('post-deploy')->assertSuccessful();
 
-    Storage::disk('local')->put('release.txt', 'old');
-    $this->artisan('ctp:release-sync')->expectsOutputToContain('post-deploy')->assertSuccessful();
-    expect(Storage::disk('local')->get('release.txt'))->toBe($current);
-
-    // The command really ran `optimize`; leave no cached config or routes behind.
-    $this->artisan('optimize:clear');
+    // The command really runs `optimize`; leave no cached config or routes behind, even if this fails.
+    try {
+        Storage::disk('local')->put('release.txt', 'old');
+        $this->artisan('ctp:release-sync')->expectsOutputToContain('post-deploy')->assertSuccessful();
+        expect(Storage::disk('local')->get('release.txt'))->toBe($current);
+    } finally {
+        $this->artisan('optimize:clear');
+    }
 });
 
 it('queues variants only for images that lack them', function () {
