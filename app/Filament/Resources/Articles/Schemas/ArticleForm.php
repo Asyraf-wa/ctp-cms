@@ -102,6 +102,7 @@ class ArticleForm
                 })
                 ->helperText(fn (string $operation) => $operation === 'edit' ? 'Changing the slug of a published article redirects the old URL automatically.' : null),
             Textarea::make('excerpt')->rows(2)->maxLength(500)->live(onBlur: true)
+                ->hintAction(self::generateExcerptAction())
                 ->helperText('One or two sentences for cards, search results and the meta description fallback.'),
             ContentEditor::make(),
         ]);
@@ -131,11 +132,9 @@ class ArticleForm
             ->modalHeading('Replace the current takeaways?')
             ->modalDescription('The takeaways below will be replaced by new ones from DeepSeek. You can still edit them before saving.')
             ->action(function (Get $get, Set $set): void {
-                try {
-                    $points = app(DeepSeek::class)->keyTakeaways((string) $get('title'), ArticleText::from($get('body')));
-                } catch (AiException $e) {
-                    Notification::make()->danger()->title('Could not generate takeaways')->body($e->getMessage())->send();
+                $points = self::askDeepSeek(fn (DeepSeek $ai) => $ai->keyTakeaways((string) $get('title'), ArticleText::from($get('body'))), 'takeaways');
 
+                if ($points === null) {
                     return;
                 }
 
@@ -143,6 +142,44 @@ class ArticleForm
                 $set('tldr', array_map(fn (string $point): array => ['point' => $point], $points));
                 Notification::make()->success()->title('Takeaways generated')->body('Read them, edit what is off, then save the article.')->send();
             });
+    }
+
+    private static function generateExcerptAction(): Action
+    {
+        return Action::make('generateExcerpt')
+            ->label('Generate with AI')
+            ->icon(Heroicon::OutlinedSparkles)
+            ->color('gray')
+            ->requiresConfirmation(fn (Get $get): bool => filled($get('excerpt')))
+            ->modalHeading('Replace the current excerpt?')
+            ->modalDescription('The excerpt will be replaced by a new one from DeepSeek. You can still edit it before saving.')
+            ->action(function (Get $get, Set $set): void {
+                $excerpt = self::askDeepSeek(fn (DeepSeek $ai) => $ai->excerpt((string) $get('title'), ArticleText::from($get('body'))), 'excerpt');
+
+                if ($excerpt === null) {
+                    return;
+                }
+
+                $set('excerpt', $excerpt);
+                Notification::make()->success()->title('Excerpt generated')->body('Read it, edit what is off, then save the article.')->send();
+            });
+    }
+
+    /**
+     * @template T
+     *
+     * @param  callable(DeepSeek): T  $ask
+     * @return T|null null after telling the admin what went wrong
+     */
+    private static function askDeepSeek(callable $ask, string $what): mixed
+    {
+        try {
+            return $ask(app(DeepSeek::class));
+        } catch (AiException $e) {
+            Notification::make()->danger()->title("Could not generate the {$what}")->body($e->getMessage())->send();
+
+            return null;
+        }
     }
 
     private static function tutorialSection(): Section

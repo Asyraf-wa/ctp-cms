@@ -126,3 +126,30 @@ it('keeps generated takeaways as a plain list once the article is saved', functi
 
     expect($article->fresh()->tldr)->toBe(['Queues keep requests fast.', 'Drain the queue from the scheduler on shared hosting.']);
 });
+
+it('writes a plain one-paragraph excerpt from the article', function () {
+    Http::fake(['api.deepseek.com/*' => Http::sequence()
+        ->push(['choices' => [['message' => ['content' => json_encode(['excerpt' => "  Run Laravel queues\n on <b>shared</b> hosting.  "])]]]])
+        ->push(['choices' => [['message' => ['content' => json_encode(['excerpt' => ' '])]]]]),
+    ]);
+
+    expect(app(DeepSeek::class)->excerpt('Laravel queues', AI_PROSE))->toBe('Run Laravel queues on shared hosting.');
+    expect(fn () => app(DeepSeek::class)->excerpt('Laravel queues', AI_PROSE))->toThrow(AiException::class, 'did not return an excerpt');
+    expect(fn () => app(DeepSeek::class)->excerpt('Laravel queues', 'too short'))->toThrow(AiException::class, 'not enough text');
+});
+
+it('fills the excerpt field from the button in the article editor and saves it', function () {
+    Http::fake(['api.deepseek.com/*' => Http::response(['choices' => [['message' => ['content' => json_encode(['excerpt' => 'Move slow work out of the request with Laravel queues.'])]]]])]);
+    $article = Article::factory()->create(['category_id' => Category::factory(), 'author_id' => $this->user->id, 'excerpt' => null, 'body' => [
+        'type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => AI_PROSE]]]],
+    ]]);
+
+    Livewire::test(EditArticle::class, ['record' => $article->getRouteKey()])
+        ->callAction(TestAction::make('generateExcerpt')->schemaComponent('excerpt'))
+        ->assertHasNoActionErrors()
+        ->assertSet('data.excerpt', 'Move slow work out of the request with Laravel queues.')
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($article->fresh()->excerpt)->toBe('Move slow work out of the request with Laravel queues.');
+});
