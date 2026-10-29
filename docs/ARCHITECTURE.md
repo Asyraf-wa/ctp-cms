@@ -253,7 +253,7 @@ Constraints: PHP 8.4, MySQL 8.0.44, **no Node, no Supervisor, cron only**. Deplo
 | Branch | Contents | Who writes it |
 |---|---|---|
 | `main` | Source code, release-ready; where work is pushed | You |
-| `production` | **Built release**: source, `vendor/` (no dev), `public/build/` (Vite output), Filament's admin assets and the PHP 8.4 handler. A linear history: one commit per release | **GitHub Actions only**, after the tests pass on `main` |
+| `production` | **Built release**: source without `tests/`, `vendor/` (no dev), `public/build/` (Vite output), Filament's admin assets and the PHP 8.4 handler. A linear history: one commit per release | **GitHub Actions only**, after the tests pass on `main` |
 
 (A `develop` branch was planned and is not used: this is a one-person project, so `main` is the working branch.)
 

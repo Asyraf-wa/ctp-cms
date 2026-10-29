@@ -105,6 +105,9 @@ jobs:
 
           git clone -q --branch production --single-branch "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" /tmp/prod
           rsync -a --delete --exclude='/.git' --exclude='/node_modules' ./ /tmp/prod/
+          # The live site never runs the tests, and host malware scanners rewrite test fixtures (a dirty clone
+          # blocks Update from Remote). rsync does not delete excluded paths, so remove the folder explicitly.
+          rm -rf /tmp/prod/tests
           cd /tmp/prod
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
