@@ -18,7 +18,9 @@ class ReleaseSync extends Command
 
     public function handle(): int
     {
-        if (! config('ctp.release_sync')) {
+        // Only an explicit false switches it off: right after a pull the cached config may not know this key yet,
+        // and this command is what rebuilds that cache.
+        if (config('ctp.release_sync', true) === false) {
             return self::SUCCESS;
         }
 

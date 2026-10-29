@@ -32,7 +32,7 @@ it('does nothing at all where release sync is switched off', function () {
 
 it('does nothing when the release is unchanged and records it after the steps run', function () {
     Storage::fake('local');
-    config(['ctp.release_sync' => true]);
+    config(['ctp.release_sync' => null]); // a config cache from before the key existed
     $current = Release::id();
 
     if ($current === null) {
