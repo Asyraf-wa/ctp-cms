@@ -21,8 +21,18 @@ it('reads the commit from a loose ref and from packed-refs', function () {
         ->and(Release::id($root.'/missing'))->toBeNull();
 });
 
+it('does nothing at all where release sync is switched off', function () {
+    Storage::fake('local');
+    config(['ctp.release_sync' => false]);
+
+    $this->artisan('ctp:release-sync')->doesntExpectOutputToContain('post-deploy')->assertSuccessful();
+
+    expect(Storage::disk('local')->exists('release.txt'))->toBeFalse();
+});
+
 it('does nothing when the release is unchanged and records it after the steps run', function () {
     Storage::fake('local');
+    config(['ctp.release_sync' => true]);
     $current = Release::id();
 
     if ($current === null) {
