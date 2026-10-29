@@ -29,7 +29,7 @@ class MediaUploader
 
         // MED-02: the same file uploaded twice is the same media item.
         if ($existing = Media::where('hash', $prepared['hash'])->first()) {
-            return $existing;
+            return $this->restoreIfMissing($existing, $prepared['contents']);
         }
 
         $disk = config('ctp.media.disk');
@@ -161,6 +161,21 @@ class MediaUploader
         $slug = Str::of(pathinfo($originalName, PATHINFO_FILENAME))->slug()->limit(60, '')->trim('-')->toString() ?: 'file';
 
         return now()->format('Y/m').'/'.$slug.'-'.Str::lower(Str::random(4)).'.'.$extension;
+    }
+
+    // A row can outlive its file (a database copied to a host without the media folder). Uploading the same
+    // image again then writes it back, instead of handing out a URL that returns 404.
+    private function restoreIfMissing(Media $media, string $contents): Media
+    {
+        $disk = Storage::disk($media->disk);
+
+        if (! $disk->exists($media->path)) {
+            $disk->put($media->path, $contents);
+            $this->variants->deleteAll($media);
+            $this->queueVariants($media);
+        }
+
+        return $media;
     }
 
     private function queueVariants(Media $media): void

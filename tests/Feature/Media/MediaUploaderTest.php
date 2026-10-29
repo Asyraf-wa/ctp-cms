@@ -131,3 +131,20 @@ it('records where media is used', function () {
     $series->delete();
     expect($cover->isInUse())->toBeFalse();
 });
+
+it('writes the file back when the same image is uploaded again after its file went missing', function () {
+    $first = $this->uploader->store(jpegWithExif());
+    Storage::disk('media')->delete([$first->path, ...array_values($first->fresh()->variants ?? [])]);
+    expect(Storage::disk('media')->exists($first->path))->toBeFalse();
+
+    $again = $this->uploader->store(jpegWithExif());
+
+    expect($again->id)->toBe($first->id)
+        ->and(Storage::disk('media')->exists($first->path))->toBeTrue()
+        ->and(Media::count())->toBe(1);
+
+    // An intact file is left alone.
+    Storage::disk('media')->put($first->path, 'marker');
+    $this->uploader->store(jpegWithExif());
+    expect(Storage::disk('media')->get($first->path))->toBe('marker');
+});
