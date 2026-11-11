@@ -13,6 +13,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Url;
 
 class ListMedia extends ListRecords
 {
@@ -21,10 +22,27 @@ class ListMedia extends ListRecords
     // 'grid' | 'list', remembered for the session.
     public string $mediaView = 'grid';
 
+    // MED-01 browsing: null is the top level (its folders and the unfiled files), 'all' is every file,
+    // a number is that folder. In the URL, so the browser's back button and a reload keep the place.
+    #[Url(as: 'folder', except: null)]
+    public ?string $folder = null;
+
     public function mount(): void
     {
         parent::mount();
         $this->mediaView = session('media.layout', 'grid');
+    }
+
+    public function openFolder(?string $folder = null): void
+    {
+        $this->folder = filled($folder) ? $folder : null;
+        $this->deselectAllTableRecords();
+        $this->resetPage();
+    }
+
+    public function currentFolder(): ?MediaFolder
+    {
+        return ctype_digit((string) $this->folder) ? MediaFolder::find((int) $this->folder) : null;
     }
 
     protected function getHeaderActions(): array
@@ -46,7 +64,8 @@ class ListMedia extends ListRecords
                 ->color('gray')
                 ->schema([
                     TextInput::make('name')->required()->maxLength(100),
-                    Select::make('parent_id')->label('Inside')->placeholder('Top level')->options(fn () => MediaFolder::options()),
+                    Select::make('parent_id')->label('Inside')->placeholder('Top level')->options(fn () => MediaFolder::options())
+                        ->default(fn () => $this->currentFolder()?->id),
                 ])
                 ->action(function (array $data) {
                     MediaFolder::create($data);
@@ -63,7 +82,9 @@ class ListMedia extends ListRecords
             ->icon(Heroicon::OutlinedArrowUpTray)
             ->modalWidth('2xl')
             ->schema([
-                Select::make('folder_id')->label('Folder')->placeholder('Unfiled')->options(fn () => MediaFolder::options()),
+                Select::make('folder_id')->label('Folder')->placeholder('Unfiled')->options(fn () => MediaFolder::options())
+                    // Upload into the folder being browsed.
+                    ->default(fn ($livewire) => $livewire instanceof self ? $livewire->currentFolder()?->id : null),
                 self::fileInput('files')->multiple()->maxParallelUploads(3)->required(),
             ])
             ->action(function (array $data, MediaUploader $uploader) {

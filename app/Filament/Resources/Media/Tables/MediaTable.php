@@ -39,7 +39,17 @@ class MediaTable
         $grid = ! ($livewire instanceof ListMedia) || $livewire->mediaView === 'grid';
 
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->with('folder')->withCount('usages'))
+            ->modifyQueryUsing(fn (Builder $query) => self::inFolder($query->with('folder')->withCount('usages'), $livewire))
+            ->header($livewire instanceof ListMedia ? fn () => view('filament.media.folder-bar', self::folderBar($livewire)) : null)
+            ->emptyStateHeading(fn () => match (true) {
+                ! $livewire instanceof ListMedia, $livewire->folder === 'all', filled($livewire->getTableSearch()) => 'No media found',
+                $livewire->currentFolder() !== null => 'This folder has no files',
+                default => 'No unfiled files',
+            })
+            ->emptyStateDescription(fn () => $livewire instanceof ListMedia && $livewire->folder !== 'all' && blank($livewire->getTableSearch())
+                ? 'Open a folder above, or upload files here.'
+                : null)
+            ->emptyStateIcon(Heroicon::OutlinedFolderOpen)
             ->defaultSort('created_at', 'desc')
             ->paginated([30, 60, 120])
             ->defaultPaginationPageOption(30)
@@ -48,13 +58,6 @@ class MediaTable
             ->searchable()
             ->searchPlaceholder('Search name, file or alt text')
             ->filters([
-                SelectFilter::make('folder')
-                    ->options(fn () => ['none' => 'Unfiled'] + MediaFolder::options())
-                    ->query(fn (Builder $query, array $data) => match ($data['value'] ?? null) {
-                        null, '' => $query,
-                        'none' => $query->whereNull('folder_id'),
-                        default => $query->where('folder_id', $data['value']),
-                    }),
                 SelectFilter::make('type')
                     ->options(['image' => 'Images', 'svg' => 'SVG', 'document' => 'Documents (PDF, ZIP)'])
                     ->query(fn (Builder $query, array $data) => match ($data['value'] ?? null) {
@@ -103,6 +106,47 @@ class MediaTable
                         ->deselectRecordsAfterCompletion(),
                 ]),
             ]);
+    }
+
+    /**
+     * @param  Builder<Media>  $query
+     * @return Builder<Media>
+     */
+    private static function inFolder(Builder $query, mixed $livewire): Builder
+    {
+        // Pickers elsewhere show everything; a search looks in every folder.
+        if (! $livewire instanceof ListMedia || $livewire->folder === 'all' || filled($livewire->getTableSearch())) {
+            return $query;
+        }
+
+        $folder = $livewire->currentFolder();
+
+        return $folder ? $query->where('folder_id', $folder->id) : $query->whereNull('folder_id');
+    }
+
+    /** @return array<string, mixed> */
+    private static function folderBar(ListMedia $livewire): array
+    {
+        $current = $livewire->currentFolder();
+        $mode = match (true) {
+            filled($livewire->getTableSearch()) => 'search',
+            $livewire->folder === 'all' => 'all',
+            $current !== null => 'folder',
+            default => 'root',
+        };
+
+        $trail = [];
+        for ($folder = $current; $folder; $folder = $folder->parent) {
+            array_unshift($trail, $folder);
+        }
+
+        return [
+            'mode' => $mode,
+            'trail' => $trail,
+            'folders' => in_array($mode, ['root', 'folder'], true)
+                ? MediaFolder::where('parent_id', $current?->id)->withCount(['media', 'children'])->orderBy('name')->get()
+                : collect(),
+        ];
     }
 
     /** @return array<int, Column|Component> */
