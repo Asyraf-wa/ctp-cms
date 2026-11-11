@@ -47,21 +47,61 @@ it('shows the grid and switches to the list view', function () {
     expect(session('media.layout'))->toBe('list');
 });
 
-it('filters by usage and folder', function () {
+it('filters by usage across all files', function () {
     $folder = MediaFolder::create(['name' => 'Covers']);
     $used = Media::factory()->create(['folder_id' => $folder->id]);
     $unused = Media::factory()->create();
     Series::factory()->create(['cover_media_id' => $used->id]);
 
     Livewire::test(ListMedia::class)
+        ->call('openFolder', 'all')
         ->filterTable('used', false)
         ->assertCanSeeTableRecords([$unused])->assertCanNotSeeTableRecords([$used])
-        ->resetTableFilters()
-        ->filterTable('folder', $folder->id)
-        ->assertCanSeeTableRecords([$used])->assertCanNotSeeTableRecords([$unused])
-        ->resetTableFilters()
-        ->filterTable('folder', 'none')
-        ->assertCanSeeTableRecords([$unused])->assertCanNotSeeTableRecords([$used]);
+        ->filterTable('used', true)
+        ->assertCanSeeTableRecords([$used])->assertCanNotSeeTableRecords([$unused]);
+});
+
+it('browses the library folder by folder', function () {
+    $covers = MediaFolder::create(['name' => 'Covers']);
+    $old = MediaFolder::create(['name' => 'Old covers', 'parent_id' => $covers->id]);
+    $loose = Media::factory()->create(['name' => 'Loose file']);
+    $cover = Media::factory()->create(['folder_id' => $covers->id, 'name' => 'Laravel cover']);
+    $archived = Media::factory()->create(['folder_id' => $old->id, 'name' => 'Archived cover']);
+
+    $page = Livewire::test(ListMedia::class);
+
+    // Top level: its folders, and only the unfiled files.
+    $page->assertSee('Covers')->assertSee('Unfiled files')->assertDontSee('Old covers')
+        ->assertCanSeeTableRecords([$loose])->assertCanNotSeeTableRecords([$cover, $archived]);
+
+    // Into a folder: its files and its subfolders, with a breadcrumb back.
+    $page->call('openFolder', (string) $covers->id)
+        ->assertSet('folder', (string) $covers->id)
+        ->assertSee('Old covers')->assertSee('Files in this folder')
+        ->assertCanSeeTableRecords([$cover])->assertCanNotSeeTableRecords([$loose, $archived]);
+
+    $page->call('openFolder', (string) $old->id)
+        ->assertCanSeeTableRecords([$archived])->assertCanNotSeeTableRecords([$cover]);
+
+    // A search looks in every folder, wherever you are.
+    $page->searchTable('Laravel')->assertSee('Results from every folder')
+        ->assertCanSeeTableRecords([$cover])->assertCanNotSeeTableRecords([$loose, $archived]);
+
+    $page->searchTable('')->call('openFolder', 'all')
+        ->assertCanSeeTableRecords([$loose, $cover, $archived]);
+
+    // Back to the top.
+    $page->call('openFolder', null)->assertSet('folder', null)
+        ->assertCanSeeTableRecords([$loose])->assertCanNotSeeTableRecords([$cover]);
+});
+
+it('uploads into the folder being browsed', function () {
+    $folder = MediaFolder::create(['name' => 'Screenshots']);
+
+    Livewire::withQueryParams(['folder' => (string) $folder->id])
+        ->test(ListMedia::class)
+        ->mountAction('upload')
+        ->assertSchemaStateSet(['folder_id' => $folder->id]);
 });
 
 it('edits the metadata in the slide-over', function () {
