@@ -148,3 +148,20 @@ it('picks a series cover from the library', function () {
     expect(Series::sole()->cover_media_id)->toBe($cover->id)
         ->and($cover->isInUse())->toBeTrue();
 });
+
+it('uploads from the picker into the folder chosen there', function () {
+    $folder = MediaFolder::create(['name' => 'Covers']);
+
+    Livewire::test(ManageSeries::class)
+        ->mountAction('create')
+        ->fillForm(['title' => 'Laravel Basics', 'slug' => 'laravel-basics'])
+        ->callAction(TestAction::make('chooseMedia')->schemaComponent('cover_media_id'), [
+            'folder' => (string) $folder->id,
+            'upload' => UploadedFile::fake()->image('cover.png', 800, 450),
+        ])
+        ->callMountedAction()
+        ->assertHasNoActionErrors();
+
+    expect(Media::sole()->folder_id)->toBe($folder->id)
+        ->and(Series::sole()->cover_media_id)->toBe(Media::sole()->id);
+});

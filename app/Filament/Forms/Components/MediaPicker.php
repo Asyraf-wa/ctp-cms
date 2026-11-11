@@ -79,7 +79,10 @@ class MediaPicker extends Field
                             ->orWhere('alt', 'like', '%'.$get('search').'%')))
                         ->when($get('folder') === 'none', fn (Builder $q) => $q->whereNull('folder_id'))
                         ->when(filled($get('folder')) && $get('folder') !== 'none', fn (Builder $q) => $q->where('folder_id', $get('folder')))),
-                ListMedia::fileInput('upload')->label('Or upload a new file')->hiddenLabel(false)
+                ListMedia::fileInput('upload')->hiddenLabel(false)
+                    ->label(fn (Get $get) => ($folder = self::folderOf($get('folder')))
+                        ? "Or upload a new file into “{$folder->name}”"
+                        : 'Or upload a new file')
                     ->when($this->imagesOnly, fn ($input) => $input->image()),
             ])
             ->action(function (MediaPicker $component, array $data, MediaUploader $uploader) {
@@ -87,7 +90,8 @@ class MediaPicker extends Field
 
                 if (filled($data['upload'] ?? null)) {
                     try {
-                        $id = $uploader->store($data['upload'])->id;
+                        // Into the folder being browsed in the picker, as in the library itself.
+                        $id = $uploader->store($data['upload'], self::folderOf($data['folder'] ?? null)?->id)->id;
                     } catch (ValidationException $e) {
                         Notification::make()->danger()->title($e->validator->errors()->first())->send();
 
@@ -104,6 +108,12 @@ class MediaPicker extends Field
                 $component->state((int) $id);
                 $component->callAfterStateUpdated();
             });
+    }
+
+    // The picker's folder filter: a folder id, 'none' (unfiled) or empty (all folders).
+    private static function folderOf(mixed $value): ?MediaFolder
+    {
+        return ctype_digit((string) $value) ? MediaFolder::find((int) $value) : null;
     }
 
     public function getRemoveAction(): Action
